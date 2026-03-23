@@ -1,0 +1,120 @@
+html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+:root {
+    --primary-blue: #1D2671;
+    --text-color: #4a4a4a;
+    --green-donate: #00A859;
+    --yellow-accent: #FFB800;
+    --background-gradient: linear-gradient(135deg, #fff 0%, #fdf2f8 50%, #eef2ff 100%);
+}
+
+section {
+    padding: 80px 10%;
+}
+
+.btn-default {
+    background-color: var(--green-donate);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-default:hover {
+    background-color: #008f4c;
+}
+
+#inicio {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--background-gradient);
+}
+
+.kid-img img {
+    border-radius: 600px;
+    border: 10px solid white;
+    width: 50rem;
+}
+
+#inicio > div:first-child {
+    max-width: 50%;
+}
+
+#inicio h1 {
+    font-size: 3rem;
+    color: var(--primary-blue);
+    line-height: 1.2;
+    margin-bottom: 25px;
+}
+
+#inicio p {
+    font-size: 1.2rem;
+    color: var(--text-color);
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+#inicio button {
+    background-color: var(--yellow-accent);
+    color: #333;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+#inicio button:hover {
+    background-color: #e6a600;
+    transform: translateY(-3px);
+}
+
+#transparencia {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    background-color: #f7f9fc;
+}
+
+.card {
+    background-color: #ffffff;
+    padding: 40px 20px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    text-align: center;
+    width: 25%;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+}
+
+.card h2 {
+    color: var(--green-donate);
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+.card p {
+    color: var(--text-color);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
