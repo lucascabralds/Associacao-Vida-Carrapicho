@@ -1,3 +1,27 @@
+header {
+    position: fixed; /* Fixa o cabeçalho na tela */
+    top: 0; /* Prende ele bem no topo */
+    left: 0; /* Prende na esquerda */
+    width: 100%; /* Faz ele ocupar a largura toda da tela */
+    z-index: 9999; /* Garante que o menu vai ficar por cima de TUDO (imagens, bolhas, etc) */
+    
+    /* É importante ter um fundo para não dar conflito visual na rolagem */
+    background-color: rgba(255, 255, 255, 0.95); /* Fundo branco levemente transparente */
+    
+    /* Uma sombra leve embaixo do menu dá um toque elegante de separação */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); 
+    
+    /* Caso precise garantir que o conteúdo do header não fique espremido */
+    padding: 15px 5%; 
+    transition: all 0.3s ease;
+}
+
+/* ⚠️ IMPORTANTE: Como o header agora flutua, a próxima seção sobe e pode ficar escondida atrás dele. 
+   Precisamos dar um "empurrãozinho" no conteúdo principal para baixo. */
+main {
+    padding-top: 90px; /* Ajuste esse valor dependendo da altura real do seu cabeçalho */
+}
+
 html {
     scroll-behavior: smooth;
     font-size: 16px;
@@ -86,6 +110,7 @@ section {
     transform: translateY(-3px);
 }
 
+/* --- SEÇÃO TRANSPARÊNCIA --- */
 #transparencia {
     display: flex;
     justify-content: space-between;
@@ -93,20 +118,29 @@ section {
     background-color: #f7f9fc;
 }
 
+/* --- ESTILIZAÇÃO DO CARD --- */
 .card {
     background-color: #ffffff;
     padding: 40px 20px;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    text-align: center;
     width: 25%;
     transition: transform 0.3s ease;
+    
+    /* Novas regras de alinhamento */
+    display: flex;
+    flex-direction: column;
+    align-items: center;  /* Centraliza horizontalmente */
+    justify-content: center; /* Centraliza verticalmente */
+    text-align: center;
 }
 
+/* Efeito de hover opcional */
 .card:hover {
-    transform: translateY(-10px);
+    transform: translateY(-5px);
 }
 
+/* --- ESTILIZAÇÃO DO TEXTO --- */
 .card h2 {
     color: var(--green-donate);
     font-size: 3rem;
@@ -117,6 +151,14 @@ section {
     color: var(--text-color);
     font-size: 1.1rem;
     font-weight: 600;
+}
+
+/* --- TAMANHO PADRÃO DOS ÍCONES (Define os 64px pedidos) --- */
+.icon-standard {
+    width: 70px;          /* Define uma largura fixa para todos */
+    height: 70px;         /* Define uma altura fixa para todos */
+    object-fit: contain;  /* Garante que a imagem caiba no espaço sem ser cortada ou amassada */
+    margin-bottom: 20px;  /* Dá um respiro entre o ícone e o número (120+, 35, etc) */
 }
 
 /* ── SOBRE NÓS ── */
