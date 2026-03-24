@@ -136,9 +136,8 @@ section {
 }
 
 .sobre-text h2 {
-    font-family: 'Poppins', Arial, sans-serif;
     font-size: 3rem;
-    font-weight: 800;
+    font-weight: 600;
     color: var(--primary-blue);
     margin-bottom: 20px;
 }
@@ -207,4 +206,10 @@ section {
     top: 30%; right: 35%;
     opacity: 0.8;
     transform: rotate(15deg);
+}
+
+.prox-event {
+    color: var(--primary-blue);
+    font-weight: 600;
+    font-size: 3rem;
 }

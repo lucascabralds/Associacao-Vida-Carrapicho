@@ -1,0 +1,38 @@
+#prox_event {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+#eventos {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 32px;
+}
+
+.event {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 20px;
+    gap: 18px;
+    width: 30%;
+    background-color: #ffffff;
+    box-shadow: 0px 0px 12px 4px rgba(0, 0, 0, 0.1);
+}
+
+.img-festa {
+  width: 100%;
+  height: 180px;         
+  object-fit: cover;  
+  display: block;
+}
+
+#festa_das_criancas .data-crianca {
+    display: flex;
+    flex-direction: column;
+}
