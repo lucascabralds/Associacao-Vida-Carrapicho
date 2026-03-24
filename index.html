@@ -7,6 +7,7 @@
     <title>Associação Vida Carrapicho | Transformando Vidas</title>
     <link rel="stylesheet" href="./src/styles/style.css">
     <link rel="stylesheet" href="./src/styles/header.css">
+    <link rel="stylesheet" href="./src/styles/home.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
@@ -41,18 +42,24 @@
             <li class="nav-item"><a href="#transparencia">Transparência</a></li>
             <li class="nav-item"><a href="#contato">Contato</a></li>
         </ul>
+
+        <button class="btn-default">
+            Doar
+        </button>
     </div>
 </header>
 
-    <main>
+    <main id="content">
         <section id="inicio">
-            <div class="kid-inicio">
-                <h1>Transformando vidas com amor e solidariedade</h1>
-                <p>Ajude a nossa ONG a fazer a diferença na vida de crianças e famílias em situação de vulnerabilidade.
-                </p>
-                <button>SAIBA MAIS</button>
+            <div id="kid_inicio">
+                <h1 class="title">Transformando vidas com amor e solidariedade</h1>
+                <p class="ajude">Ajude a nossa ONG a fazer a diferença na vida de crianças e famílias em situação de vulnerabilidade.</p>
+                <div class="btn-saibas">
+                    <button>SAIBA MAIS</button>
+                </div>
             </div>
-            <div class="kid-img">
+
+            <div id="kid-img">
                 <img src="./img/img-kids.jpeg" alt="">
             </div>
         </section>

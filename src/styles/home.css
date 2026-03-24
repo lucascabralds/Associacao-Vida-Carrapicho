@@ -1,0 +1,54 @@
+#inicio {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--background-gradient);
+}
+
+#kid_inicio {
+    width: 35%;
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+}
+
+#kid-img img {
+    border-radius: 600px;
+    border: 10px solid white;
+    width: 50rem;
+}
+
+#inicio > div:first-child {
+    max-width: 50%;
+}
+
+#inicio h1 {
+    font-size: 3rem;
+    color: var(--primary-blue);
+    line-height: 1.2;
+    margin-bottom: 25px;
+}
+
+#inicio p {
+    font-size: 1.2rem;
+    color: var(--text-color);
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+.btn-saibas button {
+    background-color: var(--yellow-accent);
+    color: #333;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+.btn-saibas button:hover {
+    background-color: #e6a600;
+    transform: translateY(-3px);
+}
