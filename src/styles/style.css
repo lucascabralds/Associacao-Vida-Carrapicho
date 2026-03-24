@@ -48,6 +48,7 @@ section {
 
 .btn-default {
     display: flex;
+    color: white;
     border: none;
     align-items: center;
     justify-content: center;

@@ -76,7 +76,7 @@ header {
     #mobile_nav_list {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 25px;
         margin: 12px 0px;
     }
 
