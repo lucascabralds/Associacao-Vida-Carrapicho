@@ -28,7 +28,7 @@
           <li class="nav-item"><a href="#contato">Contato</a></li>
         </ul>
 
-        <button class="btn-default">Doar</button>
+        <button class="btn-default" id="btn-doar-nav">Doar</button>
 
         <button id="mobile_btn">
           <img src="./img/bars-solid-full.svg" />
@@ -44,10 +44,62 @@
           <li class="nav-item"><a href="#contato">Contato</a></li>
         </ul>
 
-        <button class="btn-default">Doar</button>
+        <button class="btn-default" id="btn-doar-mobile">Doar</button>
       </div>
     </header>
 
+        <div id="modal-overlay">
+      <div id="modal-box">
+        <div id="modal-header">
+          <h2>Transparência</h2>
+          <p>Acreditamos na transparência total. Veja como utilizamos cada real doado para transformar vidas.</p>
+          <button id="modal-close" aria-label="Fechar">&#x2715;</button>
+        </div>
+
+        <div id="modal-body">
+          <!-- KPI Cards -->
+          <div id="modal-kpis">
+            <div class="kpi-card">
+              <div class="kpi-icon">💵</div>
+              <div class="kpi-label">Doações Recebidas</div>
+              <div class="kpi-value">R$ 80.000</div>
+              <div class="kpi-bar"><div class="kpi-bar-fill"></div></div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon">🍽️</div>
+              <div class="kpi-label">Alimentação</div>
+              <div class="kpi-value">R$ 35.000</div>
+              <div class="kpi-bar"><div class="kpi-bar-fill"></div></div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon">📚</div>
+              <div class="kpi-label">Educação</div>
+              <div class="kpi-value">R$ 25.000</div>
+              <div class="kpi-bar"><div class="kpi-bar-fill"></div></div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon">🏥</div>
+              <div class="kpi-label">Saúde</div>
+              <div class="kpi-value">R$ 15.000</div>
+              <div class="kpi-bar"><div class="kpi-bar-fill"></div></div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon">📋</div>
+              <div class="kpi-label">Administrativo</div>
+              <div class="kpi-value">R$ 5.000</div>
+              <div class="kpi-bar"><div class="kpi-bar-fill"></div></div>
+            </div>
+          </div>
+          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+          <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+          <!-- Chart -->
+          <div id="modal-chart-section">
+            <h3>Distribuição de Recursos</h3>
+            <canvas id="transparenciaChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
     <main id="content">
       <section id="inicio">
         <div id="kid_inicio">
