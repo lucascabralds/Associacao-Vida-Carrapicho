@@ -4,35 +4,226 @@
     align-items: center;
     justify-content: center;
     margin-top: 30px;
+    padding: 0 16px 48px;
+}
+
+.prox-event {
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #1d3ea0;
+    text-align: center;
 }
 
 #eventos {
     width: 100%;
     display: flex;
     justify-content: center;
-    gap: 24px;
+    gap: 20px;
     margin-top: 32px;
+    flex-wrap: wrap;
+    max-width: 1200px;
 }
 
-.event {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.event-card {
+    background: #fff;
     border-radius: 20px;
-    gap: 18px;
-    width: 30%;
-    background-color: #ffffff;
-    box-shadow: 0px 0px 12px 4px rgba(0, 0, 0, 0.1);
-}
-
-.img-festa {
-  width: 100%;
-  height: 180px;         
-  object-fit: cover;  
-  display: block;
-}
-
-#festa_das_criancas .data-crianca {
+    box-shadow: 0px 12px 30px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    width: 350px;
     display: flex;
     flex-direction: column;
+    transition: transform .25s ease, box-shadow .25s ease;
 }
+
+.event-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.18);
+}
+
+.event-card-header {
+    position: static; /* evita herdar position:fixed do header global */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    color: white;
+}
+
+.event-card-green { background: #00c853; }
+.event-card-gold { background: #f2a900; }
+.event-card-pink { background: #ff2e92; }
+
+.event-date {
+    font-size: 1.6rem;
+    font-weight: 700;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.event-date .day {
+    font-size: 2.8rem;
+    line-height: 1;
+}
+
+.event-date .month {
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.event-name {
+    font-size: 1.4rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.event-card-thumb-row {
+    display: flex;
+    gap: 10px;
+    padding: 12px 14px;
+    background: #f9fafb;
+}
+
+.event-thumb {
+    flex: 1;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    text-align: center;
+}
+
+.event-thumb img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+    display: block;
+}
+
+.event-thumb p {
+    font-size: 0.8rem;
+    margin: 8px 6px 10px;
+    color: #1f3b7a;
+    font-weight: 600;
+}
+
+.event-card-body {
+    padding: 16px 20px 22px;
+}
+
+.event-card-body h2 {
+    font-size: 1.6rem;
+    margin: 0 0 10px;
+    color: #1a2b5e;
+}
+
+.event-card-body p {
+    margin: 0;
+    color: #4a4a4a;
+    line-height: 1.6;
+}
+
+@media (max-width: 1110px) {
+    #eventos { justify-content: center; }
+    .event-card { width: calc(50% - 16px); }
+}
+
+.event-cta-box {
+    text-align: center;
+    margin-top: 36px;
+}
+
+.event-cta-btn {
+    display: inline-block;
+    background: #1d60ff;
+    color: #fff;
+    font-weight: 700;
+    padding: 12px 28px;
+    border-radius: 999px;
+    text-decoration: none;
+    box-shadow: 0 10px 20px rgba(29, 96, 255, 0.28);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.event-cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 22px rgba(29, 96, 255, 0.30);
+}
+
+.site-footer {
+    background: #040f2a;
+    color: #f7f8fc;
+    padding: 50px 10%;
+    margin-top: 48px;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(150px, 1fr));
+    gap: 24px;
+}
+
+.site-footer h3 {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+.site-footer p,
+.site-footer li,
+.site-footer a {
+    color: #cfd8ff;
+    font-size: 0.95rem;
+}
+
+.site-footer ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.site-footer a {
+    text-decoration: none;
+}
+
+.site-footer a:hover {
+    color: #ffffff;
+}
+
+.footer-socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.footer-socials a {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+}
+
+.footer-copyright {
+    text-align: center;
+    margin-top: 28px;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    padding-top: 18px;
+    color: #9eacd9;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 1110px) {
+    #eventos { justify-content: center; }
+    .event-card { width: calc(50% - 16px); }
+}
+
+@media (max-width: 780px) {
+    .event-card { width: 100%; }
+    .event-card-header { padding: 14px 16px; }
+    .event-card-body { padding: 14px 16px 18px; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .site-footer { padding: 40px 8%; }
+}
+
