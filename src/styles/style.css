@@ -16,10 +16,8 @@ header {
     transition: all 0.3s ease;
 }
 
-/* ⚠️ IMPORTANTE: Como o header agora flutua, a próxima seção sobe e pode ficar escondida atrás dele. 
-   Precisamos dar um "empurrãozinho" no conteúdo principal para baixo. */
 main {
-    padding-top: 90px; /* Ajuste esse valor dependendo da altura real do seu cabeçalho */
+    padding-top: 90px;
 }
 
 html {
