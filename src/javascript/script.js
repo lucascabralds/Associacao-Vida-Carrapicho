@@ -148,9 +148,9 @@ $(document).ready(function () {
     }, 250);
   }
  
-  $('#btn-doar-nav, #btn-doar-mobile').on('click', function () {
-    triggerDoarAnimation($(this));
-    setTimeout(openModal, 300);
+  $('.abrir-modal-transparencia').on('click', function (e) {
+    e.preventDefault(); // Impede que a tela role para a <section id="transparencia">
+    openModal();        // Abre o modal diretamente
   });
  
   $('#modal-close').on('click', closeModal);
