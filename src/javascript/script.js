@@ -176,3 +176,37 @@ $(document).ready(function () {
     }, 750);
   }
 });
+
+/* MODAL DE CONTATO */
+  function openModalContato() {
+    $('#modal-contato-overlay').addClass('active');
+    $('body').css('overflow', 'hidden'); // Impede a rolagem da página de fundo
+  }
+ 
+  function closeModalContato() {
+    var $box = $('#modal-contato-box');
+    $box.css({
+      animation: 'none',
+      transition: 'transform 0.25s ease, opacity 0.25s ease',
+      transform: 'translateY(30px) scale(0.97)',
+      opacity: '0'
+    });
+    setTimeout(function () {
+      $('#modal-contato-overlay').removeClass('active');
+      $('body').css('overflow', '');
+      $box.css({ transform: '', opacity: '', transition: '' });
+    }, 250);
+  }
+
+  // Aciona a abertura ao clicar no link do menu
+  $('.abrir-modal-contato').on('click', function (e) {
+    e.preventDefault(); // Impede a navegação padrão do link #
+    openModalContato();
+  });
+ 
+  // Aciona o fechamento nos botões e overlay
+  $('#modal-contato-close').on('click', closeModalContato);
+ 
+  $('#modal-contato-overlay').on('click', function (e) {
+    if ($(e.target).is('#modal-contato-overlay')) closeModalContato();
+  });
