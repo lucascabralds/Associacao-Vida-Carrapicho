@@ -688,3 +688,261 @@ section {
     gap: 30px;
   }
 }
+
+/* ===== MODAL DE DOAÇÃO - OVERLAY E CAIXA ===== */
+#modal-doacao-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 30, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 999999;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  animation: overlayIn 0.3s ease forwards;
+}
+
+#modal-doacao-overlay.active {
+  display: flex;
+}
+
+#modal-doacao-box {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 420px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* --- HEADER VERDE --- */
+#modal-doacao-header {
+  background-color: var(--green-donate);
+  color: white;
+  text-align: center;
+  padding: 35px 20px 25px;
+  position: relative;
+}
+
+#modal-doacao-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+#modal-doacao-close:hover {
+  opacity: 1;
+  transform: rotate(90deg);
+}
+
+.doacao-header-icon { margin-bottom: 10px; color: white; }
+#modal-doacao-header h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 6px; }
+#modal-doacao-header p { font-size: 0.95rem; opacity: 0.95; margin: 0; }
+
+#modal-doacao-body { padding: 25px 35px 35px; }
+
+.doacao-titulo {
+  font-size: 1.15rem;
+  color: #1f2937;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+/* --- PASSO 1: GRID DE VALORES --- */
+.grid-valores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.btn-valor-preset {
+  flex: 1 1 calc(33.333% - 10px); /* 3 colunas */
+  background: #fff;
+  border: 2px solid #e5e7eb;
+  color: #4b5563;
+  padding: 12px 10px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Quando selecionado ou hover */
+.btn-valor-preset:hover,
+.btn-valor-preset.active {
+  border-color: var(--green-donate);
+  color: var(--green-donate);
+  background-color: #f0fdf4;
+}
+
+/* --- INPUT DE VALOR CUSTOMIZADO --- */
+.input-valor-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.input-valor-wrapper:focus-within {
+  border-color: var(--green-donate);
+}
+
+.moeda-prefix {
+  padding: 12px 10px 12px 16px;
+  color: #6b7280;
+  font-weight: 500;
+  background: #f9fafb;
+  border-right: 1px solid #e5e7eb;
+}
+
+.input-valor-wrapper input {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+}
+
+/* --- PASSO 2: OPÇÕES DE PAGAMENTO --- */
+.btn-voltar-doacao {
+  display: inline-block;
+  color: var(--green-donate);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.doacao-total {
+  font-size: 1rem;
+  color: #4b5563;
+  margin-bottom: 20px;
+  margin-top: -10px;
+}
+
+.opcoes-pagamento {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.opcao-pagamento input { display: none; }
+
+.opcao-conteudo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Simulação do "Radio Button" bolinha */
+.radio-custom {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  position: relative;
+}
+
+.opcao-pagamento input:checked + .opcao-conteudo .radio-custom {
+  border-color: var(--green-donate);
+}
+
+.opcao-pagamento input:checked + .opcao-conteudo .radio-custom::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px; height: 8px;
+  background: var(--green-donate);
+  border-radius: 50%;
+}
+
+.opcao-pagamento input:checked + .opcao-conteudo {
+  border-color: var(--green-donate);
+  background-color: #f0fdf4;
+}
+
+.opcao-icone { font-size: 1.6rem; }
+.opcao-textos { display: flex; flex-direction: column; }
+.opcao-textos strong { font-size: 0.95rem; color: #111827; }
+.opcao-textos span { font-size: 0.8rem; color: #6b7280; margin-top: 2px; }
+
+/* --- ÁREAS DINÂMICAS (PIX E CARTÃO) --- */
+#area-pix {
+  text-align: center;
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px dashed #cbd5e1;
+  margin-bottom: 20px;
+}
+
+.pix-qrcode-box img {
+  width: 150px;
+  height: 150px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+}
+
+.pix-qrcode-box p {
+  font-size: 0.9rem;
+  color: #475569;
+  margin-bottom: 10px;
+}
+
+.pix-alerta {
+  display: inline-block;
+  background: #fffbeb;
+  color: #b45309;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Formulário de Cartão */
+.form-group-doacao { margin-bottom: 16px; display: flex; flex-direction: column; }
+.form-group-doacao label { font-size: 0.85rem; color: #374151; font-weight: 600; margin-bottom: 8px; }
+.form-group-doacao input { padding: 12px 16px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
+.form-group-doacao input:focus { border-color: var(--green-donate); }
+.form-row-doacao { display: flex; gap: 15px; margin-bottom: 20px; }
+.form-row-doacao .form-group-doacao { flex: 1; }
+
+/* --- BOTÕES DE AÇÃO --- */
+.btn-acao-verde {
+  width: 100%;
+  background-color: var(--green-donate);
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s;
+}
+
+.btn-acao-verde:hover {
+  background-color: #008f4c;
+}

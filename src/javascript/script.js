@@ -210,3 +210,104 @@ $(document).ready(function () {
   $('#modal-contato-overlay').on('click', function (e) {
     if ($(e.target).is('#modal-contato-overlay')) closeModalContato();
   });
+
+  /* =========================================
+     MODAL DE DOAÇÃO - FLUXO COMPLETO
+     ========================================= */
+     
+  function openModalDoacao() {
+    // Reseta o modal para o passo 1 sempre que abrir
+    $('#step-2-pagamento').hide();
+    $('#step-1-valor').show();
+    $('#input-valor-doacao').val('');
+    $('.btn-valor-preset').removeClass('active');
+    $('input[name="pagamento"]').prop('checked', false); // Tira seleção do PIX/Cartão
+    $('#area-pix').hide();
+    $('#area-cartao').hide();
+    
+    $('#modal-doacao-overlay').addClass('active');
+    $('body').css('overflow', 'hidden'); // Trava o scroll
+  }
+ 
+  function closeModalDoacao() {
+    var $box = $('#modal-doacao-box');
+    $box.css({
+      animation: 'none',
+      transition: 'transform 0.25s ease, opacity 0.25s ease',
+      transform: 'translateY(30px) scale(0.97)',
+      opacity: '0'
+    });
+    setTimeout(function () {
+      $('#modal-doacao-overlay').removeClass('active');
+      $('body').css('overflow', '');
+      $box.css({ transform: '', opacity: '', transition: '' });
+    }, 250);
+  }
+
+  // 1. Abrir Modal (Botões do Menu)
+  $('#btn-doar-nav, #btn-doar-mobile').on('click', function (e) {
+    e.preventDefault();
+    openModalDoacao();
+  });
+ 
+  // 2. Fechar Modal (Botão X e Overlay)
+  $('#modal-doacao-close').on('click', closeModalDoacao);
+  $('#modal-doacao-overlay').on('click', function (e) {
+    if ($(e.target).is('#modal-doacao-overlay')) closeModalDoacao();
+  });
+
+  // 3. Lógica do Passo 1: Clicar nos botões de valor predefinidos
+  $('.btn-valor-preset').on('click', function() {
+    // Remove a classe active de todos e coloca só no clicado
+    $('.btn-valor-preset').removeClass('active');
+    $(this).addClass('active');
+    
+    // Pega o valor do botão e joga no input
+    var valor = $(this).data('valor');
+    $('#input-valor-doacao').val(valor);
+  });
+
+  // Se o usuário digitar manualmente, desmarca os botões
+  $('#input-valor-doacao').on('input', function() {
+    $('.btn-valor-preset').removeClass('active');
+  });
+
+  // 4. Lógica de "Continuar" para o Passo 2
+  $('#btn-continuar-doacao').on('click', function() {
+    var valorDigitado = $('#input-valor-doacao').val();
+    
+    // Validação simples
+    if(!valorDigitado || valorDigitado <= 0) {
+      alert("Por favor, informe ou escolha um valor válido para doar.");
+      return;
+    }
+
+    // Formata o valor na tela do passo 2
+    $('#display-total-doacao').text(parseFloat(valorDigitado).toFixed(2).replace('.', ','));
+    
+    // Esconde passo 1, Mostra passo 2
+    $('#step-1-valor').hide();
+    $('#step-2-pagamento').fadeIn();
+  });
+
+  // 5. Botão Voltar (do Passo 2 para o Passo 1)
+  $('.btn-voltar-doacao').on('click', function(e) {
+    e.preventDefault();
+    $('#step-2-pagamento').hide();
+    $('#step-1-valor').fadeIn();
+  });
+
+  // 6. Lógica de Mostrar PIX ou Cartão
+  $('input[name="pagamento"]').on('change', function() {
+    var metodoSelecionado = $(this).val();
+
+    if (metodoSelecionado === 'pix') {
+      $('#area-cartao').hide();
+      $('#area-pix').fadeIn();
+      $('#btn-confirmar-final').text('Concluir Doação');
+    } else if (metodoSelecionado === 'cartao') {
+      $('#area-pix').hide();
+      $('#area-cartao').fadeIn();
+      $('#btn-confirmar-final').text('Confirmar Pagamento');
+    }
+  });

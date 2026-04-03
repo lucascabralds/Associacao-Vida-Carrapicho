@@ -48,6 +48,110 @@
       </div>
     </header>
 
+      #Modal de Doar - Inicio
+
+      <div id="modal-doacao-overlay">
+      <div id="modal-doacao-box">
+        
+        <div id="modal-doacao-header">
+          <button id="modal-doacao-close" aria-label="Fechar">&#x2715;</button>
+          <div class="doacao-header-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          </div>
+          <h2>Faça sua Doação</h2>
+          <p>Sua contribuição transforma vidas!</p>
+        </div>
+
+        <div id="modal-doacao-body">
+          
+          <div id="step-1-valor">
+            <h3 class="doacao-titulo">Escolha o valor da doação</h3>
+            
+            <div class="grid-valores">
+              <button type="button" class="btn-valor-preset" data-valor="20">R$ 20</button>
+              <button type="button" class="btn-valor-preset" data-valor="50">R$ 50</button>
+              <button type="button" class="btn-valor-preset" data-valor="100">R$ 100</button>
+              <button type="button" class="btn-valor-preset" data-valor="200">R$ 200</button>
+              <button type="button" class="btn-valor-preset" data-valor="500">R$ 500</button>
+            </div>
+
+            <div class="form-group-doacao">
+              <label>Ou digite outro valor</label>
+              <div class="input-valor-wrapper">
+                <span class="moeda-prefix">R$</span>
+                <input type="number" id="input-valor-doacao" placeholder="50" min="1">
+              </div>
+            </div>
+
+            <button type="button" id="btn-continuar-doacao" class="btn-acao-verde">Continuar</button>
+          </div>
+
+          <div id="step-2-pagamento" style="display: none;">
+            <a href="#" class="btn-voltar-doacao">&larr; Voltar</a>
+            
+            <h3 class="doacao-titulo">Forma de pagamento</h3>
+            <p class="doacao-total">Total: R$ <span id="display-total-doacao">0</span></p>
+
+            <div class="opcoes-pagamento">
+              <label class="opcao-pagamento">
+                <input type="radio" name="pagamento" value="pix">
+                <div class="opcao-conteudo">
+                  <div class="radio-custom"></div>
+                  <span class="opcao-icone">📱</span>
+                  <div class="opcao-textos">
+                    <strong>PIX</strong>
+                    <span>Pagamento instantâneo</span>
+                  </div>
+                </div>
+              </label>
+
+              <label class="opcao-pagamento">
+                <input type="radio" name="pagamento" value="cartao">
+                <div class="opcao-conteudo">
+                  <div class="radio-custom"></div>
+                  <span class="opcao-icone">💳</span>
+                  <div class="opcao-textos">
+                    <strong>Cartão de Crédito</strong>
+                    <span>Parcelado em até 12x</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div id="area-pix" style="display: none;">
+              <div class="pix-qrcode-box">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ExemploDePixVidaCarrapicho" alt="QR Code PIX">
+                <p>Escaneie o QR Code acima com o app do seu banco.</p>
+                <div class="pix-alerta">⚠️ Este QR Code é válido por 9 horas.</div>
+              </div>
+            </div>
+
+            <div id="area-cartao" style="display: none;">
+              <form id="form-cartao">
+                <div class="form-group-doacao">
+                  <label>Número do Cartão</label>
+                  <input type="text" placeholder="0000 0000 0000 0000">
+                </div>
+                <div class="form-row-doacao">
+                  <div class="form-group-doacao">
+                    <label>Validade</label>
+                    <input type="text" placeholder="MM/AA" maxlength="5">
+                  </div>
+                  <div class="form-group-doacao">
+                    <label>CVV</label>
+                    <input type="text" placeholder="123" maxlength="4">
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <button type="button" id="btn-confirmar-final" class="btn-acao-verde">Confirmar Doação</button>
+
+          </div> </div> </div>
+    </div>
+
+    #Modal de Doar - Fim
+
       # Modal de Transparência - Inicio
 
       <div id="modal-contato-overlay">
