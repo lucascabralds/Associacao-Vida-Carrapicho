@@ -946,3 +946,31 @@ section {
 .btn-acao-verde:hover {
   background-color: #008f4c;
 }
+
+/* Estilo base dos botões sociais com transição suave */
+.footer-socials a {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease; /* Faz a cor e o movimento mudarem suavemente */
+}
+
+/* Efeito ao passar o mouse - O botão sobe um pouquinho */
+.footer-socials a:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Gradiente Azulado para o Facebook no Hover */
+.footer-socials a.social-fb:hover {
+    background: linear-gradient(45deg, #005ce6, #0084ff);
+}
+
+/* Gradiente Oficial do Instagram no Hover */
+.footer-socials a.social-ig:hover {
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+}
