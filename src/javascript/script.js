@@ -273,10 +273,9 @@ $(document).ready(function () {
   });
 
   // 4. Lógica de "Continuar" para o Passo 2
-  $('#btn-continuar-doacao').on('click', function() {
+    $('#btn-continuar-doacao').on('click', function() {
     var valorDigitado = $('#input-valor-doacao').val();
     
-    // Validação simples
     if(!valorDigitado || valorDigitado <= 0) {
       alert("Por favor, informe ou escolha um valor válido para doar.");
       return;
@@ -285,7 +284,17 @@ $(document).ready(function () {
     // Formata o valor na tela do passo 2
     $('#display-total-doacao').text(parseFloat(valorDigitado).toFixed(2).replace('.', ','));
     
-    // Esconde passo 1, Mostra passo 2
+// === GERA O PIX DINAMICAMENTE AQUI ===
+    var payloadPix = gerarPayloadPix(valorDigitado);
+    
+    // Usa uma API gratuita para gerar a imagem do QR Code na hora
+    var urlQrCode = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent(payloadPix);
+    
+    // Joga a imagem e o texto na tela
+    $('#img-qrcode-pix').attr('src', urlQrCode);
+    $('#input-copia-cola').val(payloadPix);
+    // =====================================
+
     $('#step-1-valor').hide();
     $('#step-2-pagamento').fadeIn();
   });
@@ -310,4 +319,77 @@ $(document).ready(function () {
       $('#area-cartao').fadeIn();
       $('#btn-confirmar-final').text('Confirmar Pagamento');
     }
+  });
+
+  /* =========================================
+   GERADOR DINÂMICO DE PIX (PAYLOAD E CRC16)
+   ========================================= */
+
+function calcularCrc16Pix(payload) {
+  let crc = 0xFFFF;
+  for (let i = 0; i < payload.length; i++) {
+    crc ^= payload.charCodeAt(i) << 8;
+    for (let j = 0; j < 8; j++) {
+      if ((crc & 0x8000) !== 0) {
+        crc = (crc << 1) ^ 0x1021;
+      } else {
+        crc = crc << 1;
+      }
+    }
+    crc &= 0xFFFF;
+  }
+  return crc.toString(16).toUpperCase().padStart(4, '0');
+}
+
+function gerarPayloadPix(valor) {
+  const chave = "07895526000126"; 
+  
+  // Nome exato conforme o comprovante
+  const nomeCompleto = "ASSOCIACAO VIDA CARRAPICHO"; 
+  // Limita a 25 caracteres para não quebrar a regra do Banco Central (Tag 59)
+  const nome = nomeCompleto.substring(0, 25); 
+  
+  const cidade = "SAO PAULO";
+  const txid = "***";
+
+  // Garante que o valor tenha ponto e duas casas (Ex: 50 -> "50.00")
+  const valorFormatado = parseFloat(valor).toFixed(2);
+  
+  const tamanhoValor = valorFormatado.length.toString().padStart(2, '0');
+  const tamanhoNome = nome.length.toString().padStart(2, '0');
+  const tamanhoCidade = cidade.length.toString().padStart(2, '0');
+
+  // Montagem do Padrão EMV (BR Code)
+  const payloadBase =
+    "000201" +
+    "2636" + 
+    "0014br.gov.bcb.pix" +
+    "0114" + chave +
+    "52040000" +
+    "5303986" +
+    "54" + tamanhoValor + valorFormatado +
+    "5802BR" +
+    "59" + tamanhoNome + nome +
+    "60" + tamanhoCidade + cidade +
+    "62070503" + txid + 
+    "6304";
+
+  return payloadBase + calcularCrc16Pix(payloadBase);
+}
+
+// Lógica do botão de Copiar
+  $('#btn-copiar-pix').on('click', function() {
+    var copyText = document.getElementById("input-copia-cola");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); // Para funcionar bem no celular
+    navigator.clipboard.writeText(copyText.value);
+
+    // Efeito visual no botão
+    var $btn = $(this);
+    $btn.text('Copiado!');
+    $btn.css('background-color', '#059669'); // Fica um verde mais escuro
+    setTimeout(function() { 
+      $btn.text('Copiar'); 
+      $btn.css('background-color', 'var(--green-donate)'); 
+    }, 2000);
   });

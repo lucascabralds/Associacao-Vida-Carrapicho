@@ -118,13 +118,20 @@
               </label>
             </div>
 
-            <div id="area-pix" style="display: none;">
-              <div class="pix-qrcode-box">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ExemploDePixVidaCarrapicho" alt="QR Code PIX">
-                <p>Escaneie o QR Code acima com o app do seu banco.</p>
-                <div class="pix-alerta">⚠️ Este QR Code é válido por 9 horas.</div>
+              <div id="area-pix" style="display: none;">
+                <div class="pix-qrcode-box">
+                  <img id="img-qrcode-pix" src="" alt="QR Code PIX">
+                  <p>Escaneie o QR Code acima com o app do seu banco.</p>
+                  
+                  <div class="pix-copia-cola-box" style="margin-top: 15px; text-align: left;">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: #374151;">Ou use o Pix Copia e Cola:</label>
+                    <div style="display: flex; gap: 8px; margin-top: 5px;">
+                      <input type="text" id="input-copia-cola" readonly style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.85rem; background: #f9fafb;">
+                      <button type="button" id="btn-copiar-pix" style="padding: 10px 16px; background: var(--green-donate); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s;">Copiar</button>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
 
             <div id="area-cartao" style="display: none;">
               <form id="form-cartao">
