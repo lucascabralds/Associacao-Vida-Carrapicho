@@ -157,11 +157,11 @@ Para alterar o esquema de cores global do site de maneira fácil, acesse o arqui
 Alterar essas variáveis atualizará a cor em toda a página automaticamente.
 ________________________________________
 
-11. Solução de Problemas
+11. Solução de Problemas!
 
 Erro: O Gráfico de transparência não carrega ou fica em branco.
 Causa: Falta de conexão com a internet ou adblocker bloqueando o script do Chart.js.
-Solução: Verifique a conexão com a internet. Verifique o console (F12) para ver se os links cdn.jsdelivr.net foram bloqueados.
+Solução: Verifique a conexão com a internet. Verifique o console (F12) para ver se os links cdn.jsdelivr.net foram bloqueados..
 
 Erro: O QR Code do PIX aparece quebrado.
 Causa: A API externa do qrserver.com pode estar instável.
