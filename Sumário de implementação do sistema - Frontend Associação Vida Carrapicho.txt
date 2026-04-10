@@ -1,0 +1,183 @@
+Sumário de implementação do sistema - Frontend Associação Vida Carrapicho
+
+1. Visão Geral do Frontend
+2. Tecnologias Utilizadas
+3. Estrutura de Diretórios
+4. Funcionalidades Implementadas
+5. Pré-requisitos para Instalação
+6. Passo a Passo para Instalação
+7. Configuração de Dependências e APIs
+8. Como Executar o Sistema
+9. Guia de Uso da Interface
+10. Personalização e Estilos (CSS)
+11. Solução de Problemas
+12. Manutenção e Atualizações
+________________________________________
+
+1. Visão Geral do Frontend
+O frontend da Associação Vida Carrapicho é uma Landing Page interativa e responsiva ("Single Page Application" estática) desenvolvida para apresentar a ONG, engajar o público e facilitar a captação de recursos. O sistema permite a navegação fluida entre seções institucionais, visualização de gráficos de transparência financeira e conta com um sistema dinâmico de doações com geração de código PIX em tempo real.
+
+Objetivos
+- Apresentar a missão, estrutura e eventos da associação.
+- Fornecer um meio rápido e acessível para doações via PIX ou Cartão.
+- Demonstrar transparência através de gráficos visuais de alocação de recursos.
+- Garantir acessibilidade e usabilidade em dispositivos móveis e desktops.
+________________________________________
+
+2. Tecnologias Utilizadas
+
+Frontend Core
+- HTML5: Estruturação semântica da página (index.html)
+- CSS3: Estilização, variáveis de tema e responsividade
+- JavaScript (ES6+): Lógica de interação, modais e cálculos dinâmicos
+
+Bibliotecas e APIs Externas (Via CDN)
+- jQuery (3.7.1): Manipulação do DOM e simplificação de eventos
+- Chart.js: Renderização do gráfico de barras de transparência
+- ChartDataLabels: Exibição de porcentagens dinâmicas dentro do gráfico
+- QR Code API (v1): API pública (qrserver.com) para gerar o QR Code do PIX
+________________________________________
+
+3. Estrutura de Diretórios
+
+Associacao-Vida-Carrapicho/
+|
+|-- index.html                 # Página principal estrutural
+|
+|-- src/
+|   |-- styles/
+|   |   |-- style.css          # Estilos globais e variáveis de cor
+|   |   |-- header.css         # Estilização da barra de navegação
+|   |   |-- home.css           # Estilização da seção Hero (Início)
+|   |   |-- eventos.css        # Estilização dos cards de eventos
+|   |
+|   |-- javascript/
+|       |-- script.js          # Lógica principal (Modais, PIX, Gráfico)
+|
+|-- img/                       # Logotipos, ícones SVG e imagens de conteúdo
+________________________________________
+
+4. Funcionalidades Implementadas
+
+Navegação e Interface
+- Menu Responsivo (Mobile First): Menu estilo "hamburguer" que se adapta a telas menores.
+- Navegação Fixa (Sticky Header): O cabeçalho acompanha o usuário durante a rolagem.
+
+Sistema de Doações (Modal)
+- Interface em múltiplos passos (Escolha de Valor -> Método de Pagamento).
+- Botões de valores predefinidos (R$ 20, R$ 50, R$ 100, etc.) e campo de valor customizado.
+- Gerador de PIX Dinâmico: Calcula o Payload PIX no padrão EMV e gera o código CRC16 automaticamente baseado no valor inserido.
+- Geração de QR Code na tela e botão "Pix Copia e Cola" funcional.
+- Simulação visual de formulário para cartão de crédito.
+
+Módulo de Transparência
+- Modal dedicado com cards de KPIs (Doações, Alimentação, Educação, etc.).
+- Gráfico de barras dinâmico gerado via Chart.js que exibe a distribuição percentual exata dos recursos.
+
+Módulo de Contato
+- Modal interativo com formulário de envio de mensagem e mapa integrado (via iframe do Google Maps).
+________________________________________
+
+5. Pré-requisitos para Instalação
+
+Ambiente Necessário
+- Navegador Web: Chrome, Firefox, Safari ou Edge (Atualizados)
+- Conexão com Internet: Necessária para carregar as bibliotecas (jQuery, Chart.js) e gerar o QR Code PIX
+- Editor de Código: VS Code, Sublime Text (Apenas para edição)
+________________________________________
+
+6. Passo a Passo para Instalação
+
+1. Extraia a pasta Associacao-Vida-Carrapicho/ no seu computador.
+2. Certifique-se de que a estrutura de pastas (/img, /src/styles, /src/javascript) está intacta no mesmo nível do index.html.
+3. Não é necessária a instalação de dependências via terminal (NPM), pois o projeto utiliza requisições via CDN nativas do HTML.
+________________________________________
+
+7. Configuração de Dependências e APIs
+
+Caso precise atualizar as bibliotecas, elas estão localizadas no <head> e no final do <body> do arquivo index.html:
+
+jQuery (Head):
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+Chart.js (Antes do Gráfico):
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+Chave PIX (Para alteração futura):
+No arquivo src/javascript/script.js, na função gerarPayloadPix(), atualize as constantes:
+const chave = "07895526000126"; // Substitua pela chave PIX oficial
+const nomeCompleto = "ASSOCIACAO VIDA CARRAPICHO"; 
+________________________________________
+
+8. Como Executar o Sistema
+
+Opção 1: Execução Local Direta (Modo Leitura)
+1. Navegue até a pasta do projeto.
+2. Dê um duplo clique no arquivo index.html.
+3. O sistema abrirá diretamente no seu navegador padrão (URL constará como file:///...).
+
+Opção 2: Execução via Servidor Local (Recomendado para Testes)
+Se estiver usando o VS Code, instale a extensão "Live Server".
+1. Clique com o botão direito no arquivo index.html.
+2. Selecione "Open with Live Server".
+3. O projeto abrirá no endereço http://127.0.0.1:5500.
+________________________________________
+
+9. Guia de Uso da Interface
+
+Explorando a Página
+1. Utilize o menu superior para navegar suavemente entre as seções: Início, Sobre Nós e Eventos.
+2. Na seção "Próximos Eventos", visualize os cards com datas destacadas.
+
+Realizando uma Doação (Teste)
+1. Clique no botão verde "Doar" no canto superior direito.
+2. Selecione um valor sugerido (ex: R$ 50) ou digite um valor no campo de texto.
+3. Clique em "Continuar".
+4. Selecione a opção "PIX".
+5. Escaneie o QR Code exibido com o celular ou clique em "Copiar" para testar o sistema Copia e Cola.
+
+Acessando a Transparência
+1. Clique em "Transparência" no menu principal.
+2. O modal escurecerá a tela e exibirá o painel.
+3. Observe as animações das barras de progresso (.kpi-bar-fill) e o carregamento fluido do gráfico Chart.js.
+________________________________________
+
+10. Personalização e Estilos (CSS)
+
+Para alterar o esquema de cores global do site de maneira fácil, acesse o arquivo src/styles/style.css e localize o bloco :root:
+
+:root {
+    --primary-blue: #1D2671;      /* Cor primária para textos fortes */
+    --text-color: #4a4a4a;        /* Cor para textos de parágrafos */
+    --green-donate: #00A859;      /* Cor de destaque para botões e doações */
+    --yellow-accent: #FFB800;     /* Cor de botões secundários (Ex: Saiba Mais) */
+}
+
+Alterar essas variáveis atualizará a cor em toda a página automaticamente.
+________________________________________
+
+11. Solução de Problemas
+
+Erro: O Gráfico de transparência não carrega ou fica em branco.
+Causa: Falta de conexão com a internet ou adblocker bloqueando o script do Chart.js.
+Solução: Verifique a conexão com a internet. Verifique o console (F12) para ver se os links cdn.jsdelivr.net foram bloqueados.
+
+Erro: O QR Code do PIX aparece quebrado.
+Causa: A API externa do qrserver.com pode estar instável.
+Solução: O código "Pix Copia e Cola" funciona de maneira independente e offline. O usuário ainda pode copiar o texto caso a imagem da API falhe.
+
+Erro: Modal de doação não abre ao clicar.
+Causa: O jQuery pode não ter sido carregado corretamente antes do arquivo script.js.
+Solução: Verifique se as tags <script> no arquivo index.html estão na ordem correta (jQuery no head, script.js no final do body).
+________________________________________
+
+12. Manutenção e Atualizações
+
+Como alterar os Dados do Gráfico
+No arquivo src/javascript/script.js, localize a função buildChart():
+Altere a array data: [43.75, 31.25, 18.75, 6.25] para as novas porcentagens.
+Altere a array labels: para modificar os nomes das categorias se necessário.
+
+Backup
+Recomenda-se realizar uma cópia completa da pasta Associacao-Vida-Carrapicho/ antes de realizar grandes modificações nos arquivos HTML, CSS ou JS. Utilize ferramentas de controle de versão (Git) para gerenciar o histórico de edições do frontend.
