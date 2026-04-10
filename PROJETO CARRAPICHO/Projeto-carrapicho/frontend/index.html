@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ONG Solidária - Transformando Vidas</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        
+        body {
+            background: #f5f5f5;
+        }
+        
+        /* =====================================================
+           HEADER - CABEÇALHO DA PÁGINA
+        ===================================================== */
+        .header {
+            background: #16a34a;
+            padding: 15px 30px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo span {
+            background: white;
+            color: #16a34a;
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+        }
+        
+        .nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 25px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+        
+        .nav a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+        
+        /* =====================================================
+           HERO - SEÇÃO PRINCIPAL
+        ===================================================== */
+        .hero {
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            padding: 80px 30px;
+            text-align: center;
+            color: white;
+        }
+        
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .hero p {
+            font-size: 20px;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* =====================================================
+           SEÇÕES GERAIS
+        ===================================================== */
+        .section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+        
+        .section h2 {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 40px;
+            font-size: 18px;
+        }
+        
+        /* =====================================================
+           CARDS DE DOAÇÃO
+        ===================================================== */
+        .donation-cards {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        
+        .donation-value {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 120px;
+        }
+        
+        .donation-value:hover {
+            border-color: #16a34a;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .donation-value.active {
+            border-color: #16a34a;
+            background: #f0fdf4;
+        }
+        
+        .donation-value .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #16a34a;
+        }
+        
+        .donation-value .label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+        
+        .custom-donation {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .custom-donation input {
+            padding: 12px 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            width: 200px;
+            font-size: 16px;
+        }
+        
+        .custom-donation button {
+            background: #16a34a;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .custom-donation button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        /* =====================================================
+           QR CODE CONTAINER
+        ===================================================== */
+        .qr-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            max-width: 500px;
+            margin: 0 auto 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            display: none;
+        }
+        
+        .qr-container.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .qr-code {
+            margin: 20px 0;
+        }
+        
+        .qr-code img {
+            max-width: 250px;
+            border-radius: 15px;
+        }
+        
+        .pix-copy {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 10px;
+            word-break: break-all;
+            font-size: 12px;
+            margin: 15px 0;
+        }
+        
+        .copy-btn {
+            background: #16a34a;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .copy-btn:hover {
+            background: #15803d;
+        }
+        
+        /* =====================================================
+           EVENTOS
+        ===================================================== */
+        .eventos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+        
+        .card-evento {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .card-evento:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        
+        .card-evento img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .card-evento-content {
+            padding: 20px;
+        }
+        
+        .card-evento h3 {
+            color: #16a34a;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        
+        .card-evento p {
+            color: #6b7280;
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        
+        .status.upcoming {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status.ongoing {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status.completed {
+            background: #e0e7ff;
+            color: #1e40af;
+        }
+        
+        /* =====================================================
+           FINANÇAS E GRÁFICO
+        ===================================================== */
+        .financeiro-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .resumo-cards {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        
+        .resumo-card {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .resumo-card h4 {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .resumo-card .valor {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        
+        .resumo-card.receita .valor {
+            color: #16a34a;
+        }
+        
+        .resumo-card.despesa .valor {
+            color: #dc2626;
+        }
+        
+        .resumo-card.saldo .valor {
+            color: #3b82f6;
+        }
+        
+        /* =====================================================
+           CATEGORIAS DE DESPESAS
+        ===================================================== */
+        .categorias-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .categoria-card {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .categoria-card h4 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #374151;
+        }
+        
+        .categoria-bar {
+            background: #e5e7eb;
+            height: 8px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .categoria-fill {
+            background: #dc2626;
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        .categoria-valor {
+            font-weight: bold;
+            color: #dc2626;
+        }
+        
+        /* =====================================================
+           TABELA DE REGISTROS
+        ===================================================== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        th {
+            background: #f9fafb;
+            font-weight: 600;
+        }
+        
+        /* =====================================================
+           FOOTER E BOTÃO ADMIN
+        ===================================================== */
+        .footer {
+            background: #1f2937;
+            color: white;
+            text-align: center;
+            padding: 40px;
+            margin-top: 60px;
+        }
+        
+        .admin-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #16a34a;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            opacity: 0.3;
+            transition: 0.3s;
+            z-index: 100;
+            font-size: 20px;
+        }
+        
+        .admin-btn:hover {
+            opacity: 1;
+        }
+        
+        /* =====================================================
+           AVISO DE DOAÇÃO
+        ===================================================== */
+        .aviso-doacao {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .aviso-doacao.show {
+            display: block;
+        }
+        
+        /* =====================================================
+           ANIMAÇÕES E RESPONSIVIDADE
+        ===================================================== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .financeiro-wrapper {
+                grid-template-columns: 1fr;
+            }
+            .hero h1 {
+                font-size: 32px;
+            }
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            .nav a {
+                margin: 0 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- =====================================================
+         HEADER - CABEÇALHO DA PÁGINA
+    ===================================================== -->
+    <header class="header">
+        <div class="logo">
+            ❤️ ONG Solidária
+            <span>Transparência Total</span>
+        </div>
+        <div class="nav">
+            <a href="#">Início</a>
+            <a href="#eventos">Eventos</a>
+            <a href="#doacoes">Doações</a>
+            <a href="#transparencia">Transparência</a>
+            <a href="#contato">Contato</a>
+        </div>
+    </header>
+
+    <!-- =====================================================
+         HERO - SEÇÃO PRINCIPAL
+    ===================================================== -->
+    <section class="hero">
+        <h1>Transformando vidas através da solidariedade</h1>
+        <p>Sua doação faz a diferença. Cada real é uma semente de esperança.</p>
+    </section>
+
+    <!-- =====================================================
+         SEÇÃO DE DOAÇÕES NA LANDING PAGE
+    ===================================================== -->
+    <section id="doacoes" class="section">
+        <h2>💸 Faça sua Doação</h2>
+        <p class="section-subtitle">Escolha um valor ou doe o quanto quiser. Seu gesto muda vidas!</p>
+        
+        <div class="donation-cards" id="valoresDoacao">
+            <div class="donation-value" data-value="10">
+                <div class="value">R$ 10</div>
+                <div class="label">Café solidário</div>
+            </div>
+            <div class="donation-value" data-value="25">
+                <div class="value">R$ 25</div>
+                <div class="label">Refeição para 5 famílias</div>
+            </div>
+            <div class="donation-value" data-value="50">
+                <div class="value">R$ 50</div>
+                <div class="label">Cesta básica</div>
+            </div>
+            <div class="donation-value" data-value="100">
+                <div class="value">R$ 100</div>
+                <div class="label">Kit escolar completo</div>
+            </div>
+            <div class="donation-value" data-value="200">
+                <div class="value">R$ 200</div>
+                <div class="label">Roupas de inverno</div>
+            </div>
+        </div>
+        
+        <div class="custom-donation">
+            <input type="number" id="valorPersonalizado" placeholder="Outro valor (R$)" step="1" min="1">
+            <button id="btnDoarPersonalizado">Doar</button>
+        </div>
+        
+        <div id="qrContainer" class="qr-container">
+            <h3>🔲 QR Code PIX</h3>
+            <div id="qrCodeDisplay" class="qr-code"></div>
+            <div id="pixPayloadDisplay" class="pix-copy"></div>
+            <button class="copy-btn" onclick="copiarPix()">📋 Copiar código PIX</button>
+            
+            <div style="margin-top: 20px; text-align: left; background: #f9fafb; padding: 15px; border-radius: 10px;">
+                <p style="font-weight: bold; margin-bottom: 10px;">📌 Como pagar:</p>
+                <ol style="margin-left: 20px; font-size: 13px; line-height: 1.6;">
+                    <li>Abra o app do seu banco</li>
+                    <li>Escolha "Pagar com PIX"</li>
+                    <li>Escaneie o QR Code ou cole o código</li>
+                    <li>Confirme o pagamento</li>
+                </ol>
+                <p style="margin-top: 10px; font-size: 12px; color: #dc2626;">
+                    ⚠️ Este QR Code é válido apenas para este valor. Gere um novo para outra doação.
+                </p>
+            </div>
+            
+            <button id="btnNovoQR" class="copy-btn" style="margin-top: 15px; background: #6b7280;" onclick="resetarDoacao()">
+                ➕ Gerar outro QR Code
+            </button>
+        </div>
+        
+        <div id="avisoDoacao" class="aviso-doacao"></div>
+    </section>
+
+    <!-- =====================================================
+         SEÇÃO DE EVENTOS
+    ===================================================== -->
+    <section id="eventos" class="section">
+        <h2>📅 Nossos Eventos</h2>
+        <p class="section-subtitle">Participe e faça parte dessa corrente do bem</p>
+        <div class="eventos-grid" id="listaEventos">
+            <div class="card-evento">
+                <div class="card-evento-content">
+                    <p>Carregando eventos...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================
+         SEÇÃO DE TRANSPARÊNCIA COM GRÁFICO
+    ===================================================== -->
+    <section id="transparencia" class="section">
+        <h2>💰 Transparência Financeira</h2>
+        <p class="section-subtitle">Acompanhe como seus recursos são aplicados</p>
+        
+        <div class="resumo-cards">
+            <div class="resumo-card receita">
+                <h4>💰 Total Recebido</h4>
+                <div class="valor" id="totalReceita">R$ 0</div>
+            </div>
+            <div class="resumo-card despesa">
+                <h4>💸 Total Gastos</h4>
+                <div class="valor" id="totalDespesa">R$ 0</div>
+            </div>
+            <div class="resumo-card saldo">
+                <h4>⚖️ Saldo Atual</h4>
+                <div class="valor" id="totalSaldo">R$ 0</div>
+            </div>
+        </div>
+        
+        <div class="financeiro-wrapper">
+            <div class="chart-container">
+                <canvas id="graficoFinanceiro" width="400" height="300"></canvas>
+            </div>
+            <div>
+                <h3 style="margin-bottom: 15px;">📊 Despesas por Categoria</h3>
+                <div id="categoriasDespesas" class="categorias-grid"></div>
+            </div>
+        </div>
+        
+        <h3 style="margin: 30px 0 15px;">📋 Últimos Lançamentos</h3>
+        <div style="overflow-x: auto;">
+            <table id="tabelaRegistros">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Categoria</th>
+                        <th>Descrição</th>
+                        <th>Valor</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="5">Carregando...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- =====================================================
+         FOOTER - RODAPÉ
+    ===================================================== -->
+    <footer id="contato" class="footer">
+        <p>❤️ ONG Solidária - Fazendo o bem desde 2020</p>
+        <p style="margin-top: 15px;">📍 Rua da Solidariedade, 123 - São Paulo/SP</p>
+        <p>📞 (11) 99999-9999 | ✉️ contato@ongsolidaria.org.br</p>
+        <p style="margin-top: 20px; font-size: 12px;">CNPJ: 12.345.678/0001-99 | Chave PIX: 12.345.678/0001-99</p>
+    </footer>
+
+    <!-- =====================================================
+         BOTÃO ADMIN (ESCONDIDO)
+    ===================================================== -->
+    <a href="/admin/" class="admin-btn">⚙️</a>
+
+    <!-- =====================================================
+         SCRIPT PRINCIPAL
+    ===================================================== -->
+    <script>
+        // =====================================================
+        // CONFIGURAÇÕES INICIAIS
+        // =====================================================
+        const API_URL = 'http://localhost:3000/api';
+        let graficoFinanceiro = null;
+        let valorSelecionado = 50;
+        let qrGerado = false;
+        let ultimoValorGerado = null;
+        
+        // =====================================================
+        // DOAÇÕES - QR CODE DE USO ÚNICO
+        // =====================================================
+        
+        // Selecionar valor pré-definido e gerar QR Code automaticamente
+        document.querySelectorAll('.donation-value').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                // Verificar se já tem QR Code ativo
+                if (qrGerado) {
+                    mostrarAviso('Você já tem um QR Code ativo. Clique em "Gerar outro QR Code" para fazer uma nova doação.', 'warning');
+                    return;
+                }
+                
+                // Remover classe active de todos e adicionar no clicado
+                document.querySelectorAll('.donation-value').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Pegar o valor
+                valorSelecionado = parseInt(btn.dataset.value);
+                
+                // Limpar campo personalizado
+                document.getElementById('valorPersonalizado').value = '';
+                
+                // Gerar QR Code automaticamente
+                await gerarQRCode(valorSelecionado);
+            });
+        });
+        
+        // Botão de valor personalizado
+        document.getElementById('btnDoarPersonalizado').addEventListener('click', async () => {
+            // Verificar se já tem QR Code ativo
+            if (qrGerado) {
+                mostrarAviso('Você já tem um QR Code ativo. Clique em "Gerar outro QR Code" para fazer uma nova doação.', 'warning');
+                return;
+            }
+            
+            const valor = parseFloat(document.getElementById('valorPersonalizado').value);
+            
+            if (valor && valor >= 1) {
+                // Remover classe active dos valores pré-definidos
+                document.querySelectorAll('.donation-value').forEach(b => b.classList.remove('active'));
+                valorSelecionado = valor;
+                await gerarQRCode(valor);
+            } else {
+                alert('Digite um valor válido (mínimo R$ 1,00)');
+            }
+        });
+        
+        // Função para gerar QR Code
+        async function gerarQRCode(valor) {
+            const container = document.getElementById('qrContainer');
+            container.classList.remove('show');
+            
+            // Desabilitar botões enquanto gera
+            const btnDoar = document.getElementById('btnDoarPersonalizado');
+            const botoesValor = document.querySelectorAll('.donation-value');
+            btnDoar.disabled = true;
+            btnDoar.textContent = 'Gerando...';
+            botoesValor.forEach(btn => btn.style.pointerEvents = 'none');
+            
+            try {
+                const response = await fetch(`${API_URL}/donations/pix`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount: valor, donor_name: '', donor_email: '' })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('qrCodeDisplay').innerHTML = `<img src="${data.qrCode}" alt="QR Code PIX">`;
+                    document.getElementById('pixPayloadDisplay').innerHTML = data.payload;
+                    window.pixPayloadAtual = data.payload;
+                    container.classList.add('show');
+                    qrGerado = true;
+                    ultimoValorGerado = valor;
+                    
+                    // Scroll suave até o QR Code
+                    container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    alert('Erro ao gerar QR Code: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro de conexão com o servidor');
+            } finally {
+                btnDoar.disabled = false;
+                btnDoar.textContent = 'Doar';
+                botoesValor.forEach(btn => btn.style.pointerEvents = 'auto');
+            }
+        }
+        
+        // Função para resetar e gerar novo QR Code
+        window.resetarDoacao = function() {
+            // Resetar estado
+            qrGerado = false;
+            ultimoValorGerado = null;
+            
+            // Esconder QR Code
+            const container = document.getElementById('qrContainer');
+            container.classList.remove('show');
+            
+            // Limpar campos
+            document.getElementById('valorPersonalizado').value = '';
+            
+            // Reativar botões de valor
+            document.querySelectorAll('.donation-value').forEach(btn => {
+                btn.style.pointerEvents = 'auto';
+            });
+            
+            // Selecionar valor padrão visualmente
+            document.querySelectorAll('.donation-value').forEach(b => b.classList.remove('active'));
+            document.querySelector('.donation-value[data-value="50"]').classList.add('active');
+            valorSelecionado = 50;
+            
+            // Mostrar feedback
+            mostrarAviso('✅ Novo QR Code disponível. Escolha um valor e clique para gerar.', 'success');
+        };
+        
+        // Função para copiar PIX
+        window.copiarPix = function() {
+            if (window.pixPayloadAtual) {
+                navigator.clipboard.writeText(window.pixPayloadAtual);
+                alert('✅ Código PIX copiado!');
+            }
+        };
+        
+        // Função para mostrar aviso
+        function mostrarAviso(mensagem, tipo = 'warning') {
+            const aviso = document.getElementById('avisoDoacao');
+            aviso.innerHTML = tipo === 'success' ? `✅ ${mensagem}` : `⚠️ ${mensagem}`;
+            aviso.style.background = tipo === 'success' ? '#d1fae5' : '#fee2e2';
+            aviso.style.color = tipo === 'success' ? '#065f46' : '#dc2626';
+            aviso.style.display = 'block';
+            aviso.style.padding = '15px';
+            aviso.style.borderRadius = '10px';
+            aviso.style.marginTop = '20px';
+            aviso.style.textAlign = 'center';
+            
+            setTimeout(() => {
+                aviso.style.display = 'none';
+            }, 4000);
+        }
+        
+        // =====================================================
+        // EVENTOS
+        // =====================================================
+        async function carregarEventos() {
+            try {
+                const res = await fetch(`${API_URL}/events`);
+                const eventos = await res.json();
+                const container = document.getElementById('listaEventos');
+                
+                if (!eventos || eventos.length === 0) {
+                    container.innerHTML = '<div class="card-evento"><div class="card-evento-content"><p>📭 Nenhum evento cadastrado</p></div></div>';
+                    return;
+                }
+                
+                container.innerHTML = eventos.map(e => `
+                    <div class="card-evento" onclick="window.location.href='/evento.html?id=${e.id}'">
+                        ${e.cover_image ? `<img src="${e.cover_image}" alt="${e.title}">` : '<div style="height:200px;background:#e5e7eb;display:flex;align-items:center;justify-content:center">📷 Sem imagem</div>'}
+                        <div class="card-evento-content">
+                            <h3>${e.title}</h3>
+                            <p>${e.description?.substring(0,100) || 'Sem descrição'}${e.description?.length > 100 ? '...' : ''}</p>
+                            <p>📅 ${new Date(e.event_date).toLocaleDateString('pt-BR')}</p>
+                            <p>📍 ${e.location || 'Local não definido'}</p>
+                            <span class="status ${e.status}">${e.status === 'upcoming' ? '🔜 Em breve' : e.status === 'ongoing' ? '📢 Acontecendo' : '✅ Encerrado'}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Erro ao carregar eventos:', error);
+                document.getElementById('listaEventos').innerHTML = '<div class="card-evento"><div class="card-evento-content"><p>❌ Erro ao carregar eventos</p></div></div>';
+            }
+        }
+        
+        // =====================================================
+        // FINANÇAS COM CATEGORIAS DETALHADAS
+        // =====================================================
+        const categoriasDespesasMap = {
+            'Alimentação': 0,
+            'Aluguel': 0,
+            'Material': 0,
+            'Transporte': 0,
+            'Salários': 0,
+            'Eventos': 0,
+            'Administrativo': 0,
+            'Outros': 0
+        };
+        
+        async function carregarTransparencia() {
+            try {
+                const res = await fetch(`${API_URL}/transparency`);
+                const data = await res.json();
+                
+                const totalReceita = data.totals?.income || 0;
+                const totalDespesa = data.totals?.expense || 0;
+                const saldo = totalReceita - totalDespesa;
+                
+                document.getElementById('totalReceita').textContent = `R$ ${totalReceita.toFixed(2)}`;
+                document.getElementById('totalDespesa').textContent = `R$ ${totalDespesa.toFixed(2)}`;
+                document.getElementById('totalSaldo').textContent = `R$ ${saldo.toFixed(2)}`;
+                
+                // Processar categorias de despesas
+                const despesasPorCategoria = { ...categoriasDespesasMap };
+                (data.records || []).forEach(r => {
+                    if (r.type === 'expense') {
+                        if (despesasPorCategoria.hasOwnProperty(r.category)) {
+                            despesasPorCategoria[r.category] += parseFloat(r.amount);
+                        } else {
+                            despesasPorCategoria[r.category] = parseFloat(r.amount);
+                        }
+                    }
+                });
+                
+                // Ordenar e exibir categorias
+                const categoriasOrdenadas = Object.entries(despesasPorCategoria)
+                    .filter(([_, valor]) => valor > 0)
+                    .sort((a, b) => b[1] - a[1]);
+                
+                const maxDespesa = Math.max(...Object.values(despesasPorCategoria), 1);
+                const categoriasHtml = categoriasOrdenadas.map(([cat, valor]) => `
+                    <div class="categoria-card">
+                        <h4>${cat}</h4>
+                        <div class="categoria-bar">
+                            <div class="categoria-fill" style="width: ${(valor / maxDespesa) * 100}%"></div>
+                        </div>
+                        <div class="categoria-valor">R$ ${valor.toFixed(2)}</div>
+                    </div>
+                `).join('');
+                document.getElementById('categoriasDespesas').innerHTML = categoriasHtml || '<p>Nenhuma despesa registrada</p>';
+                
+                // Atualizar gráfico
+                if (graficoFinanceiro) graficoFinanceiro.destroy();
+                const ctx = document.getElementById('graficoFinanceiro').getContext('2d');
+                graficoFinanceiro = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: categoriasOrdenadas.map(c => c[0]),
+                        datasets: [{
+                            data: categoriasOrdenadas.map(c => c[1]),
+                            backgroundColor: ['#16a34a', '#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec489a', '#6b7280'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                
+                // Tabela de registros
+                const tbody = document.querySelector('#tabelaRegistros tbody');
+                if (!data.records || data.records.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5">Nenhum registro financeiro</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = data.records.slice(0, 10).map(r => `
+                    <tr>
+                        <td>${r.type === 'income' ? '💰 Receita' : '💸 Despesa'}</td>
+                        <td>${r.category}</td>
+                        <td>${r.description || '-'}</td>
+                        <td style="color: ${r.type === 'income' ? '#16a34a' : '#dc2626'}">R$ ${parseFloat(r.amount).toFixed(2)}</td>
+                        <td>${new Date(r.transaction_date).toLocaleDateString('pt-BR')}</td>
+                    </tr>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Erro ao carregar transparência:', error);
+            }
+        }
+        
+        // =====================================================
+        // INICIALIZAÇÃO
+        // =====================================================
+        
+        // Selecionar valor padrão
+        document.querySelector('.donation-value[data-value="50"]').classList.add('active');
+        
+        // Carregar dados
+        carregarEventos();
+        carregarTransparencia();
+        
+        // Atualizar a cada 30 segundos
+        setInterval(() => {
+            carregarEventos();
+            carregarTransparencia();
+        }, 30000);
+    </script>
+</body>
+</html>

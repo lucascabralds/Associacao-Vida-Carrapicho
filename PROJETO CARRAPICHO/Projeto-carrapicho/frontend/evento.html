@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Evento - ONG Solidária</title>
+    <style>
+        /* =====================================================
+           ESTILOS GLOBAIS
+        ===================================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        
+        body {
+            background: #f5f5f5;
+        }
+        
+        /* =====================================================
+           HEADER
+        ===================================================== */
+        .header {
+            background: #16a34a;
+            padding: 15px 30px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            transition: 0.3s;
+        }
+        
+        .nav a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+        
+        /* =====================================================
+           CONTAINER PRINCIPAL
+        ===================================================== */
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        /* =====================================================
+           CARD DO EVENTO
+        ===================================================== */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .event-title {
+            font-size: 36px;
+            color: #16a34a;
+            margin-bottom: 20px;
+        }
+        
+        .event-meta {
+            color: #666;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .event-description {
+            line-height: 1.8;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+        
+        /* =====================================================
+           GALERIA DE IMAGENS
+        ===================================================== */
+        .gallery {
+            margin: 30px 0;
+        }
+        
+        .gallery-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .gallery-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .gallery-img:hover {
+            transform: scale(1.02);
+        }
+        
+        /* =====================================================
+           LIGHTBOX
+        ===================================================== */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+        }
+        
+        .lightbox .close {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .lightbox .close:hover {
+            color: #16a34a;
+        }
+        
+        /* =====================================================
+           STATUS BADGE
+        ===================================================== */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            margin-left: 15px;
+        }
+        
+        .status-upcoming {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-ongoing {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-completed {
+            background: #e0e7ff;
+            color: #1e40af;
+        }
+        
+        /* =====================================================
+           BOTÕES
+        ===================================================== */
+        .back-btn {
+            display: inline-block;
+            margin-top: 30px;
+            color: #16a34a;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+        
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+        
+        /* =====================================================
+           FOOTER E BOTÃO ADMIN
+        ===================================================== */
+        .footer {
+            background: #1f2937;
+            color: white;
+            text-align: center;
+            padding: 40px;
+            margin-top: 60px;
+        }
+        
+        .admin-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #16a34a;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            opacity: 0.3;
+            transition: 0.3s;
+            font-size: 20px;
+        }
+        
+        .admin-btn:hover {
+            opacity: 1;
+        }
+        
+        /* =====================================================
+           RESPONSIVIDADE
+        ===================================================== */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            .event-title {
+                font-size: 28px;
+            }
+            .nav a {
+                margin: 0 10px;
+            }
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- =====================================================
+         HEADER
+    ===================================================== -->
+    <header class="header">
+        <div class="logo">❤️ ONG Solidária</div>
+        <div class="nav">
+            <a href="/">Início</a>
+            <a href="/#eventos">Eventos</a>
+            <a href="/#doacoes">Doações</a>
+            <a href="/#transparencia">Transparência</a>
+        </div>
+    </header>
+
+    <!-- =====================================================
+         CONTEÚDO PRINCIPAL
+    ===================================================== -->
+    <div class="container">
+        <div class="card" id="eventoDetalhes">
+            <div style="text-align: center; padding: 40px;">Carregando evento...</div>
+        </div>
+        <a href="/" class="back-btn">← Voltar para página inicial</a>
+    </div>
+
+    <!-- =====================================================
+         LIGHTBOX PARA IMAGENS
+    ===================================================== -->
+    <div id="lightbox" class="lightbox" onclick="fecharLightbox()">
+        <span class="close">&times;</span>
+        <img id="lightboxImg" src="">
+    </div>
+
+    <!-- =====================================================
+         FOOTER
+    ===================================================== -->
+    <footer class="footer">
+        <p>❤️ ONG Solidária - Fazendo o bem desde 2020</p>
+        <p style="margin-top: 10px;">📍 Rua da Solidariedade, 123 - São Paulo/SP</p>
+        <p>📞 (11) 99999-9999 | ✉️ contato@ongsolidaria.org.br</p>
+    </footer>
+
+    <!-- =====================================================
+         BOTÃO ADMIN
+    ===================================================== -->
+    <a href="/admin/" class="admin-btn">⚙️</a>
+
+    <!-- =====================================================
+         SCRIPT
+    ===================================================== -->
+    <script>
+        // =====================================================
+        // CONFIGURAÇÕES INICIAIS
+        // =====================================================
+        const API_URL = 'http://localhost:3000/api';
+        const eventId = new URLSearchParams(window.location.search).get('id');
+        
+        // =====================================================
+        // CARREGAR DETALHES DO EVENTO
+        // =====================================================
+        async function carregarEvento() {
+            if (!eventId) {
+                document.getElementById('eventoDetalhes').innerHTML = `
+                    <div style="text-align:center;padding:40px;color:red">
+                        <h3>❌ Evento não encontrado</h3>
+                        <p>ID do evento não foi informado.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/events/${eventId}`);
+                const evento = await response.json();
+                
+                // Verificar se o evento foi encontrado
+                if (!evento.id) {
+                    document.getElementById('eventoDetalhes').innerHTML = `
+                        <div style="text-align:center;padding:40px;color:red">
+                            <h3>❌ Evento não encontrado</h3>
+                            <p>O evento que você está procurando não existe.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Definir classe e texto do status
+                let statusClass = '';
+                let statusText = '';
+                
+                switch (evento.status) {
+                    case 'upcoming':
+                        statusClass = 'status-upcoming';
+                        statusText = '📅 Em breve';
+                        break;
+                    case 'ongoing':
+                        statusClass = 'status-ongoing';
+                        statusText = '📢 Acontecendo agora';
+                        break;
+                    case 'completed':
+                        statusClass = 'status-completed';
+                        statusText = '✅ Encerrado';
+                        break;
+                    default:
+                        statusClass = 'status-upcoming';
+                        statusText = '📅 Em breve';
+                }
+                
+                // Montar galeria de imagens
+                let galleryHtml = '';
+                if (evento.images && evento.images.length > 0) {
+                    galleryHtml = `
+                        <div class="gallery">
+                            <h3 class="gallery-title">📸 Galeria de Imagens</h3>
+                            <div class="gallery-grid">
+                                ${evento.images.map(img => `
+                                    <img src="${img.image_url}" class="gallery-img" onclick="abrirLightbox('${img.image_url}')" loading="lazy">
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Montar HTML completo
+                document.getElementById('eventoDetalhes').innerHTML = `
+                    <h1 class="event-title">
+                        ${evento.title}
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </h1>
+                    <div class="event-meta">
+                        <span>📅 ${new Date(evento.event_date).toLocaleDateString('pt-BR')} às ${new Date(evento.event_date).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</span>
+                        <span>📍 ${evento.location || 'Local não definido'}</span>
+                    </div>
+                    <div class="event-description">
+                        ${evento.description || 'Sem descrição disponível.'}
+                    </div>
+                    ${galleryHtml}
+                `;
+            } catch (error) {
+                console.error('Erro ao carregar evento:', error);
+                document.getElementById('eventoDetalhes').innerHTML = `
+                    <div style="text-align:center;padding:40px;color:red">
+                        <h3>❌ Erro ao carregar evento</h3>
+                        <p>Não foi possível carregar os detalhes do evento. Tente novamente mais tarde.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // =====================================================
+        // LIGHTBOX FUNCTIONS
+        // =====================================================
+        function abrirLightbox(imgSrc) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightboxImg');
+            lightboxImg.src = imgSrc;
+            lightbox.style.display = 'flex';
+        }
+        
+        function fecharLightbox() {
+            document.getElementById('lightbox').style.display = 'none';
+        }
+        
+        // =====================================================
+        // FECHAR LIGHTBOX COM ESC
+        // =====================================================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                fecharLightbox();
+            }
+        });
+        
+        // =====================================================
+        // INICIAR
+        // =====================================================
+        carregarEvento();
+    </script>
+</body>
+</html>

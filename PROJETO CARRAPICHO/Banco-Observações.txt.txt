@@ -1,0 +1,296 @@
+
+
+## 1. **Acessar o MySQL**
+
+### Opção 1: Via Terminal (PowerShell)
+```bash
+mysql -u root -p
+```
+Digite a senha: `admin123`
+
+### Opção 2: Via MySQL Command Line Client
+- Abra o menu Iniciar
+- Digite "MySQL 8.0 Command Line Client"
+- Digite a senha: `admin123`
+
+---
+
+## 2. **Criar o Banco de Dados**
+
+```sql
+-- Criar banco de dados
+CREATE DATABASE IF NOT EXISTS ong_sistema;
+USE ong_sistema;
+```
+
+---
+
+## 3. **Criar Tabela de Usuários**
+
+```sql
+-- Tabela de usuários (administradores)
+CREATE TABLE IF NOT EXISTS users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'editor') DEFAULT 'editor',
+    active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+---
+
+## 4. **Criar Tabela de Eventos**
+
+```sql
+-- Tabela de eventos
+CREATE TABLE IF NOT EXISTS events (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    event_date DATETIME NOT NULL,
+    location VARCHAR(200),
+    status ENUM('upcoming', 'ongoing', 'completed', 'cancelled') DEFAULT 'upcoming',
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+);
+```
+
+---
+
+## 5. **Criar Tabela de Imagens dos Eventos**
+
+```sql
+-- Tabela de imagens dos eventos (múltiplas imagens por evento)
+CREATE TABLE IF NOT EXISTS event_images (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    event_id INT NOT NULL,
+    image_url VARCHAR(500) NOT NULL,
+    is_cover BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+    INDEX idx_event_id (event_id)
+);
+```
+
+---
+
+## 6. **Criar Tabela de Transparência Financeira**
+
+```sql
+-- Tabela de transparência financeira
+CREATE TABLE IF NOT EXISTS transparency (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    type ENUM('income', 'expense') NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    description TEXT,
+    amount DECIMAL(10,2) NOT NULL,
+    transaction_date DATE NOT NULL,
+    document_url VARCHAR(500),
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+);
+```
+
+---
+
+## 7. **Criar Tabela de Doações**
+
+```sql
+-- Tabela de doações
+CREATE TABLE IF NOT EXISTS donations (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    donor_name VARCHAR(100),
+    donor_email VARCHAR(100),
+    amount DECIMAL(10,2) NOT NULL,
+    pix_key VARCHAR(100),
+    pix_txid VARCHAR(100) UNIQUE,
+    pix_payload TEXT,
+    qr_code TEXT,
+    status ENUM('pending', 'paid', 'failed') DEFAULT 'pending',
+    payment_date DATETIME,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+---
+
+## 8. **Inserir Usuário Administrador**
+
+```sql
+-- Inserir administrador padrão
+-- Senha: admin123 (criptografada com bcrypt)
+INSERT INTO users (name, email, password, role) VALUES 
+('Administrador', 'admin@ong.com', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MrE6Z5nU5qZqZqZqZqZqZqZqZqZqZ', 'admin');
+```
+
+---
+
+## 9. **Inserir Dados de Exemplo (Opcional)**
+
+```sql
+-- Inserir eventos de exemplo
+INSERT INTO events (title, description, event_date, location, status) VALUES 
+('Feijoada Solidária', 'Venha participar da nossa feijoada beneficente', DATE_ADD(NOW(), INTERVAL 15 DAY), 'Centro Comunitário', 'upcoming'),
+('Campanha do Agasalho', 'Arrecadação de roupas para o inverno', DATE_ADD(NOW(), INTERVAL 30 DAY), 'Sede da ONG', 'upcoming');
+
+-- Inserir registros financeiros de exemplo
+INSERT INTO transparency (type, category, description, amount, transaction_date) VALUES 
+('income', 'Doações', 'Campanha de Natal', 5000.00, CURDATE()),
+('expense', 'Alimentação', 'Compra de cestas básicas', 3200.00, CURDATE());
+```
+
+---
+
+## 10. **Verificar se tudo foi criado**
+
+```sql
+-- Ver todas as tabelas
+SHOW TABLES;
+
+-- Ver estrutura das tabelas
+DESCRIBE users;
+DESCRIBE events;
+DESCRIBE event_images;
+DESCRIBE transparency;
+DESCRIBE donations;
+
+-- Ver dados inseridos
+SELECT * FROM users;
+SELECT * FROM events;
+SELECT * FROM transparency;
+```
+
+---
+
+## 11. **Sair do MySQL**
+
+```sql
+EXIT;
+```
+
+---
+
+## 📋 **Resumo dos Comandos **
+
+```sql
+-- =====================================================
+-- CRIAÇÃO COMPLETA DO BANCO DE DADOS ONG SISTEMA
+-- =====================================================
+
+-- Criar banco
+CREATE DATABASE IF NOT EXISTS ong_sistema;
+USE ong_sistema;
+
+-- Tabela users
+CREATE TABLE IF NOT EXISTS users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'editor') DEFAULT 'editor',
+    active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela events
+CREATE TABLE IF NOT EXISTS events (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    event_date DATETIME NOT NULL,
+    location VARCHAR(200),
+    status ENUM('upcoming', 'ongoing', 'completed', 'cancelled') DEFAULT 'upcoming',
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- Tabela event_images
+CREATE TABLE IF NOT EXISTS event_images (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    event_id INT NOT NULL,
+    image_url VARCHAR(500) NOT NULL,
+    is_cover BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+    INDEX idx_event_id (event_id)
+);
+
+-- Tabela transparency
+CREATE TABLE IF NOT EXISTS transparency (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    type ENUM('income', 'expense') NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    description TEXT,
+    amount DECIMAL(10,2) NOT NULL,
+    transaction_date DATE NOT NULL,
+    document_url VARCHAR(500),
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- Tabela donations
+CREATE TABLE IF NOT EXISTS donations (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    donor_name VARCHAR(100),
+    donor_email VARCHAR(100),
+    amount DECIMAL(10,2) NOT NULL,
+    pix_key VARCHAR(100),
+    pix_txid VARCHAR(100) UNIQUE,
+    pix_payload TEXT,
+    qr_code TEXT,
+    status ENUM('pending', 'paid', 'failed') DEFAULT 'pending',
+    payment_date DATETIME,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Inserir admin
+INSERT INTO users (name, email, password, role) VALUES 
+('Administrador', 'admin@ong.com', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MrE6Z5nU5qZqZqZqZqZqZqZqZqZqZ', 'admin');
+
+-- Dados de exemplo
+INSERT INTO events (title, description, event_date, location, status) VALUES 
+('Feijoada Solidária', 'Venha participar da nossa feijoada beneficente', DATE_ADD(NOW(), INTERVAL 15 DAY), 'Centro Comunitário', 'upcoming'),
+('Campanha do Agasalho', 'Arrecadação de roupas para o inverno', DATE_ADD(NOW(), INTERVAL 30 DAY), 'Sede da ONG', 'upcoming');
+
+INSERT INTO transparency (type, category, description, amount, transaction_date) VALUES 
+('income', 'Doações', 'Campanha de Natal', 5000.00, CURDATE()),
+('expense', 'Alimentação', 'Compra de cestas básicas', 3200.00, CURDATE());
+
+-- Verificar
+SHOW TABLES;
+SELECT * FROM users;
+SELECT * FROM events;
+SELECT * FROM transparency;
+
+EXIT;
+```
+
+---
+
+## ✅ **Checklist **
+
+| Passo | Comando | Status |
+|-------|---------|--------|
+| 1 | Acessar MySQL | `mysql -u root -p` |
+| 2 | Criar banco | `CREATE DATABASE ong_sistema;` |
+| 3 | Criar tabela users | ✅ |
+| 4 | Criar tabela events | ✅ |
+| 5 | Criar tabela event_images | ✅ |
+| 6 | Criar tabela transparency | ✅ |
+| 7 | Criar tabela donations | ✅ |
+| 8 | Inserir admin | ✅ |
+| 9 | Inserir dados exemplo | ✅ |
+| 10 | Verificar | `SHOW TABLES;` |
+
+---
+
+]

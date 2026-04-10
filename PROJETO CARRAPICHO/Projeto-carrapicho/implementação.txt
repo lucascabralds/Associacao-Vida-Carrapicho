@@ -1,0 +1,520 @@
+Sumário
+1.	Visão Geral do Sistema
+2.	Tecnologias Utilizadas
+3.	Estrutura do Sistema
+4.	Funcionalidades
+5.	Pré-requisitos para Instalação
+6.	Passo a Passo para Instalação
+7.	Configuração do Backend
+8.	Configuração do Frontend
+9.	Como Executar o Sistema
+10.	Guia de Uso
+11.	Solução de Problemas
+12.	Manutenção e Backup
+________________________________________
+1. Visão Geral do Sistema
+O Sistema ONG Solidária é uma aplicação web completa para gestão administrativa de organizações não governamentais. O sistema permite o gerenciamento de eventos, controle financeiro e administração de usuários em um único painel integrado.
+Objetivos
+•	Centralizar a gestão de eventos da ONG
+•	Controlar receitas e despesas de forma transparente
+•	Gerenciar usuários com diferentes níveis de acesso
+•	Fornecer relatórios visuais para tomada de decisão
+________________________________________
+2. Tecnologias Utilizadas
+Frontend
+Tecnologia	Versão	Finalidade
+HTML5	-	Estrutura das páginas
+CSS3	-	Estilização e responsividade
+JavaScript (ES6+)	-	Lógica de frontend e interatividade
+Chart.js	4.4.0	Geração de gráficos financeiros
+Backend (Recomendado)
+Tecnologia	Versão	Finalidade
+Node.js	18.x ou superior	Ambiente de execução
+Express.js	4.x	Framework web
+SQLite3	5.x	Banco de dados
+JSON Web Token	9.x	Autenticação
+Multer	1.x	Upload de imagens
+CORS	2.x	Controle de acesso
+Ferramentas de Desenvolvimento
+Ferramenta	Finalidade
+Visual Studio Code	Editor de código
+Git	Controle de versão
+Postman	Teste de APIs
+SQLite Browser	Visualização do banco de dados
+________________________________________
+3. Estrutura do Sistema
+Arquitetura
+text
+ONG-Solidaria/
+│
+├── backend/
+│   ├── server.js              # Servidor principal
+│   ├── database.sqlite        # Banco de dados SQLite
+│   ├── uploads/               # Pasta para imagens
+│   └── package.json           # Dependências do backend
+│
+├── frontend/
+│   └── admin.html             # Painel administrativo
+│
+└── README.md                  # Documentação
+Estrutura do Banco de Dados
+Tabela: users
+Campo	Tipo	Descrição
+id	INTEGER PRIMARY KEY	Identificador único
+name	TEXT	Nome do usuário
+email	TEXT	Email para login
+password	TEXT	Senha (hash)
+role	TEXT	admin ou editor
+active	BOOLEAN	Status do usuário
+created_at	DATETIME	Data de criação
+Tabela: events
+Campo	Tipo	Descrição
+id	INTEGER PRIMARY KEY	Identificador único
+title	TEXT	Título do evento
+description	TEXT	Descrição detalhada
+event_date	DATETIME	Data e hora do evento
+location	TEXT	Local do evento
+status	TEXT	upcoming, ongoing, completed, cancelled
+created_at	DATETIME	Data de criação
+Tabela: event_images
+Campo	Tipo	Descrição
+id	INTEGER PRIMARY KEY	Identificador único
+event_id	INTEGER	ID do evento relacionado
+image_url	TEXT	URL da imagem
+is_cover	BOOLEAN	Indica se é imagem de capa
+created_at	DATETIME	Data de upload
+Tabela: transactions
+Campo	Tipo	Descrição
+id	INTEGER PRIMARY KEY	Identificador único
+type	TEXT	income ou expense
+category	TEXT	Categoria da transação
+description	TEXT	Descrição detalhada
+amount	REAL	Valor da transação
+transaction_date	DATE	Data da transação
+created_at	DATETIME	Data de registro
+________________________________________
+4. Funcionalidades
+Módulo de Autenticação
+•	Login com email e senha
+•	Proteção de rotas com JWT
+•	Controle de sessão via localStorage
+Módulo de Eventos
+•	Criar eventos com título, descrição, data, local
+•	Upload múltiplo de imagens
+•	Definir status do evento (Em breve, Acontecendo, Encerrado, Cancelado)
+•	Editar eventos existentes
+•	Remover imagens individualmente
+•	Excluir eventos
+•	Visualização de lista com capa e informações resumidas
+Módulo Financeiro
+•	Registrar receitas e despesas
+•	Categorização de transações
+•	Resumo com totais (receitas, despesas, saldo)
+•	Gráfico de despesas por categoria
+•	Lista de lançamentos com filtro visual
+•	Exclusão de registros
+Módulo de Usuários
+•	Criar novos usuários (admin ou editor)
+•	Listar usuários cadastrados
+•	Alterar nível de acesso (admin/editor)
+•	Excluir usuários (exceto o admin principal)
+________________________________________
+5. Pré-requisitos para Instalação
+Software Necessário
+Software	Versão Mínima	Download
+Node.js	18.0.0	https://nodejs.org/
+
+Git	2.30.0	https://git-scm.com/
+
+Navegador	Chrome/Firefox/Edge	Atualizado
+Verificar Instalação
+bash
+node --version
+npm --version
+git --version
+________________________________________
+6. Passo a Passo para Instalação
+6.1 Criar Estrutura de Pastas
+bash
+# Criar pasta principal
+mkdir ONG-Solidaria
+cd ONG-Solidaria
+
+# Criar pastas para backend
+mkdir backend
+cd backend
+mkdir uploads
+6.2 Inicializar Projeto Backend
+bash
+# Inicializar package.json
+npm init -y
+
+# Instalar dependências
+npm install express sqlite3 jsonwebtoken bcryptjs multer cors path fs
+npm install -D nodemon
+6.3 Criar Arquivo server.js
+Crie o arquivo backend/server.js com o código do servidor (fornecido separadamente).
+6.4 Criar Pasta Frontend
+bash
+# Na raiz do projeto
+cd ..
+mkdir frontend
+6.5 Adicionar Arquivo HTML
+Copie o arquivo admin.html para a pasta frontend/ (código HTML completo fornecido anteriormente).
+________________________________________
+7. Configuração do Backend
+7.1 Estrutura do server.js
+O arquivo server.js deve conter:
+javascript
+const express = require('express');
+const sqlite3 = require('sqlite3').verbose();
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
+
+const app = express();
+const PORT = 3000;
+const JWT_SECRET = 'ong_solidaria_secret_key_2024';
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Configuração do banco de dados
+const db = new sqlite3.Database('./database.sqlite');
+
+// Configuração de upload de imagens
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = /jpeg|jpg|png|gif/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+        if (mimetype && extname) {
+            return cb(null, true);
+        }
+        cb(new Error('Apenas imagens são permitidas'));
+    }
+});
+
+// Criar tabelas do banco de dados
+db.serialize(() => {
+    // Tabela de usuários
+    db.run(`CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        role TEXT DEFAULT 'editor',
+        active BOOLEAN DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    // Tabela de eventos
+    db.run(`CREATE TABLE IF NOT EXISTS events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        description TEXT,
+        event_date DATETIME NOT NULL,
+        location TEXT,
+        status TEXT DEFAULT 'upcoming',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    // Tabela de imagens de eventos
+    db.run(`CREATE TABLE IF NOT EXISTS event_images (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        event_id INTEGER NOT NULL,
+        image_url TEXT NOT NULL,
+        is_cover BOOLEAN DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
+    )`);
+
+    // Tabela de transações financeiras
+    db.run(`CREATE TABLE IF NOT EXISTS transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        type TEXT NOT NULL,
+        category TEXT NOT NULL,
+        description TEXT,
+        amount REAL NOT NULL,
+        transaction_date DATE NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    // Criar usuário admin padrão
+    const adminPassword = bcrypt.hashSync('admin123', 10);
+    db.run(`INSERT OR IGNORE INTO users (name, email, password, role) VALUES (?, ?, ?, ?)`, 
+        ['Administrador', 'admin@ong.com', adminPassword, 'admin']);
+});
+
+// Rotas da API
+// (Implementar todas as rotas conforme especificado no código completo)
+
+app.listen(PORT, () => {
+    console.log(`Servidor rodando em http://localhost:${PORT}`);
+});
+7.2 Configurar package.json
+Adicione o script de start:
+json
+{
+  "name": "ong-solidaria-backend",
+  "version": "1.0.0",
+  "description": "Backend para sistema de gestão de ONG",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "multer": "^1.4.5-lts.1",
+    "cors": "^2.8.5",
+    "path": "^0.12.7",
+    "fs": "^0.0.1-security"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
+________________________________________
+8. Configuração do Frontend
+8.1 Configurar URL da API
+No arquivo admin.html, localize a constante API_URL:
+javascript
+const API_URL = 'http://localhost:3000/api';
+Importante: Se o servidor backend estiver rodando em outra máquina ou porta, altere esta URL.
+8.2 Credenciais Padrão
+Nível	Email	Senha
+Admin	admin@ong.com	admin123
+Editor	(criar via admin)	(definir no cadastro)
+________________________________________
+9. Como Executar o Sistema
+9.1 Iniciar o Backend
+bash
+# Acessar pasta do backend
+cd backend
+
+# Primeira execução
+npm install
+
+# Iniciar servidor
+npm start
+
+# Ou em modo desenvolvimento (com auto-reload)
+npm run dev
+Saída esperada:
+text
+Servidor rodando em http://localhost:3000
+Banco de dados conectado
+9.2 Acessar o Frontend
+1.	Abra o navegador
+2.	Navegue até: file:///caminho/para/ONG-Solidaria/frontend/admin.html
+3.	Ou use um servidor local:
+bash
+# Instalar servidor HTTP simples (opcional)
+npm install -g http-server
+
+# Na pasta frontend
+http-server -p 8080
+
+# Acessar: http://localhost:8080/admin.html
+9.3 Fazer Login
+1.	Utilize as credenciais padrão:
+o	Email: admin@ong.com
+o	Senha: admin123
+2.	Após login bem-sucedido, o painel administrativo será exibido
+________________________________________
+10. Guia de Uso
+10.1 Gerenciar Eventos
+Criar Evento
+1.	Acesse a aba "Eventos"
+2.	Preencha os campos:
+o	Título (obrigatório)
+o	Descrição
+o	Data e Hora (obrigatório)
+o	Local
+o	Imagens (múltiplas, a primeira será capa)
+o	Status
+3.	Clique em "Criar Evento"
+Editar Evento
+1.	Localize o evento na lista
+2.	Clique em "Editar"
+3.	Altere as informações desejadas
+4.	Para remover imagens, clique no X sobre a imagem
+5.	Adicione novas imagens se necessário
+6.	Clique em "Salvar Alterações"
+Excluir Evento
+1.	Localize o evento na lista
+2.	Clique em "Excluir"
+3.	Confirme a exclusão
+10.2 Gerenciar Finanças
+Registrar Movimentação
+1.	Acesse a aba "Finanças"
+2.	Selecione o tipo (Receita ou Despesa)
+3.	Escolha a categoria
+4.	Preencha descrição (opcional)
+5.	Informe o valor (use ponto para decimais, ex: 99.90)
+6.	Selecione a data
+7.	Clique em "Registrar"
+Visualizar Relatórios
+•	Os totais são atualizados automaticamente
+•	O gráfico de despesas por categoria é gerado dinamicamente
+•	A lista de lançamentos mostra todos os registros
+Excluir Lançamento
+1.	Localize o registro na lista de lançamentos
+2.	Clique em "Excluir"
+3.	Confirme a exclusão
+10.3 Gerenciar Usuários
+Criar Usuário
+1.	Acesse a aba "Usuários"
+2.	Preencha:
+o	Nome completo
+o	Email
+o	Senha
+o	Nível (Admin ou Editor)
+3.	Clique em "Criar Usuário"
+Editar Nível de Acesso
+1.	Localize o usuário na lista
+2.	Clique em "Editar"
+3.	Confirme a alteração no popup
+Excluir Usuário
+1.	Localize o usuário na lista
+2.	Clique em "Excluir"
+3.	Confirme a exclusão
+Nota: O usuário administrador principal (ID 1) não pode ser excluído.
+________________________________________
+11. Solução de Problemas
+11.1 Erro: "totalReceita.toFixed is not a function"
+Causa: Valores financeiros retornando como string ou null.
+Solução: O código corrigido já trata este problema. Certifique-se de usar a versão mais recente do frontend.
+11.2 Erro de Conexão com API
+Verificar:
+bash
+# Testar se o servidor está rodando
+curl http://localhost:3000/api/events
+
+# Verificar porta ocupada
+netstat -ano | findstr :3000
+Soluções:
+•	Confirme que o backend está rodando
+•	Verifique se a porta 3000 está livre
+•	No frontend, confirme a URL do API_URL
+11.3 Erro de Autenticação
+Verificar:
+•	Credenciais corretas
+•	Token JWT não expirado
+•	Limpar localStorage e tentar novamente
+javascript
+// Limpar token manualmente no console
+localStorage.clear();
+location.reload();
+11.4 Upload de Imagens Não Funciona
+Verificar:
+•	Pasta uploads/ existe e tem permissão de escrita
+•	Tamanho da imagem não excede 5MB
+•	Formato da imagem é jpg, png ou gif
+11.5 Banco de Dados Corrompido
+Recuperar:
+bash
+# Backup do banco atual
+cp database.sqlite database.sqlite.backup
+
+# Recriar banco (remover e iniciar servidor)
+rm database.sqlite
+npm start  # Recriará as tabelas
+________________________________________
+12. Manutenção e Backup
+12.1 Backup do Banco de Dados
+bash
+# Backup manual
+cp backend/database.sqlite backups/database_$(date +%Y%m%d).sqlite
+
+# Script de backup automático (Linux/Mac)
+#!/bin/bash
+mkdir -p backups
+cp backend/database.sqlite backups/database_$(date +%Y%m%d_%H%M%S).sqlite
+find backups -name "database_*.sqlite" -mtime +30 -delete
+12.2 Backup das Imagens
+bash
+# Backup da pasta uploads
+tar -czf uploads_backup_$(date +%Y%m%d).tar.gz backend/uploads/
+12.3 Logs do Sistema
+Adicione logging no server.js para monitoramento:
+javascript
+// Middleware de logging
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+});
+12.4 Atualização do Sistema
+1.	Backup completo dos dados
+2.	Parar o servidor
+3.	Substituir arquivos (mantendo database.sqlite e uploads/)
+4.	Instalar novas dependências se necessário
+5.	Reiniciar o servidor
+6.	Testar funcionalidades
+12.5 Monitoramento
+Verifique regularmente:
+•	Espaço em disco (imagens)
+•	Tamanho do banco de dados
+•	Logs de erro
+•	Performance das consultas
+________________________________________
+13. Variáveis de Ambiente (Recomendado)
+Para produção, utilize variáveis de ambiente:
+bash
+# Criar arquivo .env na pasta backend
+PORT=3000
+JWT_SECRET=seu_segredo_aqui
+NODE_ENV=production
+DB_PATH=./database.sqlite
+Instalar dotenv:
+bash
+npm install dotenv
+Modificar server.js:
+javascript
+require('dotenv').config();
+
+const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'ong_solidaria_secret_key_2024';
+________________________________________
+14. Considerações de Segurança
+Para Produção
+1.	Alterar senha padrão do usuário admin imediatamente
+2.	Usar HTTPS em ambiente de produção
+3.	Configurar CORS adequadamente
+4.	Limitar tamanho de upload de imagens
+5.	Validar todos os inputs no backend
+6.	Usar variáveis de ambiente para dados sensíveis
+7.	Implementar rate limiting para evitar ataques
+8.	Fazer backups regulares dos dados
+________________________________________
+15. Contato e Suporte
+Para dúvidas ou sugestões:
+•	Documentação completa disponível neste arquivo
+•	Verificar logs do sistema para diagnósticos
+•	Manter backups antes de qualquer atualização
+________________________________________
+16. Licença
+Este sistema é de uso livre para organizações não governamentais sem fins lucrativos.
+________________________________________
+

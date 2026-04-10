@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - ONG Solidária</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* =====================================================
+           ESTILOS GLOBAIS
+        ===================================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        
+        body {
+            background: #f3f4f6;
+        }
+        
+        /* =====================================================
+           HEADER
+        ===================================================== */
+        .header {
+            background: #16a34a;
+            padding: 15px 30px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+        
+        .nav a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .nav a.active {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        /* =====================================================
+           BOTÕES
+        ===================================================== */
+        .btn {
+            background: #16a34a;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .btn:hover {
+            background: #15803d;
+        }
+        
+        .btn-danger {
+            background: #dc2626;
+        }
+        
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        
+        .btn-sm {
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+        
+        /* =====================================================
+           CONTAINER PRINCIPAL
+        ===================================================== */
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        /* =====================================================
+           CARDS
+        ===================================================== */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            margin-bottom: 20px;
+            color: #333;
+            border-left: 4px solid #16a34a;
+            padding-left: 15px;
+        }
+        
+        /* =====================================================
+           FORMULÁRIOS
+        ===================================================== */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #16a34a;
+            box-shadow: 0 0 0 2px rgba(22,163,74,0.1);
+        }
+        
+        .form-group input[type="file"] {
+            padding: 8px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        /* =====================================================
+           TABELAS
+        ===================================================== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        th {
+            background: #f9fafb;
+            font-weight: 600;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        /* =====================================================
+           MODAL
+        ===================================================== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .close {
+            cursor: pointer;
+            font-size: 24px;
+            color: #6b7280;
+        }
+        
+        .close:hover {
+            color: #dc2626;
+        }
+        
+        /* =====================================================
+           LOGIN
+        ===================================================== */
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #16a34a;
+        }
+        
+        .message {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .message.error {
+            background: #fee2e2;
+            color: #dc2626;
+            display: block;
+        }
+        
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            display: block;
+        }
+        
+        /* =====================================================
+           PREVIEW DE IMAGENS
+        ===================================================== */
+        .image-preview {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .image-preview img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .current-images {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .current-images .img-item {
+            position: relative;
+        }
+        
+        .current-images img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .remove-img-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc2626;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .remove-img-btn:hover {
+            background: #b91c1c;
+        }
+        
+        /* =====================================================
+           RESUMO FINANCEIRO
+        ===================================================== */
+        .resumo-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .resumo-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .resumo-card h4 {
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+        
+        .resumo-card .valor {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .resumo-card.receita .valor {
+            color: #16a34a;
+        }
+        
+        .resumo-card.despesa .valor {
+            color: #dc2626;
+        }
+        
+        .resumo-card.saldo .valor {
+            color: #3b82f6;
+        }
+        
+        /* =====================================================
+           CATEGORIAS
+        ===================================================== */
+        .categorias-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .categoria-item {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .categoria-item .nome {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .categoria-item .valor {
+            color: #dc2626;
+            font-weight: bold;
+        }
+        
+        /* =====================================================
+           GRÁFICO
+        ===================================================== */
+        .chart-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        /* =====================================================
+           RESPONSIVIDADE
+        ===================================================== */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .resumo-cards {
+                grid-template-columns: 1fr;
+            }
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            .nav {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- =====================================================
+             TELA DE LOGIN
+        ===================================================== -->
+        <div id="loginScreen">
+            <div class="login-container">
+                <h2>🔐 Painel Administrativo</h2>
+                <div id="loginMessage" class="message"></div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" placeholder="admin@ong.com">
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="password" placeholder="********">
+                </div>
+                <button class="btn" onclick="fazerLogin()" style="width:100%">Entrar</button>
+            </div>
+        </div>
+
+        <!-- =====================================================
+             PAINEL PRINCIPAL
+        ===================================================== -->
+        <div id="dashboardScreen" style="display: none;">
+            <div class="header">
+                <div class="logo">❤️ ONG Solidária - Administração</div>
+                <div class="nav">
+                    <a onclick="mostrarAba('eventos')" id="tabEventosBtn" class="active">📅 Eventos</a>
+                    <a onclick="mostrarAba('financas')" id="tabFinancasBtn">💰 Finanças</a>
+                    <a onclick="mostrarAba('usuarios')" id="tabUsuariosBtn">👥 Usuários</a>
+                </div>
+                <button class="btn" onclick="sair()">Sair</button>
+            </div>
+
+            <div class="container">
+                <!-- =====================================================
+                     ABA EVENTOS
+                ===================================================== -->
+                <div id="abaEventos">
+                    <div class="card">
+                        <h2>📅 Criar Novo Evento</h2>
+                        <form id="formEvento" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label>Título do Evento *</label>
+                                <input type="text" id="evento_title" required placeholder="Ex: Feijoada Solidária">
+                            </div>
+                            <div class="form-group">
+                                <label>Descrição</label>
+                                <textarea id="evento_desc" rows="3" placeholder="Descreva o evento..."></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Data e Hora *</label>
+                                    <input type="datetime-local" id="evento_date" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Local</label>
+                                    <input type="text" id="evento_location" placeholder="Endereço do evento">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Imagens do Evento (pode selecionar várias)</label>
+                                <input type="file" id="evento_images" name="images" multiple accept="image/*">
+                                <div id="evento_preview" class="image-preview"></div>
+                                <small style="color: #6b7280;">A primeira imagem será a capa. Use Ctrl para selecionar múltiplas.</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select id="evento_status">
+                                    <option value="upcoming">📅 Em breve</option>
+                                    <option value="ongoing">📢 Acontecendo agora</option>
+                                    <option value="completed">✅ Encerrado</option>
+                                    <option value="cancelled">❌ Cancelado</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn">➕ Criar Evento</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h2>📋 Eventos Cadastrados</h2>
+                        <div style="overflow-x: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Capa</th>
+                                        <th>Título</th>
+                                        <th>Data</th>
+                                        <th>Local</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="listaEventos">
+                                    <tr><td colspan="7">Carregando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- =====================================================
+                     ABA FINANÇAS
+                ===================================================== -->
+                <div id="abaFinancas" style="display: none;">
+                    <div class="card">
+                        <h2>💰 Registrar Movimentação</h2>
+                        <form id="formFinanca">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Tipo *</label>
+                                    <select id="financa_type" required>
+                                        <option value="income">💰 Receita (Entrada)</option>
+                                        <option value="expense">💸 Despesa (Saída)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Categoria *</label>
+                                    <select id="financa_category" required>
+                                        <option value="">Selecione...</option>
+                                        <option value="Doações">📦 Doações</option>
+                                        <option value="Eventos">🎪 Eventos</option>
+                                        <optgroup label="Despesas">
+                                            <option value="Alimentação">🍲 Alimentação</option>
+                                            <option value="Aluguel">🏢 Aluguel</option>
+                                            <option value="Material">📚 Material</option>
+                                            <option value="Transporte">🚛 Transporte</option>
+                                            <option value="Salários">👥 Salários</option>
+                                            <option value="Administrativo">📋 Administrativo</option>
+                                            <option value="Outros">📌 Outros</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Descrição</label>
+                                <input type="text" id="financa_desc" placeholder="Descreva a movimentação">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Valor (R$) *</label>
+                                    <input type="number" id="financa_amount" step="0.01" placeholder="0,00" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Data *</label>
+                                    <input type="date" id="financa_date" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn">➕ Registrar</button>
+                        </form>
+                    </div>
+                    
+                    <div class="card">
+                        <h2>📊 Resumo Financeiro</h2>
+                        <div class="resumo-cards">
+                            <div class="resumo-card receita">
+                                <h4>💰 Receitas</h4>
+                                <div class="valor" id="totalIncome">R$ 0</div>
+                            </div>
+                            <div class="resumo-card despesa">
+                                <h4>💸 Despesas</h4>
+                                <div class="valor" id="totalExpense">R$ 0</div>
+                            </div>
+                            <div class="resumo-card saldo">
+                                <h4>⚖️ Saldo</h4>
+                                <div class="valor" id="totalBalance">R$ 0</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="chart-container">
+                                <canvas id="graficoAdmin" height="200"></canvas>
+                            </div>
+                            <div>
+                                <h3>📊 Despesas por Categoria</h3>
+                                <div id="categoriasListAdmin" class="categorias-grid"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h2>📋 Lançamentos</h2>
+                        <div style="overflow-x: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Categoria</th>
+                                        <th>Descrição</th>
+                                        <th>Valor</th>
+                                        <th>Data</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="listaFinancas"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- =====================================================
+                     ABA USUÁRIOS
+                ===================================================== -->
+                <div id="abaUsuarios" style="display: none;">
+                    <div class="card">
+                        <h2>👥 Criar Novo Usuário</h2>
+                        <form id="formUsuario">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Nome *</label>
+                                    <input type="text" id="user_name" required placeholder="Nome completo">
+                                </div>
+                                <div class="form-group">
+                                    <label>Email *</label>
+                                    <input type="email" id="user_email" required placeholder="email@exemplo.com">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Senha *</label>
+                                    <input type="password" id="user_password" required placeholder="Mínimo 6 caracteres">
+                                </div>
+                                <div class="form-group">
+                                    <label>Nível de Acesso</label>
+                                    <select id="user_role">
+                                        <option value="editor">✏️ Editor (pode editar conteúdo)</option>
+                                        <option value="admin">👑 Administrador (acesso total)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn">➕ Criar Usuário</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h2>📋 Usuários do Sistema</h2>
+                        <div style="overflow-x: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nome</th>
+                                        <th>Email</th>
+                                        <th>Função</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="listaUsuarios"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         MODAL DE EDIÇÃO DE EVENTO
+    ===================================================== -->
+    <div id="modalEditarEvento" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ Editar Evento</h3>
+                <span class="close" onclick="fecharModal()">&times;</span>
+            </div>
+            <form id="formEditarEvento" enctype="multipart/form-data">
+                <input type="hidden" id="edit_evento_id">
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="edit_evento_title" required>
+                </div>
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <textarea id="edit_evento_desc" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Data e Hora</label>
+                    <input type="datetime-local" id="edit_evento_date" required>
+                </div>
+                <div class="form-group">
+                    <label>Local</label>
+                    <input type="text" id="edit_evento_location">
+                </div>
+                <div class="form-group">
+                    <label>Imagens Atuais</label>
+                    <div id="edit_evento_current_images" class="current-images"></div>
+                </div>
+                <div class="form-group">
+                    <label>Adicionar Novas Imagens</label>
+                    <input type="file" id="edit_evento_images" name="images" multiple accept="image/*">
+                    <div id="edit_evento_preview" class="image-preview"></div>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="edit_evento_status">
+                        <option value="upcoming">📅 Em breve</option>
+                        <option value="ongoing">📢 Acontecendo</option>
+                        <option value="completed">✅ Encerrado</option>
+                        <option value="cancelled">❌ Cancelado</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">💾 Salvar Alterações</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================
+        // CONFIGURAÇÕES INICIAIS
+        // =====================================================
+        const API_URL = 'http://localhost:3000/api';
+        let token = localStorage.getItem('token');
+        let graficoAdmin = null;
+        
+        // Verificar se já está logado
+        if (token) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboardScreen').style.display = 'block';
+            carregarTudo();
+        }
+        
+        // =====================================================
+        // FUNÇÕES DE AUTENTICAÇÃO
+        // =====================================================
+        async function fazerLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const msgDiv = document.getElementById('loginMessage');
+            
+            if (!email || !password) {
+                msgDiv.className = 'message error';
+                msgDiv.textContent = 'Preencha todos os campos';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    token = data.token;
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('dashboardScreen').style.display = 'block';
+                    carregarTudo();
+                } else {
+                    msgDiv.className = 'message error';
+                    msgDiv.textContent = data.error || 'Email ou senha inválidos';
+                }
+            } catch (error) {
+                msgDiv.className = 'message error';
+                msgDiv.textContent = 'Erro de conexão com o servidor';
+            }
+        }
+        
+        function sair() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            token = null;
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('dashboardScreen').style.display = 'none';
+        }
+        
+        function mostrarAba(aba) {
+            const abas = ['Eventos', 'Financas', 'Usuarios'];
+            abas.forEach(a => {
+                document.getElementById(`aba${a}`).style.display = 'none';
+                document.getElementById(`tab${a}Btn`).classList.remove('active');
+            });
+            document.getElementById(`aba${aba.charAt(0).toUpperCase() + aba.slice(1)}`).style.display = 'block';
+            document.getElementById(`tab${aba.charAt(0).toUpperCase() + aba.slice(1)}Btn`).classList.add('active');
+        }
+        
+        // =====================================================
+        // CARREGAR DADOS
+        // =====================================================
+        async function carregarTudo() {
+            await Promise.all([
+                carregarEventos(),
+                carregarFinancasAdmin(),
+                carregarUsuarios()
+            ]);
+        }
+        
+        // =====================================================
+        // EVENTOS
+        // =====================================================
+        async function carregarEventos() {
+            try {
+                const response = await fetch(`${API_URL}/events`);
+                const eventos = await response.json();
+                const tbody = document.getElementById('listaEventos');
+                
+                if (!eventos || eventos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7">Nenhum evento cadastrado</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = eventos.map(e => `
+                    <tr>
+                        <td>${e.id}</td>
+                        <td>${e.cover_image ? `<img src="${e.cover_image}" style="width:50px;height:50px;object-fit:cover;border-radius:5px">` : '-'}</td>
+                        <td><strong>${e.title}</strong><br><small>${e.description?.substring(0,50) || ''}</small></td>
+                        <td>${new Date(e.event_date).toLocaleString('pt-BR')}</td>
+                        <td>${e.location || '-'}</td>
+                        <td>${e.status === 'upcoming' ? '📅 Em breve' : e.status === 'ongoing' ? '📢 Acontecendo' : e.status === 'completed' ? '✅ Encerrado' : '❌ Cancelado'}</td>
+                        <td class="actions">
+                            <button class="btn btn-sm" onclick="abrirModalEditarEvento(${e.id})">✏️ Editar</button>
+                            <button class="btn btn-danger btn-sm" onclick="deletarEvento(${e.id})">🗑️ Excluir</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Erro ao carregar eventos:', error);
+                document.getElementById('listaEventos').innerHTML = '<tr><td colspan="7">Erro ao carregar</td></tr>';
+            }
+        }
+        // =====================================================
+        // FINANÇAS - CORRIGIDO
+        // =====================================================
+        async function carregarFinancasAdmin() {
+            try {
+                const response = await fetch(`${API_URL}/transparency`);
+                const data = await response.json();
+                
+                // Garantir que os valores são números
+                const totalReceita = parseFloat(data.totals?.income) || 0;
+                const totalDespesa = parseFloat(data.totals?.expense) || 0;
+                const saldo = totalReceita - totalDespesa;
+                
+                // Atualizar os elementos com os valores formatados
+                document.getElementById('totalIncome').textContent = `R$ ${totalReceita.toFixed(2)}`;
+                document.getElementById('totalExpense').textContent = `R$ ${totalDespesa.toFixed(2)}`;
+                document.getElementById('totalBalance').textContent = `R$ ${saldo.toFixed(2)}`;
+                
+                // Processar categorias
+                const categorias = {};
+                if (data.records && Array.isArray(data.records)) {
+                    data.records.forEach(r => {
+                        if (r.type === 'expense') {
+                            const valor = parseFloat(r.amount) || 0;
+                            categorias[r.category] = (categorias[r.category] || 0) + valor;
+                        }
+                    });
+                }
+                
+                const categoriasArray = Object.entries(categorias).sort((a, b) => b[1] - a[1]);
+                const categoriasContainer = document.getElementById('categoriasListAdmin');
+                
+                if (categoriasArray.length === 0) {
+                    categoriasContainer.innerHTML = '<p>Nenhuma despesa registrada</p>';
+                } else {
+                    categoriasContainer.innerHTML = categoriasArray.map(([cat, val]) => `
+                        <div class="categoria-item">
+                            <div class="nome">${cat}</div>
+                            <div class="valor">R$ ${val.toFixed(2)}</div>
+                        </div>
+                    `).join('');
+                }
+                
+                // Gráfico
+                if (graficoAdmin) graficoAdmin.destroy();
+                const ctx = document.getElementById('graficoAdmin').getContext('2d');
+                
+                if (categoriasArray.length === 0) {
+                    // Se não há dados, mostrar gráfico vazio
+                    graficoAdmin = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Sem dados'],
+                            datasets: [{
+                                data: [1],
+                                backgroundColor: ['#e5e7eb'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: { legend: { position: 'bottom' } }
+                        }
+                    });
+                } else {
+                    graficoAdmin = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: categoriasArray.map(c => c[0]),
+                            datasets: [{
+                                data: categoriasArray.map(c => c[1]),
+                                backgroundColor: ['#16a34a', '#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec489a', '#6b7280'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: { legend: { position: 'bottom' } }
+                        }
+                    });
+                }
+                
+                // Tabela de lançamentos
+                const tbody = document.getElementById('listaFinancas');
+                if (!data.records || data.records.length === 0) {
+                    tbody.innerHTML = '.<td colspan="6">Nenhum registro financeiro</td>;</tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = data.records.map(r => {
+                    const valor = parseFloat(r.amount) || 0;
+                    return `
+                        <tr>
+                            <td>${r.type === 'income' ? '💰 Receita' : '💸 Despesa'}</td>
+                            <td>${r.category}</td>
+                            <td>${r.description || '-'}</td>
+                            <td style="color: ${r.type === 'income' ? '#16a34a' : '#dc2626'}">R$ ${valor.toFixed(2)}</td>
+                            <td>${new Date(r.transaction_date).toLocaleDateString('pt-BR')}</td>
+                            <td><button class="btn btn-danger btn-sm" onclick="deletarFinanca(${r.id})">Excluir</button></td>
+                        </tr>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Erro ao carregar finanças:', error);
+                document.getElementById('totalIncome').textContent = 'R$ 0';
+                document.getElementById('totalExpense').textContent = 'R$ 0';
+                document.getElementById('totalBalance').textContent = 'R$ 0';
+            }
+        }
+        // =====================================================
+        // USUÁRIOS
+        // =====================================================
+        async function carregarUsuarios() {
+            try {
+                const response = await fetch(`${API_URL}/users`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const users = await response.json();
+                const tbody = document.getElementById('listaUsuarios');
+                
+                if (!users || users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6">Nenhum usuário</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = users.map(u => `
+                    <tr>
+                        <td>${u.id}</td>
+                        <td>${u.name}</td>
+                        <td>${u.email}</td>
+                        <td>${u.role === 'admin' ? '👑 Administrador' : '✏️ Editor'}</td>
+                        <td>${u.active ? '✅ Ativo' : '❌ Inativo'}</td>
+                        <td class="actions">
+                            <button class="btn btn-sm" onclick="editarUsuario(${u.id})">✏️ Editar</button>
+                            ${u.id != 1 ? `<button class="btn btn-danger btn-sm" onclick="deletarUsuario(${u.id})">🗑️ Excluir</button>` : ''}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Erro ao carregar usuários:', error);
+            }
+        }
+        
+        // =====================================================
+        // CRIAÇÃO DE EVENTO
+        // =====================================================
+        document.getElementById('formEvento').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('title', document.getElementById('evento_title').value);
+            formData.append('description', document.getElementById('evento_desc').value);
+            formData.append('event_date', document.getElementById('evento_date').value);
+            formData.append('location', document.getElementById('evento_location').value);
+            formData.append('status', document.getElementById('evento_status').value);
+            
+            const files = document.getElementById('evento_images').files;
+            for (let i = 0; i < files.length; i++) {
+                formData.append('images', files[i]);
+            }
+            
+            const response = await fetch(`${API_URL}/events`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+            
+            if (response.ok) {
+                document.getElementById('formEvento').reset();
+                document.getElementById('evento_preview').innerHTML = '';
+                carregarEventos();
+                alert('Evento criado com sucesso!');
+            } else {
+                alert('Erro ao criar evento');
+            }
+        });
+        
+        // =====================================================
+        // CRIAÇÃO DE FINANÇA
+        // =====================================================
+        document.getElementById('formFinanca').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                type: document.getElementById('financa_type').value,
+                category: document.getElementById('financa_category').value,
+                description: document.getElementById('financa_desc').value,
+                amount: document.getElementById('financa_amount').value,
+                transaction_date: document.getElementById('financa_date').value
+            };
+            
+            const response = await fetch(`${API_URL}/transparency`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                document.getElementById('formFinanca').reset();
+                carregarFinancasAdmin();
+                alert('Registro criado com sucesso!');
+            } else {
+                alert('Erro ao criar registro');
+            }
+        });
+        
+        // =====================================================
+        // CRIAÇÃO DE USUÁRIO
+        // =====================================================
+        document.getElementById('formUsuario').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                name: document.getElementById('user_name').value,
+                email: document.getElementById('user_email').value,
+                password: document.getElementById('user_password').value,
+                role: document.getElementById('user_role').value
+            };
+            
+            const response = await fetch(`${API_URL}/users`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                document.getElementById('formUsuario').reset();
+                carregarUsuarios();
+                alert('Usuário criado com sucesso!');
+            } else {
+                const error = await response.json();
+                alert(error.error || 'Erro ao criar usuário');
+            }
+        });
+        
+        // =====================================================
+        // EDIÇÃO DE EVENTO
+        // =====================================================
+        let imagensAtuais = [];
+        
+        async function abrirModalEditarEvento(id) {
+            const response = await fetch(`${API_URL}/events/${id}`);
+            const evento = await response.json();
+            
+            document.getElementById('edit_evento_id').value = evento.id;
+            document.getElementById('edit_evento_title').value = evento.title;
+            document.getElementById('edit_evento_desc').value = evento.description || '';
+            document.getElementById('edit_evento_date').value = evento.event_date.slice(0, 16);
+            document.getElementById('edit_evento_location').value = evento.location || '';
+            document.getElementById('edit_evento_status').value = evento.status;
+            
+            imagensAtuais = evento.images || [];
+            document.getElementById('edit_evento_current_images').innerHTML = imagensAtuais.map(img => `
+                <div class="img-item" data-id="${img.id}">
+                    <img src="${img.image_url}">
+                    <span class="remove-img-btn" onclick="removerImagem(${img.id})">×</span>
+                </div>
+            `).join('');
+            document.getElementById('edit_evento_preview').innerHTML = '';
+            document.getElementById('modalEditarEvento').style.display = 'flex';
+        }
+        
+        window.removerImagem = function(id) {
+            const index = imagensAtuais.findIndex(i => i.id === id);
+            if (index !== -1) {
+                imagensAtuais.splice(index, 1);
+            }
+            document.getElementById('edit_evento_current_images').innerHTML = imagensAtuais.map(img => `
+                <div class="img-item" data-id="${img.id}">
+                    <img src="${img.image_url}">
+                    <span class="remove-img-btn" onclick="removerImagem(${img.id})">×</span>
+                </div>
+            `).join('');
+        };
+        
+        document.getElementById('formEditarEvento').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit_evento_id').value;
+            const formData = new FormData();
+            
+            formData.append('title', document.getElementById('edit_evento_title').value);
+            formData.append('description', document.getElementById('edit_evento_desc').value);
+            formData.append('event_date', document.getElementById('edit_evento_date').value);
+            formData.append('location', document.getElementById('edit_evento_location').value);
+            formData.append('status', document.getElementById('edit_evento_status').value);
+            
+            const removeIds = imagensAtuais.filter(img => !img.id).map(img => img.id).join(',');
+            if (removeIds) {
+                formData.append('remove_images', removeIds);
+            }
+            
+            const files = document.getElementById('edit_evento_images').files;
+            for (let i = 0; i < files.length; i++) {
+                formData.append('images', files[i]);
+            }
+            
+            const response = await fetch(`${API_URL}/events/${id}`, {
+                method: 'PUT',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+            
+            if (response.ok) {
+                fecharModal();
+                carregarEventos();
+                alert('Evento atualizado com sucesso!');
+            } else {
+                alert('Erro ao atualizar evento');
+            }
+        });
+        
+        function fecharModal() {
+            document.getElementById('modalEditarEvento').style.display = 'none';
+        }
+        
+        // =====================================================
+        // EXCLUSÕES
+        // =====================================================
+        async function deletarEvento(id) {
+            if (!confirm('Tem certeza que deseja excluir este evento?')) return;
+            
+            const response = await fetch(`${API_URL}/events/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (response.ok) {
+                carregarEventos();
+                alert('Evento excluído com sucesso!');
+            } else {
+                alert('Erro ao excluir evento');
+            }
+        }
+        
+        async function deletarFinanca(id) {
+            if (!confirm('Tem certeza que deseja excluir este registro?')) return;
+            
+            const response = await fetch(`${API_URL}/transparency/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (response.ok) {
+                carregarFinancasAdmin();
+                alert('Registro excluído com sucesso!');
+            } else {
+                alert('Erro ao excluir registro');
+            }
+        }
+        
+        async function editarUsuario(id) {
+            const novaRole = confirm('Tornar administrador? Clique OK para Admin, Cancelar para Editor');
+            const role = novaRole ? 'admin' : 'editor';
+            
+            const response = await fetch(`${API_URL}/users/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ role })
+            });
+            
+            if (response.ok) {
+                carregarUsuarios();
+                alert('Usuário atualizado com sucesso!');
+            } else {
+                alert('Erro ao atualizar usuário');
+            }
+        }
+        
+        async function deletarUsuario(id) {
+            if (!confirm('Tem certeza que deseja excluir este usuário?')) return;
+            
+            const response = await fetch(`${API_URL}/users/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (response.ok) {
+                carregarUsuarios();
+                alert('Usuário excluído com sucesso!');
+            } else {
+                alert('Erro ao excluir usuário');
+            }
+        }
+        
+        // =====================================================
+        // PREVIEW DE IMAGENS
+        // =====================================================
+        document.getElementById('evento_images').addEventListener('change', (e) => {
+            const preview = document.getElementById('evento_preview');
+            preview.innerHTML = '';
+            for (let file of e.target.files) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    preview.innerHTML += `<img src="${ev.target.result}">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        document.getElementById('edit_evento_images').addEventListener('change', (e) => {
+            const preview = document.getElementById('edit_evento_preview');
+            preview.innerHTML = '';
+            for (let file of e.target.files) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    preview.innerHTML += `<img src="${ev.target.result}">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>

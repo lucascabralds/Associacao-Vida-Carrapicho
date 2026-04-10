@@ -1,0 +1,135 @@
+Partes que você deve alterar com informações reais
+
+Abaixo estão todas as seções do código que precisam ser atualizadas com os dados reais da ONG.
+
+---
+
+## 1. **Arquivo: `.env`** (configurações do servidor)
+
+```env
+# Dados reais da ONG
+PORT=3000
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=admin123
+DB_NAME=ong_sistema
+JWT_SECRET=ong_secret_key_2024
+
+# CHAVE PIX REAL DA ONG (alterar!)
+PIX_KEY=12.345.678/0001-99   # ← COLOCAR O CNPJ REAL DA ONG
+
+# DADOS DA ONG PARA O PIX
+PIX_MERCHANT_NAME="ONG SOLIDARIA"   # ← Nome real da ONG
+PIX_MERCHANT_CITY="SAO PAULO"       # ← Cidade real
+```
+
+---
+
+## 2. **Arquivo: `server.js`** (backend)
+
+### Linha onde gera o payload PIX (aproximadamente linha 420-430):
+
+```javascript
+// Payload PIX - Dados da ONG
+const pixKey = process.env.PIX_KEY;  // ← JÁ USA O .ENV
+const merchantName = process.env.PIX_MERCHANT_NAME || "ONG";  // ← JÁ USA O .ENV
+const merchantCity = process.env.PIX_MERCHANT_CITY || "Cidade";  // ← JÁ USA O .ENV
+```
+
+**Não precisa alterar aqui, pois já lê do `.env`**
+
+---
+
+## 3. **Arquivo: `frontend/index.html`** (landing page)
+
+### Rodapé - Dados de contato reais:
+
+```html
+<footer id="contato" class="footer">
+    <p>❤️ ONG Solidária - Fazendo o bem desde 2020</p>
+    <p style="margin-top: 15px;">📍 Rua da Solidariedade, 123 - São Paulo/SP</p>  <!-- ← ENDEREÇO REAL -->
+    <p>📞 (11) 99999-9999 | ✉️ contato@ongsolidaria.org.br</p>  <!-- ← TELEFONE E EMAIL REAIS -->
+    <p style="margin-top: 20px; font-size: 12px;">CNPJ: 12.345.678/0001-99 | Chave PIX: 12.345.678/0001-99</p>  <!-- ← CNPJ E CHAVE PIX REAIS -->
+</footer>
+```
+
+---
+
+## 4. **Arquivo: `frontend/admin/index.html`** (painel admin)
+
+### Categorias de despesas (aproximadamente linha onde tem o select de categorias):
+
+```html
+<select id="financa_category" required>
+    <option value="">Selecione...</option>
+    <option value="Doações">📦 Doações</option>
+    <option value="Eventos">🎪 Eventos</option>
+    <optgroup label="Despesas">
+        <option value="Alimentação">🍲 Alimentação</option>  <!-- ← Ajustar conforme necessidades reais -->
+        <option value="Aluguel">🏢 Aluguel</option>
+        <option value="Material">📚 Material</option>
+        <option value="Transporte">🚛 Transporte</option>
+        <option value="Salários">👥 Salários</option>
+        <option value="Eventos">🎉 Eventos</option>
+        <option value="Administrativo">📋 Administrativo</option>
+        <option value="Outros">📌 Outros</option>
+    </optgroup>
+</select>
+```
+
+**Adicione ou remova categorias conforme as despesas reais da ONG.**
+
+---
+
+## 5. **Banco de Dados** (MySQL)
+
+### Inserir dados reais dos eventos:
+
+```sql
+USE ong_sistema;
+
+-- Inserir eventos reais
+INSERT INTO events (title, description, event_date, location, status) VALUES 
+('Feijoada Solidária', 'Venha participar da nossa feijoada beneficente', '2026-04-15 12:00:00', 'Centro Comunitário', 'upcoming'),
+('Campanha do Agasalho', 'Arrecadação de roupas para o inverno', '2026-05-01 09:00:00', 'Sede da ONG', 'upcoming');
+-- ← Substituir pelos eventos reais da ONG
+```
+
+### Inserir registros financeiros reais:
+
+```sql
+INSERT INTO transparency (type, category, description, amount, transaction_date) VALUES 
+('income', 'Doações', 'Campanha de Natal', 5000.00, CURDATE()),
+('expense', 'Alimentação', 'Compra de cestas básicas', 3200.00, CURDATE());
+-- ← Substituir pelos dados reais
+```
+
+---
+
+## 6. **Resumo das alterações necessárias:**
+
+| Onde | O que alterar | Para quê |
+|------|---------------|----------|
+| **.env** | `PIX_KEY` | Chave PIX real da ONG |
+| **.env** | `PIX_MERCHANT_NAME` | Nome real da ONG |
+| **.env** | `PIX_MERCHANT_CITY` | Cidade real da ONG |
+| **index.html** | Rodapé (endereço, telefone, email, CNPJ) | Contato real |
+| **admin/index.html** | Categorias de despesas | Despesas reais da ONG |
+| **Banco de dados** | Eventos e registros financeiros | Dados reais da ONG |
+
+---
+
+## 📝 **Checklist de informações reais para coletar:**
+
+- [ ] CNPJ da ONG (para chave PIX)
+- [ ] Nome completo da ONG
+- [ ] Cidade/sede da ONG
+- [ ] Endereço completo
+- [ ] Telefone para contato
+- [ ] Email para contato
+- [ ] Lista de categorias de despesas reais
+- [ ] Lista de eventos reais (com datas, locais, descrições)
+- [ ] Histórico financeiro real (receitas e despesas)
+
+
+

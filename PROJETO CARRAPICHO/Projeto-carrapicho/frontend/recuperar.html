@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Senha - ONG</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        body {
+            background: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 {
+            text-align: center;
+            color: #16a34a;
+            margin-bottom: 10px;
+        }
+        p {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #16a34a;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #16a34a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #15803d;
+        }
+        .message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+            font-size: 14px;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            display: block;
+        }
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            display: block;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .back-link a {
+            color: #16a34a;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🔐 Recuperar Senha</h2>
+        <p>Digite seu email para receber as instruções</p>
+        
+        <input type="email" id="email" placeholder="Seu email">
+        <button onclick="enviarRecuperacao()">Enviar</button>
+        
+        <div id="message" class="message"></div>
+        
+        <div class="back-link">
+            <a href="/admin/">← Voltar para o login</a>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+
+        async function enviarRecuperacao() {
+            const email = document.getElementById('email').value;
+            const messageDiv = document.getElementById('message');
+            
+            if (!email) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Digite seu email';
+                return;
+            }
+            
+            messageDiv.style.display = 'none';
+            messageDiv.className = 'message';
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/recuperar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await response.json();
+                
+                messageDiv.className = 'message success';
+                messageDiv.textContent = 'Se o email estiver cadastrado, você receberá as instruções.';
+                messageDiv.style.display = 'block';
+                document.getElementById('email').value = '';
+                
+            } catch (error) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Erro de conexão com o servidor';
+                messageDiv.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
