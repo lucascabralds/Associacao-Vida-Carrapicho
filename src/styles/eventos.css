@@ -216,13 +216,25 @@
 
 @media (max-width: 1110px) {
     #eventos { justify-content: center; }
-    .event-card { width: calc(50% - 16px); }
+    .event-card { width: calc(50% - 16px); max-width: 520px; }
+}
+
+@media (max-width: 900px) {
+    #eventos { justify-content: center; gap: 18px; }
+    .event-card { width: 100%; max-width: 100%; }
+    .event-card-header { padding: 14px 16px; }
+    .event-card-body { padding: 14px 16px 18px; }
+    .event-card-thumb-row { padding: 10px 12px; gap: 8px; }
+    .event-thumb img { height: 75px; }
+}
+
+@media (max-width: 1024px) {
+    .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 780px) {
-    .event-card { width: 100%; }
-    .event-card-header { padding: 14px 16px; }
-    .event-card-body { padding: 14px 16px 18px; }
     .footer-grid { grid-template-columns: 1fr; }
     .site-footer { padding: 40px 8%; }
 }

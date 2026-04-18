@@ -3,10 +3,10 @@ header {
     top: 0; /* Prende ele bem no topo */
     left: 0; /* Prende na esquerda */
     width: 100%; /* Faz ele ocupar a largura toda da tela */
-    z-index: 9999; /* Garante que o menu vai ficar por cima de TUDO (imagens, bolhas, etc) */
+    z-index: 10001; /* Garante que o menu fique acima do conteúdo */
     
     /* É importante ter um fundo para não dar conflito visual na rolagem */
-    background-color: rgba(255, 255, 255, 0.95); /* Fundo branco levemente transparente */
+    background-color: #ffffff; /* Fundo branco opaco */
     
     /* Uma sombra leve embaixo do menu dá um toque elegante de separação */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); 
@@ -17,7 +17,7 @@ header {
 }
 
 main {
-    padding-top: 90px;
+    padding-top: 110px;
 }
 
 html {
@@ -67,7 +67,8 @@ section {
 /* --- SEÇÃO TRANSPARÊNCIA --- */
 #transparencia {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 30px;
     background-color: #f7f9fc;
 }
@@ -78,7 +79,8 @@ section {
     padding: 40px 20px;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    width: 25%;
+    width: min(320px, 100%);
+    flex: 1 1 280px;
     transition: transform 0.3s ease;
     
     /* Novas regras de alinhamento */

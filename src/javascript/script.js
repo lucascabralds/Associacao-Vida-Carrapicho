@@ -1,25 +1,7 @@
 $(document).ready(function () {
-    $('#mobile_btn').on('click', function () {
-        $('#mobile_menu').toggleClass('active');
-
-        let icone = $('#mobile_btn').find('img');
-
-        if ($('#mobile_menu').hasClass('active')) {
-
-            icone.attr('src', './img/x-solid-full.svg');
-        } else {
-
-            icone.attr('src', './img/bars-solid-full.svg');
-        }
-
-    });
-});
-
-$(document).ready(function () {
- 
-  /* MENU MOBILE */
   $('#mobile_btn').on('click', function () {
     $('#mobile_menu').toggleClass('active');
+    $('body').toggleClass('mobile-menu-open');
     var icone = $('#mobile_btn').find('img');
     if ($('#mobile_menu').hasClass('active')) {
       icone.attr('src', './img/x-solid-full.svg');
@@ -27,46 +9,42 @@ $(document).ready(function () {
       icone.attr('src', './img/bars-solid-full.svg');
     }
   });
- 
-  /* GRÁFICO */
- /* GRÁFICO */
+
   var chartInstance = null;
- 
+
   function buildChart() {
     if (typeof Chart === 'undefined') {
       console.error('Chart.js nao carregado');
       return;
     }
 
-    // Registra o plugin das etiquetas (DataLabels)
     Chart.register(ChartDataLabels);
- 
+
     if (chartInstance) {
       chartInstance.destroy();
       chartInstance = null;
     }
- 
+
     var oldCanvas = document.getElementById('transparenciaChart');
     if (!oldCanvas) return;
     var parent = oldCanvas.parentNode;
     var newCanvas = document.createElement('canvas');
     newCanvas.id = 'transparenciaChart';
     parent.replaceChild(newCanvas, oldCanvas);
- 
+
     var ctx = newCanvas.getContext('2d');
- 
+
     chartInstance = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: ['Alimentação', 'Educação', 'Saúde', 'Admin'],
         datasets: [{
-          // Usando as porcentagens exatas da imagem para a altura
-          data: [43.75, 31.25, 18.75, 6.25], 
-          backgroundColor: ['#3b82f6', '#a855f7', '#ec4899', '#eab308'], // Cores do mockup
+          data: [43.75, 31.25, 18.75, 6.25],
+          backgroundColor: ['#3b82f6', '#a855f7', '#ec4899', '#eab308'],
           borderRadius: { topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0 },
           borderSkipped: false,
-          barPercentage: 0.9,      // Deixa as barras mais largas
-          categoryPercentage: 0.9  // Reduz o espaço entre elas
+          barPercentage: 0.9,
+          categoryPercentage: 0.9
         }]
       },
       options: {
@@ -75,18 +53,17 @@ $(document).ready(function () {
         animation: { duration: 900, easing: 'easeOutQuart' },
         layout: {
           padding: {
-            top: 30 // Dá espaço no topo para a etiqueta não cortar
+            top: 30
           }
         },
         plugins: {
           legend: { display: false },
-          tooltip: { enabled: false }, // Desativa o hover padrão para ficar igual à imagem
+          tooltip: { enabled: false },
           datalabels: {
             anchor: 'end',
             align: 'top',
             offset: 4,
             color: '#ffffff',
-            // Puxa a mesma cor da barra para o fundo da etiqueta
             backgroundColor: function(context) {
               return context.dataset.backgroundColor[context.dataIndex];
             },
