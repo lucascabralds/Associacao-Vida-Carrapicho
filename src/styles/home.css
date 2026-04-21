@@ -1,85 +1,122 @@
 #inicio {
-    display: grid;
-    grid-template-columns: minmax(320px, 1.1fr) minmax(280px, 0.9fr);
-    align-items: center;
-    gap: 2.5rem;
-    padding: 3rem 2rem;
-    background: var(--background-gradient);
+  display: grid;
+  grid-template-columns: minmax(320px, 1.1fr) minmax(280px, 0.9fr);
+  align-items: center;
+  gap: 2.5rem;
+  padding: 3rem 2rem;
+  background: var(--background-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 60px 5%;
+  gap: 40px;
 }
 
+
+
 #kid_inicio {
-    max-width: 100%;
-    display: flex;
-    flex-direction: column;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 #kid-img {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  display: flex;
+  justify-content: center;
 }
 
 #kid-img img {
-    border-radius: 600px;
-    border: 10px solid white;
-    width: min(26rem, 90vw);
-    max-width: 100%;
-    height: auto;
+  border-radius: 600px;
+  border: 10px solid white;
+  width: min(26rem, 90vw);
+  max-width: 100%;
+  height: auto;
+  width: 100%;
+  max-width: 450px;
+  height: auto;
+  border-radius: 20px;
 }
 
 @media (max-width: 1024px) {
-    #kid-img img {
-        width: min(24rem, 80vw);
-    }
+  #kid-img img {
+    width: min(24rem, 80vw);
+  }
 }
 
 @media (max-width: 780px) {
-    #inicio {
-        grid-template-columns: 1fr;
-    }
+  #inicio {
+    grid-template-columns: 1fr;
+  }
 
-    #kid-img {
-        margin-top: 2rem;
-    }
+  #kid-img {
+    margin-top: 2rem;
+  }
 
-    #kid-img img {
-        width: min(20rem, 85vw);
-    }
+  #kid-img img {
+    width: min(20rem, 85vw);
+  }
 }
 
 @media (max-width: 480px) {
-    #kid-img img {
-        width: min(18rem, 90vw);
-    }
+  #kid-img img {
+    width: min(18rem, 90vw);
+  }
 }
 
 #inicio h1 {
-    font-size: 3rem;
-    color: var(--primary-blue);
-    line-height: 1.2;
-    margin-bottom: 25px;
+  font-size: 3rem;
+  color: var(--primary-blue);
+  line-height: 1.2;
+  margin-bottom: 25px;
 }
 
 #inicio p {
-    font-size: 1.2rem;
-    color: var(--text-color);
-    margin-bottom: 40px;
-    line-height: 1.6;
+  font-size: 1.2rem;
+  color: var(--text-color);
+  margin-bottom: 40px;
+  line-height: 1.6;
 }
 
 .btn-saibas button {
-    background-color: var(--yellow-accent);
-    color: #333;
-    border: none;
-    padding: 15px 40px;
-    border-radius: 10px;
-    font-weight: bold;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: transform 0.2s ease, background-color 0.3s ease;
+  background-color: var(--yellow-accent);
+  color: #333;
+  border: none;
+  padding: 15px 40px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background-color 0.3s ease;
 }
 
 .btn-saibas button:hover {
-    background-color: #e6a600;
-    transform: translateY(-3px);
+  background-color: #e6a600;
+  transform: translateY(-3px);
+}
+
+@media (max-width: 768px) {
+  #inicio {
+    flex-direction: column;
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .ajude {
+    font-size: 16px;
+  }
+
+  #kid-img {
+    margin-top: 20px;
+  }
 }
