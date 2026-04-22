@@ -254,7 +254,7 @@ $('#btn-continuar-doacao').on('click', function () {
   var valorDigitado = $('#input-valor-doacao').val();
 
   if (!valorDigitado || valorDigitado <= 0) {
-    alert("Por favor, informe ou escolha um valor válido para doar.");
+    showToast("Por favor, informe ou escolha um valor válido para doar.");
     return;
   }
 
@@ -393,4 +393,258 @@ $('#mobile_btn').click(function () {
 
 window.addEventListener('load', () => {
   document.querySelector('#inicio').classList.add('show');
+});
+
+const canvas = document.getElementById('ecoCanvas');
+const ctx = canvas ? canvas.getContext('2d') : null;
+
+if (canvas && ctx) {
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  const CONFIG = {
+    foodSpawnRate: 0.2,
+    preySpeed: 1.5,
+    predatorSpeed: 1.8,
+    preyReproductionEnergy: 90,
+    predatorReproductionEnergy: 180,
+    initialFood: 80,
+    initialPrey: 35,
+    initialPredators: 4
+  };
+
+  const foodArr = [];
+  const preyArr = [];
+  const predatorArr = [];
+
+  class Food {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.radius = 3;
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(59, 130, 246, 0.4)';
+      ctx.fill();
+    }
+  }
+
+  class Agent {
+    constructor(x, y, speed, color, radius) {
+      this.x = x;
+      this.y = y;
+      this.vx = (Math.random() - 0.5) * speed;
+      this.vy = (Math.random() - 0.5) * speed;
+      this.speed = speed;
+      this.color = color;
+      this.radius = radius;
+      this.energy = 50;
+    }
+    move() {
+      this.x += this.vx;
+      this.y += this.vy;
+      if (this.x < this.radius || this.x > canvas.width - this.radius) this.vx *= -1;
+      if (this.y < this.radius || this.y > canvas.height - this.radius) this.vy *= -1;
+      this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
+      this.y = Math.max(this.radius, Math.min(canvas.height - this.radius, this.y));
+    }
+    seek(targets) {
+      let closest = null;
+      let record = Infinity;
+      for (let target of targets) {
+        let d = Math.hypot(this.x - target.x, this.y - target.y);
+        if (d < record) {
+          record = d;
+          closest = target;
+        }
+      }
+      if (closest) {
+        let angle = Math.atan2(closest.y - this.y, closest.x - this.x);
+        this.vx = Math.cos(angle) * this.speed;
+        this.vy = Math.sin(angle) * this.speed;
+      }
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.fill();
+    }
+  }
+
+  class Prey extends Agent {
+    constructor(x, y) {
+      super(x, y, CONFIG.preySpeed, 'rgba(16, 185, 129, 0.3)', 6);
+    }
+    update() {
+      this.energy -= 0.05;
+      this.seek(foodArr);
+      this.move();
+      for (let i = foodArr.length - 1; i >= 0; i--) {
+        let d = Math.hypot(this.x - foodArr[i].x, this.y - foodArr[i].y);
+        if (d < this.radius + foodArr[i].radius) {
+          foodArr.splice(i, 1);
+          this.energy += 25;
+        }
+      }
+      if (this.energy > CONFIG.preyReproductionEnergy) {
+        this.energy /= 2;
+        preyArr.push(new Prey(this.x, this.y));
+      }
+      this.draw();
+    }
+  }
+
+  class Predator extends Agent {
+    constructor(x, y) {
+      super(x, y, CONFIG.predatorSpeed, 'rgba(239, 68, 68, 0.3)', 9);
+      this.energy = 100;
+    }
+    update() {
+      this.energy -= 0.1;
+      this.seek(preyArr);
+      this.move();
+      for (let i = preyArr.length - 1; i >= 0; i--) {
+        let d = Math.hypot(this.x - preyArr[i].x, this.y - preyArr[i].y);
+        if (d < this.radius + preyArr[i].radius) {
+          preyArr.splice(i, 1);
+          this.energy += 45;
+        }
+      }
+      if (this.energy > CONFIG.predatorReproductionEnergy) {
+        this.energy /= 2;
+        predatorArr.push(new Predator(this.x, this.y));
+      }
+      this.draw();
+    }
+  }
+
+  for (let i = 0; i < CONFIG.initialFood; i++) {
+    foodArr.push(new Food(Math.random() * canvas.width, Math.random() * canvas.height));
+  }
+  for (let i = 0; i < CONFIG.initialPrey; i++) {
+    preyArr.push(new Prey(Math.random() * canvas.width, Math.random() * canvas.height));
+  }
+  for (let i = 0; i < CONFIG.initialPredators; i++) {
+    predatorArr.push(new Predator(Math.random() * canvas.width, Math.random() * canvas.height));
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    if (Math.random() < CONFIG.foodSpawnRate) {
+      foodArr.push(new Food(Math.random() * canvas.width, Math.random() * canvas.height));
+    }
+    
+    for (let f of foodArr) f.draw();
+    
+    for (let i = preyArr.length - 1; i >= 0; i--) {
+      preyArr[i].update();
+      if (preyArr[i].energy <= 0) preyArr.splice(i, 1);
+    }
+    
+    for (let i = predatorArr.length - 1; i >= 0; i--) {
+      predatorArr[i].update();
+      if (predatorArr[i].energy <= 0) predatorArr.splice(i, 1);
+    }
+    
+    requestAnimationFrame(animate);
+  }
+  
+  animate();
+}
+
+const textoElemento = document.querySelector('.ajude');
+
+if (textoElemento) {
+  const texto = textoElemento.innerText.trim();
+  textoElemento.innerText = '';
+  let i = 0;
+  
+  setTimeout(() => {
+    function digitar() {
+      if (i < texto.length) {
+        textoElemento.innerHTML += texto.charAt(i);
+        i++;
+        setTimeout(digitar, 35);
+      }
+    }
+    digitar();
+  }, 600);
+}
+
+const scrollObserver = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('show-scroll');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.hidden-scroll').forEach((el) => {
+  scrollObserver.observe(el);
+});
+
+const kpiObserver = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const counters = entry.target.querySelectorAll('.counter');
+      counters.forEach(counter => {
+        const target = +counter.getAttribute('data-target');
+        const prefix = counter.getAttribute('data-prefix') || '';
+        const suffix = counter.getAttribute('data-suffix') || '';
+        const speed = 200;
+        const inc = target / speed;
+        
+        let count = 0;
+        
+        const updateCount = () => {
+          count += inc;
+          if (count < target) {
+            counter.innerText = prefix + Math.ceil(count) + suffix;
+            setTimeout(updateCount, 15);
+          } else {
+            let finalValue = target >= 1000 ? target.toLocaleString('pt-BR') : target;
+            counter.innerText = prefix + finalValue + suffix;
+          }
+        };
+        updateCount();
+      });
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.5 });
+
+const transparenciaSection = document.getElementById('transparencia');
+if (transparenciaSection) {
+  kpiObserver.observe(transparenciaSection);
+}
+
+
+const navLinksHover = document.querySelectorAll('.nav-item a');
+
+navLinksHover.forEach(link => {
+  link.style.display = 'inline-block';
+  link.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease';
+
+  link.addEventListener('mouseenter', function() {
+    this.style.transform = 'translateY(-4px)';
+    this.style.color = 'var(--primary-blue)';
+  });
+
+  link.addEventListener('mouseleave', function() {
+    this.style.transform = 'translateY(0)';
+    
+    if (!this.classList.contains('ativo')) {
+      this.style.color = 'var(--text-color)';
+    }
+  });
 });

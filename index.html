@@ -319,40 +319,28 @@
         </div>
       </section>
 
-      <section id="transparencia">
+      <section id="transparencia" class="hidden-scroll">
         <div class="card">
-          <img
-            src="img\icone_Colaboradores.png"
-            alt="Ícone Colaboradores"
-            class="icon-standard" />
-          <h2>120+</h2>
+          <img src="img\icone_Colaboradores.png" alt="Ícone Colaboradores" class="icon-standard" />
+          <h2 class="counter" data-target="120" data-suffix="+">0</h2>
           <p>Jovens atendidos</p>
         </div>
 
         <div class="card">
-          <img
-            src="img\Icones_Eventos_realizados.png"
-            alt="Ícone Eventos Realizados"
-            class="icon-standard" />
-          <h2>35</h2>
+          <img src="img\Icones_Eventos_realizados.png" alt="Ícone Eventos Realizados" class="icon-standard" />
+          <h2 class="counter" data-target="35" data-suffix="">0</h2>
           <p>Eventos realizados</p>
         </div>
 
         <div class="card">
-          <img
-            src="img\icone_Coração.png"
-            alt="Ícone Coração"
-            class="icon-standard" />
-          <h2>25</h2>
+          <img src="img\icone_Coração.png" alt="Ícone Coração" class="icon-standard" />
+          <h2 class="counter" data-target="25" data-suffix="">0</h2>
           <p>Voluntários ativos</p>
         </div>
 
         <div class="card">
-          <img
-            src="img\Icone_Cifrão.png"
-            alt="Ícone Cifrão"
-            class="icon-standard" />
-          <h2>R$ 80.000</h2>
+          <img src="img\Icone_Cifrão.png" alt="Ícone Cifrão" class="icon-standard" />
+          <h2 class="counter" data-target="80000" data-prefix="R$ " data-suffix="">0</h2>
           <p>Arrecadados</p>
         </div>
       </section>
@@ -394,6 +382,10 @@
           </div>
         </div>
       </section>
+
+      <canvas id="ecoCanvas"></canvas>
+
+
 
       <section id="prox_event">
         <h1 class="prox-event">Próximos Eventos</h1>

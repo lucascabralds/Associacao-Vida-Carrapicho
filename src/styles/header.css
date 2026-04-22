@@ -131,3 +131,9 @@ body.mobile-menu-open {
         font-weight: 600;
     }
 }
+
+.nav-item a.ativo {
+  color: var(--primary-blue);
+  border-bottom: 2px solid var(--primary-blue);
+  padding-bottom: 4px;
+}
