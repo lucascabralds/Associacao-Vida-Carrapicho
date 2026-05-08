@@ -12,96 +12,66 @@ $(document).ready(function () {
 
   var chartInstance = null;
 
-  function buildChart() {
-    if (typeof Chart === 'undefined') {
-      console.error('Chart.js nao carregado');
-      return;
-    }
+  // Função para buscar dados do backend e atualizar o gráfico de transparência
+  async function carregarDadosTransparencia() {
+      try {
+          // Procura os dados reais no seu painel administrativo
+          const response = await fetch('http://localhost:3000/api/transparency/stats');
+          const data = await response.json();
 
-    Chart.register(ChartDataLabels);
+          const ctx = document.getElementById('rendimentoChart').getContext('2d');
 
-    if (chartInstance) {
-      chartInstance.destroy();
-      chartInstance = null;
-    }
+          // Captura as cores inteligentes do seu CSS
+          const estilo = getComputedStyle(document.documentElement);
+          const azul = estilo.getPropertyValue('--primary-blue').trim();
+          const verde = estilo.getPropertyValue('--green-donate').trim();
+          const amarelo = estilo.getPropertyValue('--yellow-accent').trim();
 
-    var oldCanvas = document.getElementById('transparenciaChart');
-    if (!oldCanvas) return;
-    var parent = oldCanvas.parentNode;
-    var newCanvas = document.createElement('canvas');
-    newCanvas.id = 'transparenciaChart';
-    parent.replaceChild(newCanvas, oldCanvas);
+          const paletaCores = [verde, azul, amarelo];
 
-    var ctx = newCanvas.getContext('2d');
-
-    chartInstance = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['Alimentação', 'Educação', 'Saúde', 'Admin'],
-        datasets: [{
-          data: [43.75, 31.25, 18.75, 6.25],
-          backgroundColor: ['#3b82f6', '#a855f7', '#ec4899', '#eab308'],
-          borderRadius: { topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0 },
-          borderSkipped: false,
-          barPercentage: 0.9,
-          categoryPercentage: 0.9
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: { duration: 900, easing: 'easeOutQuart' },
-        layout: {
-          padding: {
-            top: 30
+          if (window.meuGrafico) {
+              window.meuGrafico.destroy();
           }
-        },
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: false },
-          datalabels: {
-            anchor: 'end',
-            align: 'top',
-            offset: 4,
-            color: '#ffffff',
-            backgroundColor: function (context) {
-              return context.dataset.backgroundColor[context.dataIndex];
-            },
-            borderRadius: 4,
-            font: {
-              weight: 'bold',
-              size: 11
-            },
-            padding: {
-              top: 4,
-              bottom: 4,
-              left: 8,
-              right: 8
-            },
-            formatter: function (value) {
-              return value + '%';
-            }
-          }
-        },
-        scales: {
-          y: {
-            display: false, // Esconde completamente o eixo Y (linhas e números)
-            beginAtZero: true,
-            max: 55 // Um valor máximo um pouco acima dos 43.75 para dar respiro visual
-          },
-          x: {
-            grid: { display: false, drawBorder: false },
-            border: { display: false }, // Remove a linha da base
-            ticks: {
-              color: '#6b7280',
-              font: { weight: '500', size: 12 },
-              padding: 10
-            }
-          }
-        }
+
+          window.meuGrafico = new Chart(ctx, {
+              type: 'bar',
+              data: {
+                  labels: data.labels,
+                  datasets: [{
+                      data: data.values,
+                      // Atribui cores da paleta automaticamente
+                      backgroundColor: data.labels.map((_, i) => paletaCores[i % paletaCores.length]),
+                      borderRadius: 5
+                  }]
+              },
+              options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                      legend: { display: false },
+                      datalabels: {
+                          color: '#fff',
+                          formatter: (val) => val + '%'
+                      }
+                  }
+              },
+              plugins: [ChartDataLabels]
+          });
+      } catch (error) {
+          console.error('Erro ao carregar transparência:', error);
       }
-    });
   }
+
+// Inicializa a função quando o modal for aberto ou ao carregar a página
+document.addEventListener('DOMContentLoaded', carregarDadosTransparencia);
+
+// Garante que o gráfico carrega ao abrir a página
+document.addEventListener('DOMContentLoaded', carregarGraficoTransparencia);
+
+// Iniciar quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', () => {
+    atualizarGraficoTransparencia();
+});
 
   /* MODAL */
   function openModal() {

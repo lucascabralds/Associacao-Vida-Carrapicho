@@ -260,38 +260,9 @@
         </div>
 
         <div id="modal-body">
-          <div id="modal-kpis">
-            <div class="kpi-card">
-              <div class="kpi-icon">💵</div>
-              <div class="kpi-label">Doações Recebidas</div>
-              <div class="kpi-value">R$ 80.000</div>
-              <div class="kpi-bar"><div class="kpi-bar-fill"></div></div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon">🍽️</div>
-              <div class="kpi-label">Alimentação</div>
-              <div class="kpi-value">R$ 35.000</div>
-              <div class="kpi-bar"><div class="kpi-bar-fill"></div></div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon">📚</div>
-              <div class="kpi-label">Educação</div>
-              <div class="kpi-value">R$ 25.000</div>
-              <div class="kpi-bar"><div class="kpi-bar-fill"></div></div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon">🏥</div>
-              <div class="kpi-label">Saúde</div>
-              <div class="kpi-value">R$ 15.000</div>
-              <div class="kpi-bar"><div class="kpi-bar-fill"></div></div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon">📋</div>
-              <div class="kpi-label">Administrativo</div>
-              <div class="kpi-value">R$ 5.000</div>
-              <div class="kpi-bar"><div class="kpi-bar-fill"></div></div>
-            </div>
-          </div>
+          <div class="chart-container">
+            <canvas id="rendimentoChart"></canvas>
+        </div>
           <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
           <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
           <div id="modal-chart-section">
