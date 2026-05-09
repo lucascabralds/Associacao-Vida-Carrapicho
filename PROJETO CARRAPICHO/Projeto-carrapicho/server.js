@@ -411,6 +411,33 @@ app.delete('/api/transparency/:id', authMiddleware, async (req, res) => {
     }
 });
 
+// Rota de estatísticas para o gráfico de pizza no modal público
+app.get('/api/transparency/stats', async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            `SELECT category, SUM(amount) as total
+             FROM transparency
+             WHERE type = 'expense'
+             GROUP BY category
+             ORDER BY total DESC`
+        );
+
+        if (rows.length === 0) {
+            return res.json({ labels: [], values: [] });
+        }
+
+        const somaTotal = rows.reduce((acc, item) => acc + parseFloat(item.total), 0);
+
+        res.json({
+            labels: rows.map(r => r.category),
+            values: rows.map(r => ((parseFloat(r.total) / somaTotal) * 100).toFixed(1))
+        });
+    } catch (error) {
+        console.error('Stats transparency error:', error);
+        res.status(500).json({ error: 'Erro interno ao buscar estatísticas' });
+    }
+});
+
 // =====================================================
 // ROTAS DE DOAÇÕES
 // =====================================================

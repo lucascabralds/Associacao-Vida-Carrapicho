@@ -399,9 +399,6 @@
         </div>
 
         <div id="modal-body">
-          <div class="chart-container">
-            <canvas id="rendimentoChart"></canvas>
-          </div>
           <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
           <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
           <div id="modal-chart-section">
@@ -653,5 +650,78 @@
     <script src="./src/javascript/script.js"></script>
     <script src="./src/javascript/animations.js"></script>
     <script src="./src/javascript/eventos-loader.js"></script>
+        <script>
+
+      async function carregarDadosTransparencia() {
+        try {
+          const response = await fetch('http://localhost:3000/api/transparency/stats');
+          if (!response.ok) throw new Error('Resposta inválida: ' + response.status);
+          const data = await response.json();
+
+          const canvas = document.getElementById('transparenciaChart');
+          if (!canvas) { console.error('Canvas #transparenciaChart não encontrado'); return; }
+          const ctx = canvas.getContext('2d');
+
+          if (window.meuGraficoTransparencia) {
+            window.meuGraficoTransparencia.destroy();
+          }
+
+          window.meuGraficoTransparencia = new Chart(ctx, {
+            type: 'pie',
+            data: {
+              labels: data.labels,
+              datasets: [{
+                data: data.values,
+                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796'],
+                hoverBorderColor: 'rgba(234, 236, 244, 1)',
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      return context.label + ': ' + context.parsed + '%';
+                    }
+                  }
+                }
+              }
+            }
+          });
+        } catch (error) {
+          console.error('Erro ao carregar dados do gráfico de transparência:', error);
+        }
+      }
+
+      /* ── MODAL: abre, fecha e dispara a carga ─────────────────────────── */
+      function openModal() {
+        $('#modal-overlay').addClass('active');
+        $('body').css('overflow', 'hidden');
+        carregarDadosTransparencia();
+      }
+
+      function closeModal() {
+        $('#modal-overlay').removeClass('active');
+        $('body').css('overflow', '');
+      }
+
+      $(document).ready(function () {
+        $('.abrir-modal-transparencia').on('click', function (e) {
+          e.preventDefault();
+          openModal();
+        });
+
+        $('#modal-close').on('click', function () {
+          closeModal();
+        });
+
+        $('#modal-overlay').on('click', function (e) {
+          if ($(e.target).is('#modal-overlay')) closeModal();
+        });
+      });
+    </script>
   </body>
 </html>
