@@ -1287,3 +1287,127 @@ section {
   opacity: 1;
   transform: translateY(0);
 }
+
+#modal-creditos-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 30, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 99999;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  animation: overlayIn 0.3s ease forwards;
+}
+
+#modal-creditos-overlay.active {
+  display: flex;
+}
+
+#modal-creditos-box {
+  background: #ffffff;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+  animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  position: relative;
+}
+
+#modal-creditos-header {
+  background: linear-gradient(135deg, var(--primary-blue) 0%, #111649 100%);
+  padding: 32px 36px 28px;
+  border-radius: 24px 24px 0 0;
+  color: white;
+}
+
+#modal-creditos-header h2 {
+  font-size: 1.8rem;
+  margin-bottom: 6px;
+}
+
+#modal-creditos-header p {
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+#modal-creditos-close {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, background 0.2s;
+}
+
+#modal-creditos-close:hover {
+  background: rgba(255, 255, 255, 0.4);
+  transform: rotate(90deg);
+}
+
+#modal-creditos-body {
+  padding: 32px 36px;
+}
+
+.creditos-titulo {
+  color: var(--primary-blue);
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  margin-top: 20px;
+}
+
+#modal-creditos-body h3:first-child {
+  margin-top: 0;
+}
+
+.creditos-lista {
+  list-style: none;
+  padding: 0;
+}
+
+#modal-creditos-body .creditos-lista li {
+  padding: 14px 16px;
+  background: #f8fafc;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  color: #111649 !important;
+  font-weight: 600;
+  border-left: 4px solid var(--green-donate);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  
+  
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; 
+  gap: 8px;
+}
+
+.credito-nome {
+  font-size: 1.05rem;
+  order: 2;
+}
+
+.credito-cargo {
+  font-size: 0.75rem;
+  background-color: #e0e7ff;
+  color: var(--primary-blue);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  order: 1;
+}

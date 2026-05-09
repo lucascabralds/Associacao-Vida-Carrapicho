@@ -618,3 +618,34 @@ navLinksHover.forEach(link => {
     }
   });
 });
+
+function openModalCreditos() {
+  $('#modal-creditos-overlay').addClass('active');
+  $('body').css('overflow', 'hidden');
+}
+
+function closeModalCreditos() {
+  var $box = $('#modal-creditos-box');
+  $box.css({
+    animation: 'none',
+    transition: 'transform 0.25s ease, opacity 0.25s ease',
+    transform: 'translateY(30px) scale(0.97)',
+    opacity: '0'
+  });
+  setTimeout(function () {
+    $('#modal-creditos-overlay').removeClass('active');
+    $('body').css('overflow', '');
+    $box.css({ transform: '', opacity: '', transition: '' });
+  }, 250);
+}
+
+$('.abrir-modal-creditos').on('click', function (e) {
+  e.preventDefault();
+  openModalCreditos();
+});
+
+$('#modal-creditos-close').on('click', closeModalCreditos);
+
+$('#modal-creditos-overlay').on('click', function (e) {
+  if ($(e.target).is('#modal-creditos-overlay')) closeModalCreditos();
+});
