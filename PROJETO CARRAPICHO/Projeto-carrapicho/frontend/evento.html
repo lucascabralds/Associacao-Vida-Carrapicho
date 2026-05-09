@@ -309,6 +309,83 @@
         // =====================================================
         const API_URL = 'http://localhost:3000/api';
         const eventId = new URLSearchParams(window.location.search).get('id');
+        const listarTodos = new URLSearchParams(window.location.search).get('listar');
+        
+        // =====================================================
+        // CARREGAR LISTA DE TODOS OS EVENTOS
+        // =====================================================
+        async function carregarTodosEventos() {
+            try {
+                const response = await fetch(`${API_URL}/events`);
+                const eventos = await response.json();
+                
+                // Ordenar por data
+                eventos.sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
+                
+                if (eventos.length === 0) {
+                    document.getElementById('eventoDetalhes').innerHTML = `
+                        <div style="text-align:center;padding:40px;color:#666">
+                            <h3>📭 Nenhum evento encontrado</h3>
+                            <p>Verifique mais tarde para novos eventos!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Montar HTML com lista de eventos
+                let eventosHtml = '<h1 class="event-title">📅 Todos os Eventos</h1>';
+                eventosHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-top:30px;">';
+                
+                eventos.forEach(evento => {
+                    let statusClass = '';
+                    let statusText = '';
+                    
+                    switch (evento.status) {
+                        case 'upcoming':
+                            statusClass = 'status-upcoming';
+                            statusText = '📅 Em breve';
+                            break;
+                        case 'ongoing':
+                            statusClass = 'status-ongoing';
+                            statusText = '📢 Acontecendo agora';
+                            break;
+                        case 'completed':
+                            statusClass = 'status-completed';
+                            statusText = '✅ Encerrado';
+                            break;
+                        default:
+                            statusClass = 'status-upcoming';
+                            statusText = '📅 Em breve';
+                    }
+                    
+                    const capa = evento.cover_image || './img/evento.png';
+                    const dataFormatada = new Date(evento.event_date).toLocaleDateString('pt-BR');
+                    
+                    eventosHtml += `
+                        <div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1);cursor:pointer;transition:transform 0.3s;" onclick="window.location.href='?id=${evento.id}'">
+                            <img src="${capa}" alt="${evento.title}" style="width:100%;height:200px;object-fit:cover;">
+                            <div style="padding:15px;">
+                                <h3 style="margin:0 0 10px;color:#16a34a;font-size:18px;">${evento.title}</h3>
+                                <p style="margin:5px 0;color:#666;font-size:14px;"><strong>📅</strong> ${dataFormatada}</p>
+                                <p style="margin:5px 0;color:#666;font-size:14px;"><strong>📍</strong> ${evento.location || 'Local não definido'}</p>
+                                <span class="status-badge ${statusClass}" style="display:inline-block;margin-top:10px;">${statusText}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                eventosHtml += '</div>';
+                document.getElementById('eventoDetalhes').innerHTML = eventosHtml;
+            } catch (error) {
+                console.error('Erro ao carregar eventos:', error);
+                document.getElementById('eventoDetalhes').innerHTML = `
+                    <div style="text-align:center;padding:40px;color:red">
+                        <h3>❌ Erro ao carregar eventos</h3>
+                        <p>Não foi possível carregar a lista de eventos. Tente novamente mais tarde.</p>
+                    </div>
+                `;
+            }
+        }
         
         // =====================================================
         // CARREGAR DETALHES DO EVENTO
@@ -428,7 +505,11 @@
         // =====================================================
         // INICIAR
         // =====================================================
-        carregarEvento();
+        if (listarTodos || !eventId) {
+            carregarTodosEventos();
+        } else {
+            carregarEvento();
+        }
     </script>
 </body>
 </html>

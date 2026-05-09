@@ -98,30 +98,30 @@ const adminMiddleware = (req, res, next) => {
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        
+
         if (!email || !password) {
             return res.status(400).json({ error: 'Email e senha são obrigatórios' });
         }
-        
+
         const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-        
+
         if (users.length === 0) {
             return res.status(401).json({ error: 'Email ou senha inválidos' });
         }
-        
+
         const user = users[0];
         const isValid = await bcrypt.compare(password, user.password);
-        
+
         if (!isValid) {
             return res.status(401).json({ error: 'Email ou senha inválidos' });
         }
-        
+
         const token = jwt.sign(
             { id: user.id, name: user.name, email: user.email, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
-        
+
         res.json({
             success: true,
             token,
@@ -149,24 +149,24 @@ app.get('/api/users', authMiddleware, adminMiddleware, async (req, res) => {
 app.post('/api/users', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
-        
+
         if (!name || !email || !password) {
             return res.status(400).json({ error: 'Nome, email e senha são obrigatórios' });
         }
-        
+
         const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
         if (existing.length > 0) {
             return res.status(400).json({ error: 'Email já cadastrado' });
         }
-        
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const userRole = role || 'editor';
-        
+
         const [result] = await pool.query(
             'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
             [name, email, hashedPassword, userRole]
         );
-        
+
         res.status(201).json({ id: result.insertId, name, email, role: userRole });
     } catch (error) {
         console.error('Create user error:', error);
@@ -178,10 +178,10 @@ app.put('/api/users/:id', authMiddleware, adminMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
         const { name, email, role, active, password } = req.body;
-        
+
         const updates = [];
         const values = [];
-        
+
         if (name) { updates.push('name = ?'); values.push(name); }
         if (email) { updates.push('email = ?'); values.push(email); }
         if (role) { updates.push('role = ?'); values.push(role); }
@@ -191,14 +191,14 @@ app.put('/api/users/:id', authMiddleware, adminMiddleware, async (req, res) => {
             updates.push('password = ?');
             values.push(hashedPassword);
         }
-        
+
         if (updates.length === 0) {
             return res.status(400).json({ error: 'Nenhum dado para atualizar' });
         }
-        
+
         values.push(id);
         await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, values);
-        
+
         res.json({ success: true });
     } catch (error) {
         console.error('Update user error:', error);
@@ -260,19 +260,19 @@ app.get('/api/events/:id', async (req, res) => {
 app.post('/api/events', authMiddleware, upload.array('images', 10), async (req, res) => {
     try {
         const { title, description, event_date, location, status } = req.body;
-        
+
         if (!title || !event_date) {
             return res.status(400).json({ error: 'Título e data são obrigatórios' });
         }
-        
+
         const [result] = await pool.query(
             `INSERT INTO events (title, description, event_date, location, status, created_by)
              VALUES (?, ?, ?, ?, ?, ?)`,
             [title, description, event_date, location, status || 'upcoming', req.user.id]
         );
-        
+
         const eventId = result.insertId;
-        
+
         const images = req.files || [];
         for (let i = 0; i < images.length; i++) {
             const imageUrl = `/uploads/${images[i].filename}`;
@@ -282,10 +282,10 @@ app.post('/api/events', authMiddleware, upload.array('images', 10), async (req, 
                 [eventId, imageUrl, isCover]
             );
         }
-        
+
         const [newEvent] = await pool.query('SELECT * FROM events WHERE id = ?', [eventId]);
         const [eventImages] = await pool.query('SELECT * FROM event_images WHERE event_id = ? ORDER BY is_cover DESC, id ASC', [eventId]);
-        
+
         res.status(201).json({ ...newEvent[0], images: eventImages });
     } catch (error) {
         console.error('Create event error:', error);
@@ -298,7 +298,7 @@ app.put('/api/events/:id', authMiddleware, upload.array('images', 10), async (re
     try {
         const { id } = req.params;
         const { title, description, event_date, location, status, remove_images } = req.body;
-        
+
         const updates = [];
         const values = [];
         if (title) { updates.push('title = ?'); values.push(title); }
@@ -306,13 +306,13 @@ app.put('/api/events/:id', authMiddleware, upload.array('images', 10), async (re
         if (event_date) { updates.push('event_date = ?'); values.push(event_date); }
         if (location) { updates.push('location = ?'); values.push(location); }
         if (status) { updates.push('status = ?'); values.push(status); }
-        
+
         if (updates.length > 0) {
             updates.push('updated_at = NOW()');
             values.push(id);
             await pool.query(`UPDATE events SET ${updates.join(', ')} WHERE id = ?`, values);
         }
-        
+
         if (remove_images) {
             const removeIds = remove_images.split(',').map(Number);
             for (const imgId of removeIds) {
@@ -324,7 +324,7 @@ app.put('/api/events/:id', authMiddleware, upload.array('images', 10), async (re
                 await pool.query('DELETE FROM event_images WHERE id = ? AND event_id = ?', [imgId, id]);
             }
         }
-        
+
         const newImages = req.files || [];
         const [existingCover] = await pool.query('SELECT id FROM event_images WHERE event_id = ? AND is_cover = TRUE', [id]);
         for (let i = 0; i < newImages.length; i++) {
@@ -335,7 +335,7 @@ app.put('/api/events/:id', authMiddleware, upload.array('images', 10), async (re
                 [id, imageUrl, isCover]
             );
         }
-        
+
         const [updatedEvent] = await pool.query('SELECT * FROM events WHERE id = ?', [id]);
         const [eventImages] = await pool.query('SELECT * FROM event_images WHERE event_id = ? ORDER BY is_cover DESC, id ASC', [id]);
         res.json({ ...updatedEvent[0], images: eventImages });
@@ -420,18 +420,18 @@ app.post('/api/donations/pix', async (req, res) => {
         if (!amount || amount < 1) {
             return res.status(400).json({ error: 'Valor mínimo R$ 1,00' });
         }
-        
+
         const pixKey = process.env.PIX_KEY;
         const txid = Date.now().toString() + Math.random().toString(36).substring(2, 10);
         const payload = `00020126360014BR.GOV.BCB.PIX0114${pixKey}5204000053039865404${amount.toFixed(2)}5802BR5913ONG6007Cidade62140510${txid}6304`;
         const qrCode = await QRCode.toDataURL(payload, { width: 300 });
-        
+
         const [result] = await pool.query(
             `INSERT INTO donations (donor_name, donor_email, amount, pix_key, pix_txid, pix_payload, qr_code, status)
              VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')`,
             [donor_name || null, donor_email || null, amount, pixKey, txid, payload, qrCode]
         );
-        
+
         res.json({ success: true, donation_id: result.insertId, txid, amount, qrCode, payload });
     } catch (error) {
         console.error('Generate QR Code error:', error);
@@ -455,6 +455,34 @@ app.get('/api/donations', authMiddleware, async (req, res) => {
         console.error('List donations error:', error);
         res.status(500).json({ error: 'Erro ao listar doações' });
     }
+});
+
+// =====================================================
+// ROTA DE CONTATO
+// =====================================================
+
+app.post('/contato', async (req, res) => {
+
+    try {
+
+        console.log(req.body);
+
+        res.json({
+            sucesso: true,
+            mensagem: 'Mensagem enviada com sucesso!'
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            sucesso: false,
+            mensagem: 'Erro ao enviar mensagem'
+        });
+
+    }
+
 });
 
 // =====================================================
