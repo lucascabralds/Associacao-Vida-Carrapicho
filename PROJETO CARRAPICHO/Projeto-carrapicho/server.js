@@ -527,3 +527,5 @@ app.listen(PORT, async () => {
         console.error('❌ Erro no banco:', error.message);
     }
 });
+
+app.use('/api/events', require('./backend/routes/eventRoutes'));

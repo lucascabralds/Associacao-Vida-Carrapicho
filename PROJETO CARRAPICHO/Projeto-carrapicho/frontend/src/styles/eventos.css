@@ -214,6 +214,8 @@
     font-size: 0.9rem;
 }
 
+
+
 @media (max-width: 1110px) {
     #eventos { justify-content: center; }
     .event-card { width: calc(50% - 16px); max-width: 520px; }
