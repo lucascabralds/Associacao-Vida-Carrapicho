@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Associação Vida Carrapicho</title>
+    <link rel="icon" type="image/png" href="../img/Logo.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+        integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        /* =====================================================
+         ESTILOS GLOBAIS - MESMOS DO HOME
+    ===================================================== */
+        :root {
+            --primary-blue: #1D2671;
+            --text-color: #4a4a4a;
+            --green-donate: #00A859;
+            --yellow-accent: #FFB800;
+            --bg-light: #f8f9fa;
+            --white: #ffffff;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --border-radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background: var(--bg-light);
+            min-height: 100vh;
+        }
+
+        /* =====================================================
+         HEADER
+    ===================================================== */
+        .admin-header {
+            background: var(--white);
+            box-shadow: var(--shadow);
+            padding: 15px 30px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-area img {
+            height: 50px;
+        }
+
+        .logo-area h1 {
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            color: var(--text-color);
+            background: transparent;
+            border: none;
+        }
+
+        .nav-tab:hover {
+            background: rgba(0, 168, 89, 0.1);
+            color: var(--green-donate);
+        }
+
+        .nav-tab.active {
+            background: var(--green-donate);
+            color: white;
+        }
+
+        .btn-sair {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-sair:hover {
+            background: #b91c1c;
+            transform: translateY(-2px);
+        }
+
+        .btn-home {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-home:hover {
+            background: #0f1a4a;
+            transform: translateY(-2px);
+        }
+
+        /* =====================================================
+         CONTAINER PRINCIPAL
+    ===================================================== */
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 25px;
+        }
+
+        /* =====================================================
+         CARDS
+    ===================================================== */
+        .card {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 28px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            color: var(--primary-blue);
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            border-left: 4px solid var(--green-donate);
+            padding-left: 15px;
+        }
+
+        .card h3 {
+            color: var(--primary-blue);
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        /* =====================================================
+         FORMULÁRIOS
+    ===================================================== */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--green-donate);
+            box-shadow: 0 0 0 3px rgba(0, 168, 89, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn-primary {
+            background: var(--green-donate);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        /* =====================================================
+         TABELAS
+    ===================================================== */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #f0fdf4;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* =====================================================
+         DASHBOARD CARDS
+    ===================================================== */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-card {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .dashboard-card.receita {
+            border-bottom: 4px solid var(--green-donate);
+        }
+
+        .dashboard-card.despesa {
+            border-bottom: 4px solid #dc2626;
+        }
+
+        .dashboard-card.saldo {
+            border-bottom: 4px solid var(--primary-blue);
+        }
+
+        .dashboard-card h4 {
+            color: var(--text-color);
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .dashboard-card .valor {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .dashboard-card.receita .valor {
+            color: var(--green-donate);
+        }
+
+        .dashboard-card.despesa .valor {
+            color: #dc2626;
+        }
+
+        .dashboard-card.saldo .valor {
+            color: var(--primary-blue);
+        }
+
+        /* =====================================================
+         GRÁFICOS
+    ===================================================== */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .chart-box {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-box h3 {
+            margin-bottom: 20px;
+            color: var(--primary-blue);
+        }
+
+        .categorias-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .categoria-item {
+            background: #f0fdf4;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .categoria-item .nome {
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .categoria-item .valor {
+            color: var(--green-donate);
+            font-weight: bold;
+        }
+
+        /* =====================================================
+         MODAL
+    ===================================================== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            width: 90%;
+            max-width: 650px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-header h3 {
+            color: var(--primary-blue);
+        }
+
+        .close-modal {
+            cursor: pointer;
+            font-size: 28px;
+            color: var(--text-color);
+            transition: 0.3s;
+        }
+
+        .close-modal:hover {
+            color: #dc2626;
+        }
+
+        .image-preview,
+        .current-images {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .image-preview img,
+        .current-images img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .img-item {
+            position: relative;
+        }
+
+        .remove-img-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #dc2626;
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* =====================================================
+         LOGIN
+    ===================================================== */
+        .login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1D2671 0%, #00A859 100%);
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-card img {
+            width: 80px;
+            margin-bottom: 20px;
+        }
+
+        .login-card h2 {
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+        }
+
+        .login-card p {
+            color: var(--text-color);
+            margin-bottom: 30px;
+        }
+
+        .login-message {
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .login-message.error {
+            background: #fee2e2;
+            color: #dc2626;
+            display: block;
+        }
+
+        .login-message.success {
+            background: #d1fae5;
+            color: #065f46;
+            display: block;
+        }
+
+        .login-footer {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .login-footer a {
+            color: var(--green-donate);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* =====================================================
+         PROTECTED USER BADGE
+    ===================================================== */
+        .protected-badge {
+            color: var(--green-donate);
+            font-size: 11px;
+            margin-left: 5px;
+        }
+
+        .protected-label {
+            background: #f0fdf4;
+            color: var(--green-donate);
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* =====================================================
+         RESPONSIVIDADE
+    ===================================================== */
+        @media (max-width: 768px) {
+
+            .form-row,
+            .dashboard-grid,
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .nav-tabs {
+                justify-content: center;
+            }
+        }
+
+        /* Estilos para impressão/PDF */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            .pdf-content,
+            .pdf-content * {
+                visibility: visible;
+            }
+
+            .pdf-content {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                padding: 20px;
+            }
+
+            .no-print {
+                display: none;
+            }
+        }
+
+        .report-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #00A859;
+        }
+
+        .report-title {
+            color: #1D2671;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .report-date {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .report-table th {
+            background: #00A859;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .report-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .report-summary {
+            background: #f0fdf4;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .report-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =====================================================
+     TELA DE LOGIN
+===================================================== -->
+    <div id="loginScreen" class="login-wrapper">
+        <div class="login-card">
+            <img src="../img/logo-carrapicho.png" alt="Logo">
+            <h2>Painel Administrativo</h2>
+            <p>Faça login para gerenciar o sistema</p>
+            <div id="loginMessage" class="login-message"></div>
+            <div class="form-group">
+                <input type="email" id="email" placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Sua senha">
+            </div>
+            <button class="btn-primary" onclick="fazerLogin()" style="width: 100%;">Entrar</button>
+            <div class="login-footer">
+                <a href="/">← Voltar para o site</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================
+     PAINEL PRINCIPAL
+===================================================== -->
+    <div id="dashboardScreen" style="display: none;">
+        <header class="admin-header">
+            <div class="logo-area">
+                <img src="../img/logo-carrapicho.png" alt="Logo">
+                <h1>Associação Vida Carrapicho - Admin</h1>
+            </div>
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="mostrarAba('dashboard')">📊 Dashboard</button>
+                <button class="nav-tab" onclick="mostrarAba('eventos')">📅 Eventos</button>
+                <button class="nav-tab" onclick="mostrarAba('financas')">💰 Finanças</button>
+                <button class="nav-tab" id="tabUsuariosBtn" onclick="mostrarAba('usuarios')">👥 Usuários</button>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <a href="/" class="btn-home">🏠 Site</a>
+                <button class="btn-sair" onclick="sair()">Sair</button>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- =====================================================
+         ABA DASHBOARD
+    ===================================================== -->
+            <div id="abaDashboard">
+                <div class="dashboard-grid">
+                    <div class="dashboard-card receita">
+                        <h4>💰 Total Arrecadado</h4>
+                        <div class="valor" id="adminTotalReceita">R$ 0</div>
+                    </div>
+                    <div class="dashboard-card despesa">
+                        <h4>💸 Total Gastos</h4>
+                        <div class="valor" id="adminTotalDespesa">R$ 0</div>
+                    </div>
+                    <div class="dashboard-card saldo">
+                        <h4>⚖️ Saldo Atual</h4>
+                        <div class="valor" id="adminTotalSaldo">R$ 0</div>
+                    </div>
+                </div>
+
+                <div class="charts-row">
+                    <div class="chart-box">
+                        <h3>📊 Distribuição de Gastos</h3>
+                        <canvas id="adminGraficoGastos" height="250"></canvas>
+                    </div>
+                    <div class="chart-box">
+                        <h3>📈 Receitas vs Despesas</h3>
+                        <canvas id="adminGraficoComparativo" height="250"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📋 Despesas por Categoria</h3>
+                    <div id="adminCategoriasList" class="categorias-grid"></div>
+                </div>
+            </div>
+
+            <div class="card" style="text-align: center;">
+                <h2>📄 Relatórios</h2>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <button class="btn-primary" onclick="gerarRelatorioFinanceiro()">💰 Relatório Financeiro</button>
+                    <button class="btn-primary" onclick="gerarRelatorioEventos()">📅 Relatório de Eventos</button>
+                    <button class="btn-primary" onclick="gerarRelatorioCompleto()">📊 Relatório Completo</button>
+                </div>
+            </div>
+            <!-- =====================================================
+         ABA EVENTOS
+    ===================================================== -->
+            <div id="abaEventos" style="display: none;">
+                <div class="card">
+                    <h2>➕ Criar Novo Evento</h2>
+                    <form id="formEvento" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label>Título do Evento *</label>
+                            <input type="text" id="evento_title" required placeholder="Ex: Feijoada Solidária">
+                        </div>
+                        <div class="form-group">
+                            <label>Descrição</label>
+                            <textarea id="evento_desc" rows="3" placeholder="Descreva o evento..."></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Data e Hora *</label>
+                                <input type="datetime-local" id="evento_date" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Local</label>
+                                <input type="text" id="evento_location" placeholder="Endereço do evento">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Imagens do Evento</label>
+                            <input type="file" id="evento_images" multiple accept="image/*">
+                            <div id="evento_preview" class="image-preview"></div>
+                            <small>⭐ A primeira imagem será a capa do evento</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="evento_status">
+                                <option value="upcoming">📅 Em breve</option>
+                                <option value="ongoing">📢 Acontecendo agora</option>
+                                <option value="completed">✅ Encerrado</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary">✨ Criar Evento</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>📋 Eventos Cadastrados</h2>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Capa</th>
+                                    <th>Título</th>
+                                    <th>Data</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaEventos">
+                                <tr>
+                                    <td colspan="6">Carregando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =====================================================
+         ABA FINANÇAS
+    ===================================================== -->
+            <div id="abaFinancas" style="display: none;">
+                <div class="card">
+                    <h2>💰 Registrar Movimentação</h2>
+                    <form id="formFinanca">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Tipo *</label>
+                                <select id="financa_type" required>
+                                    <option value="income">💰 Receita (Entrada)</option>
+                                    <option value="expense">💸 Despesa (Saída)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Categoria *</label>
+                                <select id="financa_category" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="Doações">📦 Doações</option>
+                                    <option value="Eventos">🎪 Eventos</option>
+                                    <option value="Alimentação">🍲 Alimentação</option>
+                                    <option value="Educação">📚 Educação</option>
+                                    <option value="Transporte">🚛 Transporte</option>
+                                    <option value="Saúde">🏥 Saúde</option>
+                                    <option value="Infraestrutura">🏢 Infraestrutura</option>
+                                    <option value="Administrativo">📋 Administrativo</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Descrição</label>
+                            <input type="text" id="financa_desc" placeholder="Descreva a movimentação">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Valor (R$) *</label>
+                                <input type="number" id="financa_amount" step="0.01" placeholder="0,00" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Data *</label>
+                                <input type="date" id="financa_date" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">➕ Registrar</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>📋 Lançamentos Recentes</h2>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Categoria</th>
+                                    <th>Descrição</th>
+                                    <th>Valor</th>
+                                    <th>Data</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaFinancas"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =====================================================
+         ABA USUÁRIOS
+    ===================================================== -->
+            <div id="abaUsuarios" style="display: none;">
+                <div class="card" id="formUsuarioCard">
+                    <h2>👥 Criar Novo Usuário</h2>
+                    <form id="formUsuario">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nome *</label>
+                                <input type="text" id="user_name" required placeholder="Nome completo">
+                            </div>
+                            <div class="form-group">
+                                <label>Email *</label>
+                                <input type="email" id="user_email" required placeholder="email@exemplo.com">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Senha *</label>
+                                <input type="password" id="user_password" required placeholder="Mínimo 6 caracteres">
+                            </div>
+                            <div class="form-group">
+                                <label>Nível de Acesso</label>
+                                <select id="user_role">
+                                    <option value="editor">✏️ Editor</option>
+                                    <option value="admin">👑 Administrador</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">➕ Criar Usuário</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>📋 Usuários do Sistema</h2>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Email</th>
+                                    <th>Função</th>
+                                    <th>Status</th>
+                                    <th>Ações <span class="protected-badge">🛡️ ID 1 é protegido</span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaUsuarios"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR EVENTO -->
+    <div id="modalEditarEvento" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ Editar Evento</h3>
+                <span class="close-modal" onclick="fecharModal()">&times;</span>
+            </div>
+            <form id="formEditarEvento" enctype="multipart/form-data">
+                <input type="hidden" id="edit_evento_id">
+                <div class="form-group"><label>Título</label><input type="text" id="edit_evento_title" required></div>
+                <div class="form-group"><label>Descrição</label><textarea id="edit_evento_desc" rows="3"></textarea>
+                </div>
+                <div class="form-group"><label>Data</label><input type="datetime-local" id="edit_evento_date" required>
+                </div>
+                <div class="form-group"><label>Local</label><input type="text" id="edit_evento_location"></div>
+                <div class="form-group"><label>Imagens Atuais</label>
+                    <div id="edit_evento_current_images" class="current-images"></div>
+                </div>
+                <div class="form-group"><label>Adicionar Imagens</label><input type="file" id="edit_evento_images"
+                        multiple accept="image/*">
+                    <div id="edit_evento_preview" class="image-preview"></div>
+                </div>
+                <div class="form-group"><label>Status</label><select id="edit_evento_status">
+                        <option value="upcoming">Em breve</option>
+                        <option value="ongoing">Acontecendo</option>
+                        <option value="completed">Encerrado</option>
+                    </select></div>
+                <button type="submit" class="btn-primary">💾 Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================
+        // CONFIGURAÇÕES
+        // =====================================================
+        const API_URL = window.location.origin + '/api';
+        let token = localStorage.getItem('token');
+        let graficoGastos = null;
+        let graficoComparativo = null;
+        let imagensAtuais = [];
+
+        if (token) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboardScreen').style.display = 'block';
+            carregarTudo();
+            verificarPermissaoAdmin();
+        }
+
+        // =====================================================
+        // VERIFICAÇÃO DE PERMISSÕES
+        // =====================================================
+        function getUserRole() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            return user.role || 'editor';
+        }
+
+        function isAdmin() {
+            return getUserRole() === 'admin';
+        }
+
+        function verificarPermissaoAdmin() {
+            if (!isAdmin()) {
+                const abaUsuarios = document.getElementById('abaUsuarios');
+                const btnUsuarios = document.getElementById('tabUsuariosBtn');
+                const formUsuarioCard = document.getElementById('formUsuarioCard');
+
+                if (abaUsuarios) abaUsuarios.style.display = 'none';
+                if (btnUsuarios) btnUsuarios.style.display = 'none';
+                if (formUsuarioCard) formUsuarioCard.style.display = 'none';
+            }
+        }
+
+        // =====================================================
+        // LOGIN
+        // =====================================================
+        async function fazerLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const msgDiv = document.getElementById('loginMessage');
+
+            if (!email || !password) {
+                msgDiv.className = 'login-message error';
+                msgDiv.textContent = 'Preencha todos os campos';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    token = data.token;
+
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('dashboardScreen').style.display = 'block';
+
+                    verificarPermissaoAdmin();
+                    await carregarTudo();
+                } else {
+                    msgDiv.className = 'login-message error';
+                    msgDiv.textContent = data.error || 'Email ou senha inválidos';
+                }
+            } catch (error) {
+                msgDiv.className = 'login-message error';
+                msgDiv.textContent = 'Erro de conexão com o servidor';
+            }
+        }
+
+        function sair() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            token = null;
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboardScreen').style.display = 'none';
+        }
+
+        function mostrarAba(aba) {
+            const abas = ['Dashboard', 'Eventos', 'Financas', 'Usuarios'];
+            abas.forEach(a => {
+                const el = document.getElementById(`aba${a}`);
+                if (el) el.style.display = 'none';
+            });
+
+            if (aba === 'usuarios' && !isAdmin()) {
+                alert('🔒 Acesso negado! Apenas administradores podem gerenciar usuários.');
+                return;
+            }
+
+            document.getElementById(`aba${aba.charAt(0).toUpperCase() + aba.slice(1)}`).style.display = 'block';
+
+            const btns = document.querySelectorAll('.nav-tab');
+            btns.forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.querySelector(`.nav-tab[onclick*="${aba}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            if (aba === 'dashboard') carregarDashboardAdmin();
+        }
+
+        async function carregarTudo() {
+            await Promise.all([carregarEventos(), carregarFinancasAdmin(), carregarUsuarios()]);
+            carregarDashboardAdmin();
+        }
+
+        async function carregarDashboardAdmin() {
+            try {
+                const response = await fetch(`${API_URL}/transparency`);
+                const data = await response.json();
+
+                const totalReceita = parseFloat(data.totals?.income) || 0;
+                const totalDespesa = parseFloat(data.totals?.expense) || 0;
+                const saldo = totalReceita - totalDespesa;
+
+                document.getElementById('adminTotalReceita').textContent = `R$ ${totalReceita.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+                document.getElementById('adminTotalDespesa').textContent = `R$ ${totalDespesa.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+                document.getElementById('adminTotalSaldo').textContent = `R$ ${saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+
+                const despesasPorCategoria = {};
+                (data.records || []).forEach(r => {
+                    if (r.type === 'expense') {
+                        despesasPorCategoria[r.category] = (despesasPorCategoria[r.category] || 0) + parseFloat(r.amount);
+                    }
+                });
+
+                const labels = Object.keys(despesasPorCategoria);
+                const values = Object.values(despesasPorCategoria);
+                const total = values.reduce((a, b) => a + b, 0);
+
+                const ctxGastos = document.getElementById('adminGraficoGastos').getContext('2d');
+                if (graficoGastos) graficoGastos.destroy();
+                graficoGastos = new Chart(ctxGastos, {
+                    type: 'doughnut',
+                    data: { labels, datasets: [{ data: values, backgroundColor: ['#00A859', '#1D2671', '#FFB800', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'] }] },
+                    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom' } } }
+                });
+
+                const ctxComparativo = document.getElementById('adminGraficoComparativo').getContext('2d');
+                if (graficoComparativo) graficoComparativo.destroy();
+                graficoComparativo = new Chart(ctxComparativo, {
+                    type: 'bar',
+                    data: { labels: ['Receitas', 'Despesas'], datasets: [{ label: 'Valores (R$)', data: [totalReceita, totalDespesa], backgroundColor: ['#00A859', '#dc2626'], borderRadius: 8 }] },
+                    options: { responsive: true, maintainAspectRatio: true, scales: { y: { beginAtZero: true, title: { display: true, text: 'R$' } } } }
+                });
+
+                const categoriasContainer = document.getElementById('adminCategoriasList');
+                if (labels.length === 0) {
+                    categoriasContainer.innerHTML = '<p>Nenhuma despesa registrada</p>';
+                } else {
+                    categoriasContainer.innerHTML = labels.map((cat, i) => `<div class="categoria-item"><div class="nome">${cat}</div><div class="valor">R$ ${values[i].toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div><small>${((values[i] / total) * 100).toFixed(1)}%</small></div>`).join('');
+                }
+            } catch (error) {
+                console.error('Erro no dashboard:', error);
+            }
+        }
+
+        // =====================================================
+        // EVENTOS
+        // =====================================================
+        async function carregarEventos() {
+            try {
+                const response = await fetch(`${API_URL}/events`);
+                const eventos = await response.json();
+                const tbody = document.getElementById('listaEventos');
+                if (!eventos || eventos.length === 0) { tbody.innerHTML = '<tr><td colspan="6">Nenhum evento</td></tr>'; return; }
+                tbody.innerHTML = eventos.map(e => `
+        <tr>
+          <td>${e.id}</td>
+          <td>${e.cover_image ? `<img src="${e.cover_image}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;">` : '-'}</td>
+          <td><strong>${e.title}</strong><br><small>${e.description?.substring(0, 50) || ''}</small></td>
+          <td>${new Date(e.event_date).toLocaleString('pt-BR')}</td>
+          <td>${e.status === 'upcoming' ? '📅 Em breve' : e.status === 'ongoing' ? '📢 Acontecendo' : '✅ Encerrado'}</td>
+          <td class="actions"><button class="btn-secondary" onclick="abrirModalEditarEvento(${e.id})">Editar</button><button class="btn-danger" onclick="deletarEvento(${e.id})">Excluir</button></td>
+        </tr>
+      `).join('');
+            } catch (error) { console.error(error); }
+        }
+
+        document.getElementById('formEvento')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('title', document.getElementById('evento_title').value);
+            formData.append('description', document.getElementById('evento_desc').value);
+            formData.append('event_date', document.getElementById('evento_date').value);
+            formData.append('location', document.getElementById('evento_location').value);
+            formData.append('status', document.getElementById('evento_status').value);
+            const files = document.getElementById('evento_images').files;
+            for (let i = 0; i < files.length; i++) formData.append('images', files[i]);
+            const response = await fetch(`${API_URL}/events`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
+            if (response.ok) { alert('Evento criado!'); document.getElementById('formEvento').reset(); document.getElementById('evento_preview').innerHTML = ''; carregarEventos(); }
+            else alert('Erro ao criar');
+        });
+
+        async function deletarEvento(id) { if (confirm('Excluir evento?')) { await fetch(`${API_URL}/events/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); carregarEventos(); } }
+
+        // =====================================================
+        // FINANÇAS
+        // =====================================================
+        async function carregarFinancasAdmin() {
+            try {
+                const response = await fetch(`${API_URL}/transparency`);
+                const data = await response.json();
+                const tbody = document.getElementById('listaFinancas');
+                if (!data.records || data.records.length === 0) { tbody.innerHTML = '<tr><td colspan="6">Nenhum registro</td></tr>'; return; }
+                tbody.innerHTML = data.records.map(r => `
+        <tr>
+          <td>${r.type === 'income' ? '💰 Receita' : '💸 Despesa'}</td>
+          <td>${r.category}</td>
+          <td>${r.description || '-'}</td>
+          <td style="color:${r.type === 'income' ? '#00A859' : '#dc2626'}">R$ ${parseFloat(r.amount).toFixed(2)}</td>
+          <td>${new Date(r.transaction_date).toLocaleDateString('pt-BR')}</td>
+          <td><button class="btn-danger" onclick="deletarFinanca(${r.id})">Excluir</button></td>
+        </tr>
+      `).join('');
+            } catch (error) { console.error(error); }
+        }
+
+        document.getElementById('formFinanca')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = { type: document.getElementById('financa_type').value, category: document.getElementById('financa_category').value, description: document.getElementById('financa_desc').value, amount: document.getElementById('financa_amount').value, transaction_date: document.getElementById('financa_date').value };
+            const response = await fetch(`${API_URL}/transparency`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(data) });
+            if (response.ok) { alert('Registro criado!'); document.getElementById('formFinanca').reset(); carregarFinancasAdmin(); carregarDashboardAdmin(); }
+            else alert('Erro');
+        });
+
+        async function deletarFinanca(id) { if (confirm('Excluir registro?')) { await fetch(`${API_URL}/transparency/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); carregarFinancasAdmin(); carregarDashboardAdmin(); } }
+
+        // =====================================================
+        // USUÁRIOS (APENAS ADMIN)
+        // =====================================================
+        async function carregarUsuarios() {
+            if (!isAdmin()) return;
+
+            try {
+                const response = await fetch(`${API_URL}/users`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const users = await response.json();
+                const tbody = document.getElementById('listaUsuarios');
+
+                if (!users || users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6">Nenhum usuário registrado</td></tr>';
+                    return;
+                }
+
+                const usuarioLogado = JSON.parse(localStorage.getItem('user') || '{}');
+
+                tbody.innerHTML = users.map(u => {
+                    const isProtected = u.id === 1;
+                    const podeExcluir = !isProtected && u.id !== usuarioLogado.id;
+                    const podeEditar = !isProtected;
+
+                    return `
+          <tr>
+            <td>${u.id} ${isProtected ? '🛡️' : ''}</td>
+            <td>${u.name}${isProtected ? ' <span class="protected-badge">(Administrador Principal)</span>' : ''}</td>
+            <td>${u.email}</td>
+            <td>${u.role === 'admin' ? '👑 Administrador' : '✏️ Editor'}</td>
+            <td>${u.active ? '✅ Ativo' : '❌ Inativo'}</td>
+            <td class="actions">
+              ${podeEditar ? `<button class="btn-secondary" onclick="editarUsuario(${u.id})">✏️ Editar</button>` : ''}
+              ${podeExcluir ? `<button class="btn-danger" onclick="deletarUsuario(${u.id})">🗑️ Excluir</button>` : ''}
+              ${isProtected ? '<span class="protected-label">🔒 Protegido</span>' : ''}
+            </td>
+          </tr>
+        `;
+                }).join('');
+
+            } catch (error) {
+                console.error('Erro ao carregar usuários:', error);
+            }
+        }
+
+        document.getElementById('formUsuario')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!isAdmin()) {
+                alert('❌ Apenas administradores podem criar novos usuários!');
+                return;
+            }
+
+            const data = {
+                name: document.getElementById('user_name').value,
+                email: document.getElementById('user_email').value,
+                password: document.getElementById('user_password').value,
+                role: document.getElementById('user_role').value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/users`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('✅ Usuário criado com sucesso!');
+                    document.getElementById('formUsuario').reset();
+                    carregarUsuarios();
+                } else {
+                    const error = await response.json();
+                    alert(error.error || '❌ Erro ao criar usuário');
+                }
+            } catch (error) {
+                alert('❌ Erro de conexão');
+            }
+        });
+
+        async function editarUsuario(id) {
+            if (!isAdmin()) {
+                alert('❌ Apenas administradores podem editar usuários!');
+                return;
+            }
+
+            // 🔒 PROTECÃO: NÃO ALTERAR O USUÁRIO ID 1
+            if (id === 1) {
+                alert('🛡️ OPERAÇÃO BLOQUEADA! O usuário administrador principal (ID 1) não pode ser modificado. Este é o usuário mestre do sistema.');
+                return;
+            }
+
+            const usuarioLogado = JSON.parse(localStorage.getItem('user') || '{}');
+            const isSelf = id === usuarioLogado.id;
+
+            if (isSelf) {
+                alert('⚠️ Você está editando seu próprio usuário. Tenha cuidado para não remover seus próprios privilégios de admin!');
+            }
+
+            const novaRole = confirm(`Alterar nível de acesso? Clique OK para Admin, Cancelar para Editor${isSelf ? '\n\n⚠️ CUIDADO: Alterar seu próprio papel pode te bloquear do sistema!' : ''}`);
+            const role = novaRole ? 'admin' : 'editor';
+
+            // Verificar se não é o último admin sendo rebaixado
+            if (!novaRole && !isSelf) {
+                try {
+                    const response = await fetch(`${API_URL}/users`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const users = await response.json();
+                    const admins = users.filter(u => u.role === 'admin' && u.id !== id);
+
+                    if (admins.length === 0) {
+                        alert('❌ OPERAÇÃO BLOQUEADA! Não é possível rebaixar o último administrador do sistema. Crie outro admin primeiro.');
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Erro ao verificar admins:', error);
+                }
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/users/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ role })
+                });
+
+                if (response.ok) {
+                    alert('✅ Usuário atualizado com sucesso!');
+                    carregarUsuarios();
+
+                    // Se o usuário editado é o próprio logado, atualizar localStorage
+                    if (isSelf) {
+                        const user = JSON.parse(localStorage.getItem('user') || '{}');
+                        user.role = role;
+                        localStorage.setItem('user', JSON.stringify(user));
+                        alert('⚠️ Sua função foi alterada. Algumas permissões podem ter mudado.');
+                    }
+                } else {
+                    alert('❌ Erro ao atualizar usuário');
+                }
+            } catch (error) {
+                alert('❌ Erro de conexão');
+            }
+        }
+
+        // =====================================================
+        // EDIÇÃO DE EVENTO
+        // =====================================================
+        async function abrirModalEditarEvento(id) {
+            const response = await fetch(`${API_URL}/events/${id}`);
+            const evento = await response.json();
+            document.getElementById('edit_evento_id').value = evento.id;
+            document.getElementById('edit_evento_title').value = evento.title;
+            document.getElementById('edit_evento_desc').value = evento.description || '';
+            document.getElementById('edit_evento_date').value = evento.event_date.slice(0, 16);
+            document.getElementById('edit_evento_location').value = evento.location || '';
+            document.getElementById('edit_evento_status').value = evento.status;
+            imagensAtuais = evento.images || [];
+            document.getElementById('edit_evento_current_images').innerHTML = imagensAtuais.map(img => `<div class="img-item" data-id="${img.id}"><img src="${img.image_url}"><span class="remove-img-btn" onclick="removerImagem(${img.id})">×</span></div>`).join('');
+            document.getElementById('edit_evento_preview').innerHTML = '';
+            document.getElementById('modalEditarEvento').style.display = 'flex';
+        }
+
+        window.removerImagem = function (id) {
+            imagensAtuais = imagensAtuais.filter(i => i.id !== id);
+            document.getElementById('edit_evento_current_images').innerHTML = imagensAtuais.map(img => `<div class="img-item" data-id="${img.id}"><img src="${img.image_url}"><span class="remove-img-btn" onclick="removerImagem(${img.id})">×</span></div>`).join('');
+        };
+
+        document.getElementById('formEditarEvento')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit_evento_id').value;
+            const formData = new FormData();
+            formData.append('title', document.getElementById('edit_evento_title').value);
+            formData.append('description', document.getElementById('edit_evento_desc').value);
+            formData.append('event_date', document.getElementById('edit_evento_date').value);
+            formData.append('location', document.getElementById('edit_evento_location').value);
+            formData.append('status', document.getElementById('edit_evento_status').value);
+            const removeIds = imagensAtuais.filter(img => !img.id).map(img => img.id).join(',');
+            if (removeIds) formData.append('remove_images', removeIds);
+            const files = document.getElementById('edit_evento_images').files;
+            for (let i = 0; i < files.length; i++) formData.append('images', files[i]);
+            const response = await fetch(`${API_URL}/events/${id}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
+            if (response.ok) { alert('Evento atualizado!'); fecharModal(); carregarEventos(); }
+            else alert('Erro');
+        });
+
+        function fecharModal() { document.getElementById('modalEditarEvento').style.display = 'none'; }
+
+        // =====================================================
+        // PREVIEW DE IMAGENS
+        // =====================================================
+        document.getElementById('evento_images')?.addEventListener('change', (e) => {
+            const preview = document.getElementById('evento_preview');
+            preview.innerHTML = '';
+            for (let file of e.target.files) {
+                const reader = new FileReader();
+                reader.onload = (ev) => preview.innerHTML += `<img src="${ev.target.result}">`;
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('edit_evento_images')?.addEventListener('change', (e) => {
+            const preview = document.getElementById('edit_evento_preview');
+            preview.innerHTML = '';
+            for (let file of e.target.files) {
+                const reader = new FileReader();
+                reader.onload = (ev) => preview.innerHTML += `<img src="${ev.target.result}">`;
+                reader.readAsDataURL(file);
+            }
+        });
+        // =====================================================
+        // RELATÓRIOS PDF
+        // =====================================================
+
+        async function gerarRelatorioFinanceiro() {
+            try {
+                const response = await fetch(`${API_URL}/transparency`);
+                const data = await response.json();
+
+                const totalReceita = parseFloat(data.totals?.income) || 0;
+                const totalDespesa = parseFloat(data.totals?.expense) || 0;
+                const saldo = totalReceita - totalDespesa;
+
+                const despesasPorCategoria = {};
+                (data.records || []).forEach(r => {
+                    if (r.type === 'expense') {
+                        despesasPorCategoria[r.category] = (despesasPorCategoria[r.category] || 0) + parseFloat(r.amount);
+                    }
+                });
+
+                const html = `
+      <div class="pdf-content" style="font-family: Arial, sans-serif; padding: 20px;">
+        <div class="report-header">
+          <img src="../img/logo-carrapicho.png" style="width: 80px; margin-bottom: 10px;">
+          <h1 class="report-title">Relatório Financeiro</h1>
+          <p class="report-date">Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
+          <p>Associação Vida Carrapicho</p>
+        </div>
+        
+        <div class="report-summary">
+          <h3>📊 Resumo Financeiro</h3>
+          <table style="width: 100%;">
+            <tr><td><strong>💰 Total de Receitas:</strong></td><td style="color: #00A859;">R$ ${totalReceita.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+            <tr><td><strong>💸 Total de Despesas:</strong></td><td style="color: #dc2626;">R$ ${totalDespesa.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+            <tr><td><strong>⚖️ Saldo Atual:</strong></td><td style="color: ${saldo >= 0 ? '#00A859' : '#dc2626'};">R$ ${saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+          </table>
+        </div>
+        
+        <h3>📋 Despesas por Categoria</h3>
+        <table class="report-table">
+          <thead><tr><th>Categoria</th><th>Valor</th><th>Percentual</th></tr></thead>
+          <tbody>
+            ${Object.entries(despesasPorCategoria).map(([cat, val]) => `
+              <tr>
+                <td>${cat}</td>
+                <td>R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                <td>${((val / totalDespesa) * 100).toFixed(1)}%</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        
+        <h3>📋 Últimos Lançamentos</h3>
+        <table class="report-table">
+          <thead><tr><th>Tipo</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th>Data</th></tr></thead>
+          <tbody>
+            ${(data.records || []).slice(0, 20).map(r => `
+              <tr>
+                <td>${r.type === 'income' ? '💰 Receita' : '💸 Despesa'}</td>
+                <td>${r.category}</td>
+                <td>${r.description || '-'}</td>
+                <td style="color: ${r.type === 'income' ? '#00A859' : '#dc2626'}">R$ ${parseFloat(r.amount).toFixed(2)}</td>
+                <td>${new Date(r.transaction_date).toLocaleDateString('pt-BR')}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        
+        <div class="report-footer">
+          <p>Relatório gerado automaticamente pelo sistema da Associação Vida Carrapicho</p>
+          <p>CNPJ: 07.895.526/0001-26 | www.vidacarrapicho.org</p>
+        </div>
+      </div>
+    `;
+
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                document.body.appendChild(tempDiv);
+
+                const element = tempDiv.querySelector('.pdf-content');
+                const opt = {
+                    margin: [0.5, 0.5, 0.5, 0.5],
+                    filename: `relatorio_financeiro_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(element).save();
+                setTimeout(() => tempDiv.remove(), 1000);
+
+            } catch (error) {
+                console.error('Erro ao gerar relatório:', error);
+                alert('Erro ao gerar relatório financeiro');
+            }
+        }
+
+        async function gerarRelatorioEventos() {
+            try {
+                const response = await fetch(`${API_URL}/events`);
+                const eventos = await response.json();
+
+                const html = `
+      <div class="pdf-content" style="font-family: Arial, sans-serif; padding: 20px;">
+        <div class="report-header">
+          <img src="../img/logo-carrapicho.png" style="width: 80px; margin-bottom: 10px;">
+          <h1 class="report-title">Relatório de Eventos</h1>
+          <p class="report-date">Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
+          <p>Associação Vida Carrapicho</p>
+        </div>
+        
+        <div class="report-summary">
+          <h3>📊 Resumo de Eventos</h3>
+          <table style="width: 100%;">
+            <tr><td><strong>📅 Total de Eventos:</strong></td><td>${eventos.length}</td></tr>
+            <tr><td><strong>📅 Eventos Futuros:</strong></td><td>${eventos.filter(e => e.status === 'upcoming').length}</td></tr>
+            <tr><td><strong>📢 Eventos Acontecendo:</strong></td><td>${eventos.filter(e => e.status === 'ongoing').length}</td></tr>
+            <tr><td><strong>✅ Eventos Encerrados:</strong></td><td>${eventos.filter(e => e.status === 'completed').length}</td></tr>
+          </table>
+        </div>
+        
+        <h3>📋 Lista de Eventos</h3>
+        <table class="report-table">
+          <thead><tr><th>ID</th><th>Evento</th><th>Data</th><th>Local</th><th>Status</th></tr></thead>
+          <tbody>
+            ${eventos.map(e => `
+              <tr>
+                <td>${e.id}</td>
+                <td><strong>${e.title}</strong><br><small>${e.description?.substring(0, 80) || ''}</small></td>
+                <td>${new Date(e.event_date).toLocaleString('pt-BR')}</td>
+                <td>${e.location || '-'}</td>
+                <td>${e.status === 'upcoming' ? '📅 Em breve' : e.status === 'ongoing' ? '📢 Acontecendo' : '✅ Encerrado'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        
+        <div class="report-footer">
+          <p>Relatório gerado automaticamente pelo sistema da Associação Vida Carrapicho</p>
+          <p>CNPJ: 07.895.526/0001-26 | www.vidacarrapicho.org</p>
+        </div>
+      </div>
+    `;
+
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                document.body.appendChild(tempDiv);
+
+                const element = tempDiv.querySelector('.pdf-content');
+                const opt = {
+                    margin: [0.5, 0.5, 0.5, 0.5],
+                    filename: `relatorio_eventos_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(element).save();
+                setTimeout(() => tempDiv.remove(), 1000);
+
+            } catch (error) {
+                console.error('Erro ao gerar relatório:', error);
+                alert('Erro ao gerar relatório de eventos');
+            }
+        }
+
+        async function gerarRelatorioCompleto() {
+            try {
+                const [financasRes, eventosRes] = await Promise.all([
+                    fetch(`${API_URL}/transparency`),
+                    fetch(`${API_URL}/events`)
+                ]);
+
+                const financas = await financasRes.json();
+                const eventos = await eventosRes.json();
+
+                const totalReceita = parseFloat(financas.totals?.income) || 0;
+                const totalDespesa = parseFloat(financas.totals?.expense) || 0;
+                const saldo = totalReceita - totalDespesa;
+
+                const despesasPorCategoria = {};
+                (financas.records || []).forEach(r => {
+                    if (r.type === 'expense') {
+                        despesasPorCategoria[r.category] = (despesasPorCategoria[r.category] || 0) + parseFloat(r.amount);
+                    }
+                });
+
+                const html = `
+      <div class="pdf-content" style="font-family: Arial, sans-serif; padding: 20px;">
+        <div class="report-header">
+          <img src="../img/logo-carrapicho.png" style="width: 80px; margin-bottom: 10px;">
+          <h1 class="report-title">Relatório Geral da Associação</h1>
+          <p class="report-date">Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
+          <p>Associação Vida Carrapicho - Transparência e Gestão</p>
+        </div>
+        
+        <div class="report-summary">
+          <h3>💰 Resumo Financeiro</h3>
+          <table style="width: 100%;">
+            <tr><td><strong>📈 Total de Receitas:</strong></td><td style="color: #00A859;">R$ ${totalReceita.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+            <tr><td><strong>📉 Total de Despesas:</strong></td><td style="color: #dc2626;">R$ ${totalDespesa.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+            <tr><td><strong>⚖️ Saldo Atual:</strong></td><td style="color: ${saldo >= 0 ? '#00A859' : '#dc2626'};">R$ ${saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+          </table>
+        </div>
+        
+        <div class="report-summary">
+          <h3>📅 Resumo de Eventos</h3>
+          <table style="width: 100%;">
+            <tr><td><strong>Total de Eventos:</strong></td><td>${eventos.length}</td></tr>
+            <tr><td><strong>Eventos Futuros:</strong></td><td>${eventos.filter(e => e.status === 'upcoming').length}</td></tr>
+            <tr><td><strong>Eventos Realizados:</strong></td><td>${eventos.filter(e => e.status === 'completed').length}</td></tr>
+          </table>
+        </div>
+        
+        <h3>📊 Despesas por Categoria</h3>
+        <table class="report-table">
+          <thead><tr><th>Categoria</th><th>Valor</th><th>Percentual</th></tr></thead>
+          <tbody>
+            ${Object.entries(despesasPorCategoria).map(([cat, val]) => `
+              <tr>
+                <td>${cat}</td>
+                <td>R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                <td>${((val / totalDespesa) * 100).toFixed(1)}%</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        
+        <div class="report-footer">
+          <p>Relatório gerado automaticamente pelo sistema da Associação Vida Carrapicho</p>
+          <p>CNPJ: 07.895.526/0001-26 | www.vidacarrapicho.org</p>
+          <p>R. Iraí de Minas, 202 - Jardim Itapolis - São Paulo/SP - CEP 03941-040</p>
+        </div>
+      </div>
+    `;
+
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                document.body.appendChild(tempDiv);
+
+                const element = tempDiv.querySelector('.pdf-content');
+                const opt = {
+                    margin: [0.5, 0.5, 0.5, 0.5],
+                    filename: `relatorio_completo_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(element).save();
+                setTimeout(() => tempDiv.remove(), 1000);
+
+            } catch (error) {
+                console.error('Erro ao gerar relatório completo:', error);
+                alert('Erro ao gerar relatório completo');
+            }
+        }
+    </script>
+</body>
+
+</html>
