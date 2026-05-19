@@ -771,12 +771,15 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>Imagens do Evento</label>
-                            <input type="file" id="evento_images" multiple accept="image/*">
-                            <div id="evento_preview" class="image-preview"></div>
-                            <small>⭐ A primeira imagem será a capa do evento</small>
+                            <label>📸 Imagens do Evento (máximo 5)</label>
+                            <input type="file" id="evento_images" name="images" multiple accept="image/*" data-max-files="5">
+                            <div id="evento_preview" class="image-preview" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;"></div>
+                            <small style="color: #6b7280;">
+                                ⭐ A primeira imagem será a capa do evento.<br>
+                                📏 Formatos: JPG, PNG, GIF, WEBP (máx. 10MB cada)<br>
+                                🖼️ Imagens serão automaticamente redimensionadas para 1024px
+                            </small>
                         </div>
-                        <div class="form-group">
                             <label>Status</label>
                             <select id="evento_status">
                                 <option value="upcoming">📅 Em breve</option>
