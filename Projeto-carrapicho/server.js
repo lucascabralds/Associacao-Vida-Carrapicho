@@ -548,17 +548,25 @@ app.post('/api/contato', async (req, res) => {
 });
 
 // =====================================================
-// INICIAR SERVIDOR
+// EXPORTA APP PARA VERCEL (SERVERLESS)
+// =====================================================
+module.exports = app;
+
+// =====================================================
+// INICIAR SERVIDOR (APENAS LOCAL, OPCIONAL)
 // =====================================================
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, async () => {
-    console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
-    console.log(`📁 Frontend: http://localhost:${PORT}/`);
-    console.log(`🔧 Admin: http://localhost:${PORT}/admin`);
-    try {
-        await pool.query('SELECT NOW()');
-        console.log('✅ Banco de dados PostgreSQL conectado!');
-    } catch (error) {
-        console.error('❌ Erro no banco:', error.message);
-    }
-});
+
+if (require.main === module) {
+    app.listen(PORT, async () => {
+        console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+        console.log(`📁 Frontend: http://localhost:${PORT}/`);
+        console.log(`🔧 Admin: http://localhost:${PORT}/admin`);
+        try {
+            await pool.query('SELECT NOW()');
+            console.log('✅ Banco de dados PostgreSQL conectado!');
+        } catch (error) {
+            console.error('❌ Erro no banco:', error.message);
+        }
+    });
+}
