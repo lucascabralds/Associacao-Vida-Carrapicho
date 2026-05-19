@@ -1427,262 +1427,197 @@
             }
         });
         // =====================================================
-        // RELATÓRIOS PDF
-        // =====================================================
+// RELATÓRIOS PDF CORRIGIDOS
+// =====================================================
 
-        async function gerarRelatorioFinanceiro() {
-            try {
-                const response = await fetch(`${API_URL}/transparency`);
-                const data = await response.json();
-
-                const totalReceita = parseFloat(data.totals?.income) || 0;
-                const totalDespesa = parseFloat(data.totals?.expense) || 0;
-                const saldo = totalReceita - totalDespesa;
-
-                const despesasPorCategoria = {};
-                (data.records || []).forEach(r => {
-                    if (r.type === 'expense') {
-                        despesasPorCategoria[r.category] = (despesasPorCategoria[r.category] || 0) + parseFloat(r.amount);
-                    }
-                });
-
-                const html = `
-      <div class="pdf-content" style="font-family: Arial, sans-serif; padding: 20px;">
-        <div class="report-header">
-          <img src="../img/logo-carrapicho.png" style="width: 80px; margin-bottom: 10px;">
-          <h1 class="report-title">Relatório Financeiro</h1>
-          <p class="report-date">Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
-          <p>Associação Vida Carrapicho</p>
-        </div>
+async function gerarRelatorioFinanceiro() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/transparency`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
         
-        <div class="report-summary">
-          <h3>📊 Resumo Financeiro</h3>
-          <table style="width: 100%;">
-            <tr><td><strong>💰 Total de Receitas:</strong></td><td style="color: #00A859;">R$ ${totalReceita.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
-            <tr><td><strong>💸 Total de Despesas:</strong></td><td style="color: #dc2626;">R$ ${totalDespesa.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
-            <tr><td><strong>⚖️ Saldo Atual:</strong></td><td style="color: ${saldo >= 0 ? '#00A859' : '#dc2626'};">R$ ${saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
-          </table>
-        </div>
+        console.log('Dados recebidos:', data); // Debug
         
-        <h3>📋 Despesas por Categoria</h3>
-        <table class="report-table">
-          <thead><tr><th>Categoria</th><th>Valor</th><th>Percentual</th></tr></thead>
-          <tbody>
-            ${Object.entries(despesasPorCategoria).map(([cat, val]) => `
-              <tr>
-                <td>${cat}</td>
-                <td>R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                <td>${((val / totalDespesa) * 100).toFixed(1)}%</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
+        const totalReceita = parseFloat(data.totals?.income) || 0;
+        const totalDespesa = parseFloat(data.totals?.expense) || 0;
+        const saldo = totalReceita - totalDespesa;
         
-        <h3>📋 Últimos Lançamentos</h3>
-        <table class="report-table">
-          <thead><tr><th>Tipo</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th>Data</th></tr></thead>
-          <tbody>
-            ${(data.records || []).slice(0, 20).map(r => `
-              <tr>
-                <td>${r.type === 'income' ? '💰 Receita' : '💸 Despesa'}</td>
-                <td>${r.category}</td>
-                <td>${r.description || '-'}</td>
-                <td style="color: ${r.type === 'income' ? '#00A859' : '#dc2626'}">R$ ${parseFloat(r.amount).toFixed(2)}</td>
-                <td>${new Date(r.transaction_date).toLocaleDateString('pt-BR')}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        
-        <div class="report-footer">
-          <p>Relatório gerado automaticamente pelo sistema da Associação Vida Carrapicho</p>
-          <p>CNPJ: 07.895.526/0001-26 | www.vidacarrapicho.org</p>
-        </div>
-      </div>
-    `;
-
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = html;
-                document.body.appendChild(tempDiv);
-
-                const element = tempDiv.querySelector('.pdf-content');
-                const opt = {
-                    margin: [0.5, 0.5, 0.5, 0.5],
-                    filename: `relatorio_financeiro_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true },
-                    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-                };
-
-                html2pdf().set(opt).from(element).save();
-                setTimeout(() => tempDiv.remove(), 1000);
-
-            } catch (error) {
-                console.error('Erro ao gerar relatório:', error);
-                alert('Erro ao gerar relatório financeiro');
-            }
+        const despesasPorCategoria = {};
+        if (data.records && Array.isArray(data.records)) {
+            data.records.forEach(r => {
+                if (r.type === 'expense') {
+                    const cat = r.category;
+                    const val = parseFloat(r.amount);
+                    despesasPorCategoria[cat] = (despesasPorCategoria[cat] || 0) + val;
+                }
+            });
         }
-
-        async function gerarRelatorioEventos() {
-            try {
-                const response = await fetch(`${API_URL}/events`);
-                const eventos = await response.json();
-
-                const html = `
-      <div class="pdf-content" style="font-family: Arial, sans-serif; padding: 20px;">
-        <div class="report-header">
-          <img src="../img/logo-carrapicho.png" style="width: 80px; margin-bottom: 10px;">
-          <h1 class="report-title">Relatório de Eventos</h1>
-          <p class="report-date">Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
-          <p>Associação Vida Carrapicho</p>
-        </div>
         
-        <div class="report-summary">
-          <h3>📊 Resumo de Eventos</h3>
-          <table style="width: 100%;">
-            <tr><td><strong>📅 Total de Eventos:</strong></td><td>${eventos.length}</td></tr>
-            <tr><td><strong>📅 Eventos Futuros:</strong></td><td>${eventos.filter(e => e.status === 'upcoming').length}</td></tr>
-            <tr><td><strong>📢 Eventos Acontecendo:</strong></td><td>${eventos.filter(e => e.status === 'ongoing').length}</td></tr>
-            <tr><td><strong>✅ Eventos Encerrados:</strong></td><td>${eventos.filter(e => e.status === 'completed').length}</td></tr>
-          </table>
-        </div>
+        const html = `
+            <div class="pdf-content" style="font-family: Arial, sans-serif; padding: 20px;">
+                <div class="report-header">
+                    <img src="../img/logo-carrapicho.png" style="width: 80px; margin-bottom: 10px;">
+                    <h1 class="report-title">Relatório Financeiro</h1>
+                    <p class="report-date">Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
+                    <p>Associação Vida Carrapicho</p>
+                </div>
+                <div class="report-summary">
+                    <h3>📊 Resumo Financeiro</h3>
+                    <table style="width: 100%;">
+                        <tr><td><strong>💰 Total de Receitas:</strong></td><td style="color: #00A859;">R$ ${totalReceita.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+                        <tr><td><strong>💸 Total de Despesas:</strong></td><td style="color: #dc2626;">R$ ${totalDespesa.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+                        <tr><td><strong>⚖️ Saldo Atual:</strong></td><td style="color: ${saldo >= 0 ? '#00A859' : '#dc2626'};">R$ ${saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+                    </table>
+                </div>
+                <div class="report-footer">
+                    <p>Relatório gerado automaticamente pelo sistema da Associação Vida Carrapicho</p>
+                    <p>CNPJ: 07.895.526/0001-26</p>
+                </div>
+            </div>
+        `;
         
-        <h3>📋 Lista de Eventos</h3>
-        <table class="report-table">
-          <thead><tr><th>ID</th><th>Evento</th><th>Data</th><th>Local</th><th>Status</th></tr></thead>
-          <tbody>
-            ${eventos.map(e => `
-              <tr>
-                <td>${e.id}</td>
-                <td><strong>${e.title}</strong><br><small>${e.description?.substring(0, 80) || ''}</small></td>
-                <td>${new Date(e.event_date).toLocaleString('pt-BR')}</td>
-                <td>${e.location || '-'}</td>
-                <td>${e.status === 'upcoming' ? '📅 Em breve' : e.status === 'ongoing' ? '📢 Acontecendo' : '✅ Encerrado'}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
+        const element = document.createElement('div');
+        element.innerHTML = html;
+        document.body.appendChild(element);
         
-        <div class="report-footer">
-          <p>Relatório gerado automaticamente pelo sistema da Associação Vida Carrapicho</p>
-          <p>CNPJ: 07.895.526/0001-26 | www.vidacarrapicho.org</p>
-        </div>
-      </div>
-    `;
-
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = html;
-                document.body.appendChild(tempDiv);
-
-                const element = tempDiv.querySelector('.pdf-content');
-                const opt = {
-                    margin: [0.5, 0.5, 0.5, 0.5],
-                    filename: `relatorio_eventos_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2 },
-                    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-                };
-
-                html2pdf().set(opt).from(element).save();
-                setTimeout(() => tempDiv.remove(), 1000);
-
-            } catch (error) {
-                console.error('Erro ao gerar relatório:', error);
-                alert('Erro ao gerar relatório de eventos');
-            }
-        }
-
-        async function gerarRelatorioCompleto() {
-            try {
-                const [financasRes, eventosRes] = await Promise.all([
-                    fetch(`${API_URL}/transparency`),
-                    fetch(`${API_URL}/events`)
-                ]);
-
-                const financas = await financasRes.json();
-                const eventos = await eventosRes.json();
-
-                const totalReceita = parseFloat(financas.totals?.income) || 0;
-                const totalDespesa = parseFloat(financas.totals?.expense) || 0;
-                const saldo = totalReceita - totalDespesa;
-
-                const despesasPorCategoria = {};
-                (financas.records || []).forEach(r => {
-                    if (r.type === 'expense') {
-                        despesasPorCategoria[r.category] = (despesasPorCategoria[r.category] || 0) + parseFloat(r.amount);
-                    }
-                });
-
-                const html = `
-      <div class="pdf-content" style="font-family: Arial, sans-serif; padding: 20px;">
-        <div class="report-header">
-          <img src="../img/logo-carrapicho.png" style="width: 80px; margin-bottom: 10px;">
-          <h1 class="report-title">Relatório Geral da Associação</h1>
-          <p class="report-date">Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
-          <p>Associação Vida Carrapicho - Transparência e Gestão</p>
-        </div>
+        const opt = {
+            margin: [0.5, 0.5, 0.5, 0.5],
+            filename: `relatorio_financeiro_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
         
-        <div class="report-summary">
-          <h3>💰 Resumo Financeiro</h3>
-          <table style="width: 100%;">
-            <tr><td><strong>📈 Total de Receitas:</strong></td><td style="color: #00A859;">R$ ${totalReceita.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
-            <tr><td><strong>📉 Total de Despesas:</strong></td><td style="color: #dc2626;">R$ ${totalDespesa.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
-            <tr><td><strong>⚖️ Saldo Atual:</strong></td><td style="color: ${saldo >= 0 ? '#00A859' : '#dc2626'};">R$ ${saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
-          </table>
-        </div>
+        html2pdf().set(opt).from(element).save();
+        setTimeout(() => element.remove(), 1000);
         
-        <div class="report-summary">
-          <h3>📅 Resumo de Eventos</h3>
-          <table style="width: 100%;">
-            <tr><td><strong>Total de Eventos:</strong></td><td>${eventos.length}</td></tr>
-            <tr><td><strong>Eventos Futuros:</strong></td><td>${eventos.filter(e => e.status === 'upcoming').length}</td></tr>
-            <tr><td><strong>Eventos Realizados:</strong></td><td>${eventos.filter(e => e.status === 'completed').length}</td></tr>
-          </table>
-        </div>
+    } catch (error) {
+        console.error('Erro ao gerar relatório:', error);
+        alert('Erro ao gerar relatório financeiro: ' + error.message);
+    }
+}
+
+async function gerarRelatorioEventos() {
+    try {
+        const response = await fetch(`${API_URL}/events`);
+        const eventos = await response.json();
         
-        <h3>📊 Despesas por Categoria</h3>
-        <table class="report-table">
-          <thead><tr><th>Categoria</th><th>Valor</th><th>Percentual</th></tr></thead>
-          <tbody>
-            ${Object.entries(despesasPorCategoria).map(([cat, val]) => `
-              <tr>
-                <td>${cat}</td>
-                <td>R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                <td>${((val / totalDespesa) * 100).toFixed(1)}%</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
+        console.log('Eventos recebidos:', eventos); // Debug
         
-        <div class="report-footer">
-          <p>Relatório gerado automaticamente pelo sistema da Associação Vida Carrapicho</p>
-          <p>CNPJ: 07.895.526/0001-26 | www.vidacarrapicho.org</p>
-          <p>R. Iraí de Minas, 202 - Jardim Itapolis - São Paulo/SP - CEP 03941-040</p>
-        </div>
-      </div>
-    `;
+        const html = `
+            <div class="pdf-content" style="font-family: Arial, sans-serif; padding: 20px;">
+                <div class="report-header">
+                    <img src="../img/logo-carrapicho.png" style="width: 80px; margin-bottom: 10px;">
+                    <h1 class="report-title">Relatório de Eventos</h1>
+                    <p class="report-date">Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
+                    <p>Associação Vida Carrapicho</p>
+                </div>
+                <div class="report-summary">
+                    <h3>📊 Resumo de Eventos</h3>
+                    <table style="width: 100%;">
+                        <tr><td><strong>📅 Total de Eventos:</strong></td><td>${eventos.length}</td></tr>
+                        <tr><td><strong>📅 Eventos Futuros:</strong></td><td>${eventos.filter(e => e.status === 'upcoming').length}</td></tr>
+                        <tr><td><strong>📢 Eventos Acontecendo:</strong></td><td>${eventos.filter(e => e.status === 'ongoing').length}</td></tr>
+                        <tr><td><strong>✅ Eventos Encerrados:</strong></td><td>${eventos.filter(e => e.status === 'completed').length}</td></tr>
+                    </table>
+                </div>
+                <div class="report-footer">
+                    <p>Relatório gerado automaticamente pelo sistema da Associação Vida Carrapicho</p>
+                    <p>CNPJ: 07.895.526/0001-26</p>
+                </div>
+            </div>
+        `;
+        
+        const element = document.createElement('div');
+        element.innerHTML = html;
+        document.body.appendChild(element);
+        
+        const opt = {
+            margin: [0.5, 0.5, 0.5, 0.5],
+            filename: `relatorio_eventos_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        
+        html2pdf().set(opt).from(element).save();
+        setTimeout(() => element.remove(), 1000);
+        
+    } catch (error) {
+        console.error('Erro ao gerar relatório:', error);
+        alert('Erro ao gerar relatório de eventos: ' + error.message);
+    }
+}
 
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = html;
-                document.body.appendChild(tempDiv);
-
-                const element = tempDiv.querySelector('.pdf-content');
-                const opt = {
-                    margin: [0.5, 0.5, 0.5, 0.5],
-                    filename: `relatorio_completo_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2 },
-                    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-                };
-
-                html2pdf().set(opt).from(element).save();
-                setTimeout(() => tempDiv.remove(), 1000);
-
-            } catch (error) {
-                console.error('Erro ao gerar relatório completo:', error);
-                alert('Erro ao gerar relatório completo');
-            }
-        }
+async function gerarRelatorioCompleto() {
+    try {
+        const token = localStorage.getItem('token');
+        const [financasRes, eventosRes] = await Promise.all([
+            fetch(`${API_URL}/transparency`, { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch(`${API_URL}/events`)
+        ]);
+        
+        const financas = await financasRes.json();
+        const eventos = await eventosRes.json();
+        
+        const totalReceita = parseFloat(financas.totals?.income) || 0;
+        const totalDespesa = parseFloat(financas.totals?.expense) || 0;
+        const saldo = totalReceita - totalDespesa;
+        
+        const html = `
+            <div class="pdf-content" style="font-family: Arial, sans-serif; padding: 20px;">
+                <div class="report-header">
+                    <img src="../img/logo-carrapicho.png" style="width: 80px; margin-bottom: 10px;">
+                    <h1 class="report-title">Relatório Geral da Associação</h1>
+                    <p class="report-date">Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
+                    <p>Associação Vida Carrapicho - Transparência e Gestão</p>
+                </div>
+                <div class="report-summary">
+                    <h3>💰 Resumo Financeiro</h3>
+                    <table style="width: 100%;">
+                        <tr><td><strong>📈 Total de Receitas:</strong></td><td style="color: #00A859;">R$ ${totalReceita.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+                        <tr><td><strong>📉 Total de Despesas:</strong></td><td style="color: #dc2626;">R$ ${totalDespesa.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+                        <tr><td><strong>⚖️ Saldo Atual:</strong></td><td style="color: ${saldo >= 0 ? '#00A859' : '#dc2626'};">R$ ${saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+                    </table>
+                </div>
+                <div class="report-summary">
+                    <h3>📅 Resumo de Eventos</h3>
+                    <table style="width: 100%;">
+                        <tr><td><strong>Total de Eventos:</strong></td><td>${eventos.length}</td></tr>
+                        <tr><td><strong>Eventos Futuros:</strong></td><td>${eventos.filter(e => e.status === 'upcoming').length}</td></tr>
+                        <tr><td><strong>Eventos Realizados:</strong></td><td>${eventos.filter(e => e.status === 'completed').length}</td></tr>
+                    </table>
+                </div>
+                <div class="report-footer">
+                    <p>Relatório gerado automaticamente pelo sistema da Associação Vida Carrapicho</p>
+                    <p>CNPJ: 07.895.526/0001-26 | www.vidacarrapicho.org</p>
+                    <p>R. Iraí de Minas, 202 - Jardim Itapolis - São Paulo/SP - CEP 03941-040</p>
+                </div>
+            </div>
+        `;
+        
+        const element = document.createElement('div');
+        element.innerHTML = html;
+        document.body.appendChild(element);
+        
+        const opt = {
+            margin: [0.5, 0.5, 0.5, 0.5],
+            filename: `relatorio_completo_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        
+        html2pdf().set(opt).from(element).save();
+        setTimeout(() => element.remove(), 1000);
+        
+    } catch (error) {
+        console.error('Erro ao gerar relatório completo:', error);
+        alert('Erro ao gerar relatório completo: ' + error.message);
+    }
+}
     </script>
 </body>
 
