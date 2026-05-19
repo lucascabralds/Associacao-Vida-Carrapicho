@@ -181,4 +181,84 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend', 'home.html'));
 });
 
+// =====================================================
+// ROTAS DE EVENTOS - CRUD COMPLETO
+// =====================================================
+
+// Criar evento
+app.post('/api/events', authMiddleware, async (req, res) => {
+    try {
+        const { title, description, event_date, location, status } = req.body;
+        const result = await pool.query(
+            `INSERT INTO events (title, description, event_date, location, status, created_by)
+             VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+            [title, description, event_date, location, status || 'upcoming', req.user.id]
+        );
+        res.status(201).json({ id: result.rows[0].id, ...req.body });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao criar evento' });
+    }
+});
+
+// Atualizar evento
+app.put('/api/events/:id', authMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description, event_date, location, status } = req.body;
+        
+        await pool.query(
+            `UPDATE events 
+             SET title = $1, description = $2, event_date = $3, location = $4, status = $5, updated_at = NOW()
+             WHERE id = $6`,
+            [title, description, event_date, location, status, id]
+        );
+        
+        res.json({ success: true, message: 'Evento atualizado com sucesso' });
+    } catch (error) {
+        console.error('Update event error:', error);
+        res.status(500).json({ error: 'Erro ao atualizar evento' });
+    }
+});
+
+// Deletar evento
+app.delete('/api/events/:id', authMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        await pool.query('DELETE FROM events WHERE id = $1', [id]);
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao deletar evento' });
+    }
+});
+
+// =====================================================
+// ROTAS DE TRANSPARÊNCIA - CRUD COMPLETO
+// =====================================================
+
+// Criar registro de transparência
+app.post('/api/transparency', authMiddleware, async (req, res) => {
+    try {
+        const { type, category, description, amount, transaction_date } = req.body;
+        const result = await pool.query(
+            `INSERT INTO transparency (type, category, description, amount, transaction_date, created_by)
+             VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+            [type, category, description, amount, transaction_date, req.user.id]
+        );
+        res.status(201).json({ id: result.rows[0].id, ...req.body });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao criar registro' });
+    }
+});
+
+// Deletar registro de transparência
+app.delete('/api/transparency/:id', authMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        await pool.query('DELETE FROM transparency WHERE id = $1', [id]);
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao deletar registro' });
+    }
+});
+
 module.exports = app;
