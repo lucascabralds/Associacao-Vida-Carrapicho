@@ -42,7 +42,7 @@ const adminMiddleware = (req, res, next) => {
 };
 
 // =====================================================
-// ROTA DE LOGIN (COMPARAÇÃO DIRETA - SEM HASH)
+// ROTA DE LOGIN (COM HASH)
 // =====================================================
 app.post('/api/auth/login', async (req, res) => {
     try {
@@ -60,8 +60,10 @@ app.post('/api/auth/login', async (req, res) => {
         
         const user = result.rows[0];
         
-        // COMPARAÇÃO DIRETA (TEXTO PURO)
-        if (password !== user.password) {
+        // COMPARAÇÃO COM HASH
+        const isValid = await bcrypt.compare(password, user.password);
+        
+        if (!isValid) {
             return res.status(401).json({ error: 'Email ou senha inválidos' });
         }
         
