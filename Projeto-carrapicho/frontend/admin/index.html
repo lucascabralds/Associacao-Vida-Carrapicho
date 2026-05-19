@@ -772,14 +772,15 @@
                         </div>
                         <div class="form-group">
                             <label>📸 Imagens do Evento (máximo 5)</label>
-                            <input type="file" id="evento_images" name="images" multiple accept="image/*" data-max-files="5">
+                            <input type="file" id="evento_images" name="images" multiple accept="image/*">
                             <div id="evento_preview" class="image-preview" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;"></div>
                             <small style="color: #6b7280;">
                                 ⭐ A primeira imagem será a capa do evento.<br>
                                 📏 Formatos: JPG, PNG, GIF, WEBP (máx. 10MB cada)<br>
-                                🖼️ Imagens serão automaticamente redimensionadas para 1024px
+                                🖼️ Clique no ✕ para remover a imagem
                             </small>
                         </div>
+                        <div class="form-group">
                             <label>Status</label>
                             <select id="evento_status">
                                 <option value="upcoming">📅 Em breve</option>
@@ -987,141 +988,138 @@
             carregarTudo();
             verificarPermissaoAdmin();
         }
-    
-            // =====================================================
-    // FUNÇÃO PARA COMPRIMIR IMAGEM
-    // =====================================================
-    async function comprimirImagem(file, maxWidth = 1024, qualidade = 0.7) {
-        return new Promise((resolve, reject) => {
-            // Se for muito pequeno, não comprime
-            if (file.size < 500 * 1024) {
-                resolve(file);
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (e) => {
-                const img = new Image();
-                img.src = e.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-                    
-                    if (width > maxWidth) {
-                        height = (height * maxWidth) / width;
-                        width = maxWidth;
-                    }
-                    
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    canvas.toBlob((blob) => {
-                        resolve(blob);
-                    }, 'image/jpeg', qualidade);
+
+        // =====================================================
+        // FUNÇÃO PARA COMPRIMIR IMAGEM
+        // =====================================================
+        async function comprimirImagem(file, maxWidth = 1024, qualidade = 0.7) {
+            return new Promise((resolve, reject) => {
+                if (file.size < 500 * 1024) {
+                    resolve(file);
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        if (width > maxWidth) {
+                            height = (height * maxWidth) / width;
+                            width = maxWidth;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        canvas.toBlob((blob) => {
+                            resolve(blob);
+                        }, 'image/jpeg', qualidade);
+                    };
+                    img.onerror = reject;
                 };
-                img.onerror = reject;
-            };
-            reader.onerror = reject;
-        });
-    }
-
-    // =====================================================
-    // PREVIEW DAS IMAGENS NO FORMULÁRIO
-    // =====================================================
-    function previewImages(files, previewElement) {
-        previewElement.innerHTML = '';
-        for (let i = 0; i < Math.min(files.length, 5); i++) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.style.width = '80px';
-                img.style.height = '80px';
-                img.style.objectFit = 'cover';
-                img.style.borderRadius = '8px';
-                img.style.margin = '5px';
-                img.style.border = '2px solid #00A859';
-                previewElement.appendChild(img);
-            };
-            reader.readAsDataURL(files[i]);
-        }
-    }
-    
-    // =====================================================
-    // FORMULÁRIO DE CRIAÇÃO DE EVENTO
-    // =====================================================
-    document.getElementById('formEvento').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const formData = new FormData();
-        formData.append('title', document.getElementById('evento_title').value);
-        formData.append('description', document.getElementById('evento_desc').value);
-        formData.append('event_date', document.getElementById('evento_date').value);
-        formData.append('location', document.getElementById('evento_location').value);
-        formData.append('status', document.getElementById('evento_status').value);
-        
-        // Processar imagens (máximo 5)
-        const files = document.getElementById('evento_images').files;
-        if (files.length > 5) {
-            alert('Máximo de 5 imagens por evento!');
-            return;
-        }
-        
-        const loadingMsg = document.createElement('div');
-        loadingMsg.textContent = '⏳ Processando imagens...';
-        loadingMsg.style.color = '#00A859';
-        document.getElementById('formEvento').appendChild(loadingMsg);
-        
-        for (let i = 0; i < files.length; i++) {
-            const compressed = await comprimirImagem(files[i], 1024, 0.7);
-            formData.append('images', compressed, `imagem_${i}.jpg`);
-        }
-        
-        try {
-            const response = await fetch(`${API_URL}/events`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: formData
+                reader.onerror = reject;
             });
-            
-            if (response.ok) {
-                alert(`✅ Evento criado com sucesso!\n📸 Imagens enviadas: ${files.length}`);
-                document.getElementById('formEvento').reset();
-                document.getElementById('evento_preview').innerHTML = '';
-                carregarEventos();
-            } else {
-                const error = await response.json();
-                alert('❌ Erro ao criar evento: ' + (error.error || 'Erro desconhecido'));
-            }
-        } catch (error) {
-            alert('❌ Erro de conexão: ' + error.message);
-        } finally {
-            loadingMsg.remove();
         }
-    });
-    
-    // =====================================================
-    // PREVIEW AO SELECIONAR IMAGENS
-    // =====================================================
-    document.getElementById('evento_images').addEventListener('change', (e) => {
-        const preview = document.getElementById('evento_preview');
-        const files = e.target.files;
-        
-        if (files.length > 5) {
-            alert('Máximo de 5 imagens!');
-            document.getElementById('evento_images').value = '';
-            preview.innerHTML = '';
-            return;
-        }
-        
-        previewImages(files, preview);
-    });
 
-        // Modificar o envio do formulário
+        // =====================================================
+        // REMOVER IMAGEM DO PREVIEW
+        // =====================================================
+        function removerImagemSelecionada(index) {
+            const input = document.getElementById('evento_images');
+            const dt = new DataTransfer();
+            const files = Array.from(input.files);
+            
+            if (files[index]) {
+                files.splice(index, 1);
+                files.forEach(file => dt.items.add(file));
+                input.files = dt.files;
+                
+                // Atualizar preview
+                const preview = document.getElementById('evento_preview');
+                const imagens = preview.querySelectorAll('.preview-img-wrapper');
+                if (imagens[index]) imagens[index].remove();
+                
+                // Reorganizar índices
+                document.querySelectorAll('.remove-preview-btn').forEach((btn, i) => {
+                    btn.onclick = () => removerImagemSelecionada(i);
+                });
+                
+                // Atualizar contador
+                const contador = document.getElementById('imagens-contador');
+                if (contador) contador.textContent = `${input.files.length}/5 imagens selecionadas`;
+            }
+        }
+
+        // =====================================================
+        // PREVIEW DAS IMAGENS COM BOTÃO DE REMOVER
+        // =====================================================
+        function previewImages(files, previewElement) {
+            previewElement.innerHTML = '';
+            for (let i = 0; i < Math.min(files.length, 5); i++) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const div = document.createElement('div');
+                    div.className = 'preview-img-wrapper';
+                    div.style.position = 'relative';
+                    div.style.display = 'inline-block';
+                    div.style.margin = '5px';
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.width = '80px';
+                    img.style.height = '80px';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '8px';
+                    img.style.border = '2px solid #00A859';
+                    
+                    const btnRemover = document.createElement('button');
+                    btnRemover.innerHTML = '✕';
+                    btnRemover.style.position = 'absolute';
+                    btnRemover.style.top = '-8px';
+                    btnRemover.style.right = '-8px';
+                    btnRemover.style.width = '24px';
+                    btnRemover.style.height = '24px';
+                    btnRemover.style.borderRadius = '50%';
+                    btnRemover.style.backgroundColor = '#dc2626';
+                    btnRemover.style.color = 'white';
+                    btnRemover.style.border = 'none';
+                    btnRemover.style.cursor = 'pointer';
+                    btnRemover.style.fontSize = '14px';
+                    btnRemover.style.fontWeight = 'bold';
+                    btnRemover.className = 'remove-preview-btn';
+                    btnRemover.onclick = () => removerImagemSelecionada(i);
+                    
+                    div.appendChild(img);
+                    div.appendChild(btnRemover);
+                    previewElement.appendChild(div);
+                };
+                reader.readAsDataURL(files[i]);
+            }
+            
+            // Atualizar contador
+            let contador = document.getElementById('imagens-contador');
+            if (!contador) {
+                contador = document.createElement('div');
+                contador.id = 'imagens-contador';
+                contador.style.marginTop = '10px';
+                contador.style.fontSize = '12px';
+                contador.style.color = '#666';
+                previewElement.parentNode.appendChild(contador);
+            }
+            contador.textContent = `${files.length}/5 imagens selecionadas`;
+        }
+
+        // =====================================================
+        // FORMULÁRIO DE CRIAÇÃO DE EVENTO
+        // =====================================================
         document.getElementById('formEvento').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -1132,28 +1130,65 @@
             formData.append('location', document.getElementById('evento_location').value);
             formData.append('status', document.getElementById('evento_status').value);
             
-            // Comprimir imagens antes de enviar
             const files = document.getElementById('evento_images').files;
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                if (file.size > 500 * 1024) { // Se maior que 500KB, comprime
-                    const compressed = await comprimirImagem(file, 1024, 0.7);
-                    formData.append('images', compressed, file.name);
-                } else {
-                    formData.append('images', file);
-                }
+            if (files.length > 5) {
+                alert('Máximo de 5 imagens por evento!');
+                return;
             }
             
-            const response = await fetch(`${API_URL}/events`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: formData
-            });
+            const loadingMsg = document.createElement('div');
+            loadingMsg.textContent = '⏳ Processando imagens...';
+            loadingMsg.style.color = '#00A859';
+            document.getElementById('formEvento').appendChild(loadingMsg);
             
-            // ... resto do código
+            for (let i = 0; i < files.length; i++) {
+                const compressed = await comprimirImagem(files[i], 1024, 0.7);
+                formData.append('images', compressed, `imagem_${i}.jpg`);
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/events`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    alert(`✅ Evento criado com sucesso!\n📸 Imagens enviadas: ${files.length}`);
+                    document.getElementById('formEvento').reset();
+                    document.getElementById('evento_preview').innerHTML = '';
+                    carregarEventos();
+                } else {
+                    const error = await response.json();
+                    alert('❌ Erro ao criar evento: ' + (error.error || 'Erro desconhecido'));
+                }
+            } catch (error) {
+                alert('❌ Erro de conexão: ' + error.message);
+            } finally {
+                loadingMsg.remove();
+            }
         });
-                
-                
+
+        // =====================================================
+        // PREVIEW AO SELECIONAR IMAGENS (COM LIMITE DE 5)
+        // =====================================================
+        document.getElementById('evento_images').addEventListener('change', (e) => {
+            const preview = document.getElementById('evento_preview');
+            let files = Array.from(e.target.files);
+            
+            if (files.length > 5) {
+                alert('Máximo de 5 imagens!');
+                files = files.slice(0, 5);
+                e.target.files = (function() {
+                    const dt = new DataTransfer();
+                    files.forEach(f => dt.items.add(f));
+                    return dt.files;
+                })();
+            }
+            
+            previewImages(files, preview);
+        });
+
         // =====================================================
         // VERIFICAÇÃO DE PERMISSÕES
         // =====================================================
@@ -1316,34 +1351,24 @@
                 const tbody = document.getElementById('listaEventos');
                 if (!eventos || eventos.length === 0) { tbody.innerHTML = '<tr><td colspan="6">Nenhum evento</td></tr>'; return; }
                 tbody.innerHTML = eventos.map(e => `
-        <tr>
-          <td>${e.id}</td>
-          <td>${e.cover_image ? `<img src="${e.cover_image}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;">` : '-'}</td>
-          <td><strong>${e.title}</strong><br><small>${e.description?.substring(0, 50) || ''}</small></td>
-          <td>${new Date(e.event_date).toLocaleString('pt-BR')}</td>
-          <td>${e.status === 'upcoming' ? '📅 Em breve' : e.status === 'ongoing' ? '📢 Acontecendo' : '✅ Encerrado'}</td>
-          <td class="actions"><button class="btn-secondary" onclick="abrirModalEditarEvento(${e.id})">Editar</button><button class="btn-danger" onclick="deletarEvento(${e.id})">Excluir</button></td>
-        </tr>
-      `).join('');
+                    <tr>
+                        <td>${e.id}</td>
+                        <td>${e.cover_image ? `<img src="${e.cover_image}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;">` : '-'}</td>
+                        <td><strong>${e.title}</strong><br><small>${e.description?.substring(0, 50) || ''}</small></td>
+                        <td>${new Date(e.event_date).toLocaleString('pt-BR')}</td>
+                        <td>${e.status === 'upcoming' ? '📅 Em breve' : e.status === 'ongoing' ? '📢 Acontecendo' : '✅ Encerrado'}</td>
+                        <td class="actions"><button class="btn-secondary" onclick="abrirModalEditarEvento(${e.id})">Editar</button><button class="btn-danger" onclick="deletarEvento(${e.id})">Excluir</button></td>
+                    </tr>
+                `).join('');
             } catch (error) { console.error(error); }
         }
 
-        document.getElementById('formEvento')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData();
-            formData.append('title', document.getElementById('evento_title').value);
-            formData.append('description', document.getElementById('evento_desc').value);
-            formData.append('event_date', document.getElementById('evento_date').value);
-            formData.append('location', document.getElementById('evento_location').value);
-            formData.append('status', document.getElementById('evento_status').value);
-            const files = document.getElementById('evento_images').files;
-            for (let i = 0; i < files.length; i++) formData.append('images', files[i]);
-            const response = await fetch(`${API_URL}/events`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
-            if (response.ok) { alert('Evento criado!'); document.getElementById('formEvento').reset(); document.getElementById('evento_preview').innerHTML = ''; carregarEventos(); }
-            else alert('Erro ao criar');
-        });
-
-        async function deletarEvento(id) { if (confirm('Excluir evento?')) { await fetch(`${API_URL}/events/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); carregarEventos(); } }
+        async function deletarEvento(id) { 
+            if (confirm('Excluir evento?')) { 
+                await fetch(`${API_URL}/events/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); 
+                carregarEventos(); 
+            } 
+        }
 
         // =====================================================
         // FINANÇAS
@@ -1355,15 +1380,15 @@
                 const tbody = document.getElementById('listaFinancas');
                 if (!data.records || data.records.length === 0) { tbody.innerHTML = '<tr><td colspan="6">Nenhum registro</td></tr>'; return; }
                 tbody.innerHTML = data.records.map(r => `
-        <tr>
-          <td>${r.type === 'income' ? '💰 Receita' : '💸 Despesa'}</td>
-          <td>${r.category}</td>
-          <td>${r.description || '-'}</td>
-          <td style="color:${r.type === 'income' ? '#00A859' : '#dc2626'}">R$ ${parseFloat(r.amount).toFixed(2)}</td>
-          <td>${new Date(r.transaction_date).toLocaleDateString('pt-BR')}</td>
-          <td><button class="btn-danger" onclick="deletarFinanca(${r.id})">Excluir</button></td>
-        </tr>
-      `).join('');
+                    <tr>
+                        <td>${r.type === 'income' ? '💰 Receita' : '💸 Despesa'}</td>
+                        <td>${r.category}</td>
+                        <td>${r.description || '-'}</td>
+                        <td style="color:${r.type === 'income' ? '#00A859' : '#dc2626'}">R$ ${parseFloat(r.amount).toFixed(2)}</td>
+                        <td>${new Date(r.transaction_date).toLocaleDateString('pt-BR')}</td>
+                        <td><button class="btn-danger" onclick="deletarFinanca(${r.id})">Excluir</button></td>
+                    </tr>
+                `).join('');
             } catch (error) { console.error(error); }
         }
 
@@ -1403,19 +1428,19 @@
                     const podeEditar = !isProtected;
 
                     return `
-          <tr>
-            <td>${u.id} ${isProtected ? '🛡️' : ''}</td>
-            <td>${u.name}${isProtected ? ' <span class="protected-badge">(Administrador Principal)</span>' : ''}</td>
-            <td>${u.email}</td>
-            <td>${u.role === 'admin' ? '👑 Administrador' : '✏️ Editor'}</td>
-            <td>${u.active ? '✅ Ativo' : '❌ Inativo'}</td>
-            <td class="actions">
-              ${podeEditar ? `<button class="btn-secondary" onclick="editarUsuario(${u.id})">✏️ Editar</button>` : ''}
-              ${podeExcluir ? `<button class="btn-danger" onclick="deletarUsuario(${u.id})">🗑️ Excluir</button>` : ''}
-              ${isProtected ? '<span class="protected-label">🔒 Protegido</span>' : ''}
-            </td>
-          </tr>
-        `;
+                        <tr>
+                            <td>${u.id} ${isProtected ? '🛡️' : ''}</td>
+                            <td>${u.name}${isProtected ? ' <span class="protected-badge">(Administrador Principal)</span>' : ''}</td>
+                            <td>${u.email}</td>
+                            <td>${u.role === 'admin' ? '👑 Administrador' : '✏️ Editor'}</td>
+                            <td>${u.active ? '✅ Ativo' : '❌ Inativo'}</td>
+                            <td class="actions">
+                                ${podeEditar ? `<button class="btn-secondary" onclick="editarUsuario(${u.id})">✏️ Editar</button>` : ''}
+                                ${podeExcluir ? `<button class="btn-danger" onclick="deletarUsuario(${u.id})">🗑️ Excluir</button>` : ''}
+                                ${isProtected ? '<span class="protected-label">🔒 Protegido</span>' : ''}
+                            </td>
+                        </tr>
+                    `;
                 }).join('');
 
             } catch (error) {
@@ -1467,9 +1492,8 @@
                 return;
             }
 
-            // 🔒 PROTECÃO: NÃO ALTERAR O USUÁRIO ID 1
             if (id === 1) {
-                alert('🛡️ OPERAÇÃO BLOQUEADA! O usuário administrador principal (ID 1) não pode ser modificado. Este é o usuário mestre do sistema.');
+                alert('🛡️ OPERAÇÃO BLOQUEADA! O usuário administrador principal (ID 1) não pode ser modificado.');
                 return;
             }
 
@@ -1477,29 +1501,11 @@
             const isSelf = id === usuarioLogado.id;
 
             if (isSelf) {
-                alert('⚠️ Você está editando seu próprio usuário. Tenha cuidado para não remover seus próprios privilégios de admin!');
+                alert('⚠️ Você está editando seu próprio usuário. Tenha cuidado!');
             }
 
             const novaRole = confirm(`Alterar nível de acesso? Clique OK para Admin, Cancelar para Editor${isSelf ? '\n\n⚠️ CUIDADO: Alterar seu próprio papel pode te bloquear do sistema!' : ''}`);
             const role = novaRole ? 'admin' : 'editor';
-
-            // Verificar se não é o último admin sendo rebaixado
-            if (!novaRole && !isSelf) {
-                try {
-                    const response = await fetch(`${API_URL}/users`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    const users = await response.json();
-                    const admins = users.filter(u => u.role === 'admin' && u.id !== id);
-
-                    if (admins.length === 0) {
-                        alert('❌ OPERAÇÃO BLOQUEADA! Não é possível rebaixar o último administrador do sistema. Crie outro admin primeiro.');
-                        return;
-                    }
-                } catch (error) {
-                    console.error('Erro ao verificar admins:', error);
-                }
-            }
 
             try {
                 const response = await fetch(`${API_URL}/users/${id}`, {
@@ -1514,8 +1520,6 @@
                 if (response.ok) {
                     alert('✅ Usuário atualizado com sucesso!');
                     carregarUsuarios();
-
-                    // Se o usuário editado é o próprio logado, atualizar localStorage
                     if (isSelf) {
                         const user = JSON.parse(localStorage.getItem('user') || '{}');
                         user.role = role;
@@ -1524,6 +1528,42 @@
                     }
                 } else {
                     alert('❌ Erro ao atualizar usuário');
+                }
+            } catch (error) {
+                alert('❌ Erro de conexão');
+            }
+        }
+
+        async function deletarUsuario(id) {
+            if (!isAdmin()) {
+                alert('❌ Apenas administradores podem excluir usuários!');
+                return;
+            }
+            
+            if (id === 1) {
+                alert('🛡️ O usuário administrador principal NÃO PODE ser deletado!');
+                return;
+            }
+            
+            const usuarioLogado = JSON.parse(localStorage.getItem('user') || '{}');
+            if (id === usuarioLogado.id) {
+                alert('❌ Você não pode excluir seu próprio usuário!');
+                return;
+            }
+            
+            if (!confirm('⚠️ Tem certeza que deseja excluir este usuário?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/users/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    alert('✅ Usuário excluído com sucesso!');
+                    carregarUsuarios();
+                } else {
+                    alert('❌ Erro ao excluir usuário');
                 }
             } catch (error) {
                 alert('❌ Erro de conexão');
@@ -1548,7 +1588,7 @@
             document.getElementById('modalEditarEvento').style.display = 'flex';
         }
 
-        window.removerImagem = function (id) {
+        window.removerImagem = function(id) {
             imagensAtuais = imagensAtuais.filter(i => i.id !== id);
             document.getElementById('edit_evento_current_images').innerHTML = imagensAtuais.map(img => `<div class="img-item" data-id="${img.id}"><img src="${img.image_url}"><span class="remove-img-btn" onclick="removerImagem(${img.id})">×</span></div>`).join('');
         };
@@ -1574,18 +1614,8 @@
         function fecharModal() { document.getElementById('modalEditarEvento').style.display = 'none'; }
 
         // =====================================================
-        // PREVIEW DE IMAGENS
+        // PREVIEW DE IMAGENS NA EDIÇÃO
         // =====================================================
-        document.getElementById('evento_images')?.addEventListener('change', (e) => {
-            const preview = document.getElementById('evento_preview');
-            preview.innerHTML = '';
-            for (let file of e.target.files) {
-                const reader = new FileReader();
-                reader.onload = (ev) => preview.innerHTML += `<img src="${ev.target.result}">`;
-                reader.readAsDataURL(file);
-            }
-        });
-
         document.getElementById('edit_evento_images')?.addEventListener('change', (e) => {
             const preview = document.getElementById('edit_evento_preview');
             preview.innerHTML = '';
@@ -1595,10 +1625,10 @@
                 reader.readAsDataURL(file);
             }
         });
+
         // =====================================================
         // RELATÓRIOS PDF
         // =====================================================
-
         async function gerarRelatorioFinanceiro() {
             try {
                 const response = await fetch(`${API_URL}/transparency`);
@@ -1616,59 +1646,34 @@
                 });
 
                 const html = `
-      <div class="pdf-content" style="font-family: Arial, sans-serif; padding: 20px;">
-        <div class="report-header">
-          <img src="../img/logo-carrapicho.png" style="width: 80px; margin-bottom: 10px;">
-          <h1 class="report-title">Relatório Financeiro</h1>
-          <p class="report-date">Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
-          <p>Associação Vida Carrapicho</p>
-        </div>
-        
-        <div class="report-summary">
-          <h3>📊 Resumo Financeiro</h3>
-          <table style="width: 100%;">
-            <tr><td><strong>💰 Total de Receitas:</strong></td><td style="color: #00A859;">R$ ${totalReceita.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
-            <tr><td><strong>💸 Total de Despesas:</strong></td><td style="color: #dc2626;">R$ ${totalDespesa.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
-            <tr><td><strong>⚖️ Saldo Atual:</strong></td><td style="color: ${saldo >= 0 ? '#00A859' : '#dc2626'};">R$ ${saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
-          </table>
-        </div>
-        
-        <h3>📋 Despesas por Categoria</h3>
-        <table class="report-table">
-          <thead><tr><th>Categoria</th><th>Valor</th><th>Percentual</th></tr></thead>
-          <tbody>
-            ${Object.entries(despesasPorCategoria).map(([cat, val]) => `
-              <tr>
-                <td>${cat}</td>
-                <td>R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                <td>${((val / totalDespesa) * 100).toFixed(1)}%</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        
-        <h3>📋 Últimos Lançamentos</h3>
-        <table class="report-table">
-          <thead><tr><th>Tipo</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th>Data</th></tr></thead>
-          <tbody>
-            ${(data.records || []).slice(0, 20).map(r => `
-              <tr>
-                <td>${r.type === 'income' ? '💰 Receita' : '💸 Despesa'}</td>
-                <td>${r.category}</td>
-                <td>${r.description || '-'}</td>
-                <td style="color: ${r.type === 'income' ? '#00A859' : '#dc2626'}">R$ ${parseFloat(r.amount).toFixed(2)}</td>
-                <td>${new Date(r.transaction_date).toLocaleDateString('pt-BR')}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        
-        <div class="report-footer">
-          <p>Relatório gerado automaticamente pelo sistema da Associação Vida Carrapicho</p>
-          <p>CNPJ: 07.895.526/0001-26 | www.vidacarrapicho.org</p>
-        </div>
-      </div>
-    `;
+                    <div class="pdf-content" style="font-family: Arial, sans-serif; padding: 20px;">
+                        <div class="report-header">
+                            <img src="../img/logo-carrapicho.png" style="width: 80px; margin-bottom: 10px;">
+                            <h1 class="report-title">Relatório Financeiro</h1>
+                            <p class="report-date">Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
+                            <p>Associação Vida Carrapicho</p>
+                        </div>
+                        <div class="report-summary">
+                            <h3>📊 Resumo Financeiro</h3>
+                            <table style="width: 100%;">
+                                <tr><td><strong>💰 Total de Receitas:</strong></td><td style="color: #00A859;">R$ ${totalReceita.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+                                <tr><td><strong>💸 Total de Despesas:</strong></td><td style="color: #dc2626;">R$ ${totalDespesa.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+                                <tr><td><strong>⚖️ Saldo Atual:</strong></td><td style="color: ${saldo >= 0 ? '#00A859' : '#dc2626'};">R$ ${saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+                            </table>
+                        </div>
+                        <h3>📋 Despesas por Categoria</h3>
+                        <table class="report-table">
+                            <thead><tr><th>Categoria</th><th>Valor</th><th>Percentual</th></tr></thead>
+                            <tbody>
+                                ${Object.entries(despesasPorCategoria).map(([cat, val]) => `<tr><td>${cat}</td><td>R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td><td>${((val / totalDespesa) * 100).toFixed(1)}%</td></tr>`).join('')}
+                            </tbody>
+                        </table>
+                        <div class="report-footer">
+                            <p>Relatório gerado automaticamente pelo sistema da Associação Vida Carrapicho</p>
+                            <p>CNPJ: 07.895.526/0001-26 | www.vidacarrapicho.org</p>
+                        </div>
+                    </div>
+                `;
 
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = html;
@@ -1685,7 +1690,6 @@
 
                 html2pdf().set(opt).from(element).save();
                 setTimeout(() => tempDiv.remove(), 1000);
-
             } catch (error) {
                 console.error('Erro ao gerar relatório:', error);
                 alert('Erro ao gerar relatório financeiro');
@@ -1698,46 +1702,35 @@
                 const eventos = await response.json();
 
                 const html = `
-      <div class="pdf-content" style="font-family: Arial, sans-serif; padding: 20px;">
-        <div class="report-header">
-          <img src="../img/logo-carrapicho.png" style="width: 80px; margin-bottom: 10px;">
-          <h1 class="report-title">Relatório de Eventos</h1>
-          <p class="report-date">Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
-          <p>Associação Vida Carrapicho</p>
-        </div>
-        
-        <div class="report-summary">
-          <h3>📊 Resumo de Eventos</h3>
-          <table style="width: 100%;">
-            <tr><td><strong>📅 Total de Eventos:</strong></td><td>${eventos.length}</td></tr>
-            <tr><td><strong>📅 Eventos Futuros:</strong></td><td>${eventos.filter(e => e.status === 'upcoming').length}</td></tr>
-            <tr><td><strong>📢 Eventos Acontecendo:</strong></td><td>${eventos.filter(e => e.status === 'ongoing').length}</td></tr>
-            <tr><td><strong>✅ Eventos Encerrados:</strong></td><td>${eventos.filter(e => e.status === 'completed').length}</td></tr>
-          </table>
-        </div>
-        
-        <h3>📋 Lista de Eventos</h3>
-        <table class="report-table">
-          <thead><tr><th>ID</th><th>Evento</th><th>Data</th><th>Local</th><th>Status</th></tr></thead>
-          <tbody>
-            ${eventos.map(e => `
-              <tr>
-                <td>${e.id}</td>
-                <td><strong>${e.title}</strong><br><small>${e.description?.substring(0, 80) || ''}</small></td>
-                <td>${new Date(e.event_date).toLocaleString('pt-BR')}</td>
-                <td>${e.location || '-'}</td>
-                <td>${e.status === 'upcoming' ? '📅 Em breve' : e.status === 'ongoing' ? '📢 Acontecendo' : '✅ Encerrado'}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        
-        <div class="report-footer">
-          <p>Relatório gerado automaticamente pelo sistema da Associação Vida Carrapicho</p>
-          <p>CNPJ: 07.895.526/0001-26 | www.vidacarrapicho.org</p>
-        </div>
-      </div>
-    `;
+                    <div class="pdf-content" style="font-family: Arial, sans-serif; padding: 20px;">
+                        <div class="report-header">
+                            <img src="../img/logo-carrapicho.png" style="width: 80px; margin-bottom: 10px;">
+                            <h1 class="report-title">Relatório de Eventos</h1>
+                            <p class="report-date">Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
+                            <p>Associação Vida Carrapicho</p>
+                        </div>
+                        <div class="report-summary">
+                            <h3>📊 Resumo de Eventos</h3>
+                            <table style="width: 100%;">
+                                <tr><td><strong>📅 Total de Eventos:</strong></td><td>${eventos.length}</td></tr>
+                                <tr><td><strong>📅 Eventos Futuros:</strong></td><td>${eventos.filter(e => e.status === 'upcoming').length}</td></tr>
+                                <tr><td><strong>📢 Eventos Acontecendo:</strong></td><td>${eventos.filter(e => e.status === 'ongoing').length}</td></tr>
+                                <tr><td><strong>✅ Eventos Encerrados:</strong></td><td>${eventos.filter(e => e.status === 'completed').length}</td></tr>
+                            </table>
+                        </div>
+                        <h3>📋 Lista de Eventos</h3>
+                        <table class="report-table">
+                            <thead><tr><th>ID</th><th>Evento</th><th>Data</th><th>Local</th><th>Status</th></tr></thead>
+                            <tbody>
+                                ${eventos.map(e => `<tr><td>${e.id}</td><td><strong>${e.title}</strong><br><small>${e.description?.substring(0, 80) || ''}</small></td><td>${new Date(e.event_date).toLocaleString('pt-BR')}</td><td>${e.location || '-'}</td><td>${e.status === 'upcoming' ? '📅 Em breve' : e.status === 'ongoing' ? '📢 Acontecendo' : '✅ Encerrado'}</td></tr>`).join('')}
+                            </tbody>
+                        </table>
+                        <div class="report-footer">
+                            <p>Relatório gerado automaticamente pelo sistema da Associação Vida Carrapicho</p>
+                            <p>CNPJ: 07.895.526/0001-26 | www.vidacarrapicho.org</p>
+                        </div>
+                    </div>
+                `;
 
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = html;
@@ -1754,7 +1747,6 @@
 
                 html2pdf().set(opt).from(element).save();
                 setTimeout(() => tempDiv.remove(), 1000);
-
             } catch (error) {
                 console.error('Erro ao gerar relatório:', error);
                 alert('Erro ao gerar relatório de eventos');
@@ -1783,53 +1775,36 @@
                 });
 
                 const html = `
-      <div class="pdf-content" style="font-family: Arial, sans-serif; padding: 20px;">
-        <div class="report-header">
-          <img src="../img/logo-carrapicho.png" style="width: 80px; margin-bottom: 10px;">
-          <h1 class="report-title">Relatório Geral da Associação</h1>
-          <p class="report-date">Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
-          <p>Associação Vida Carrapicho - Transparência e Gestão</p>
-        </div>
-        
-        <div class="report-summary">
-          <h3>💰 Resumo Financeiro</h3>
-          <table style="width: 100%;">
-            <tr><td><strong>📈 Total de Receitas:</strong></td><td style="color: #00A859;">R$ ${totalReceita.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
-            <tr><td><strong>📉 Total de Despesas:</strong></td><td style="color: #dc2626;">R$ ${totalDespesa.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
-            <tr><td><strong>⚖️ Saldo Atual:</strong></td><td style="color: ${saldo >= 0 ? '#00A859' : '#dc2626'};">R$ ${saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
-          </table>
-        </div>
-        
-        <div class="report-summary">
-          <h3>📅 Resumo de Eventos</h3>
-          <table style="width: 100%;">
-            <tr><td><strong>Total de Eventos:</strong></td><td>${eventos.length}</td></tr>
-            <tr><td><strong>Eventos Futuros:</strong></td><td>${eventos.filter(e => e.status === 'upcoming').length}</td></tr>
-            <tr><td><strong>Eventos Realizados:</strong></td><td>${eventos.filter(e => e.status === 'completed').length}</td></tr>
-          </table>
-        </div>
-        
-        <h3>📊 Despesas por Categoria</h3>
-        <table class="report-table">
-          <thead><tr><th>Categoria</th><th>Valor</th><th>Percentual</th></tr></thead>
-          <tbody>
-            ${Object.entries(despesasPorCategoria).map(([cat, val]) => `
-              <tr>
-                <td>${cat}</td>
-                <td>R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                <td>${((val / totalDespesa) * 100).toFixed(1)}%</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        
-        <div class="report-footer">
-          <p>Relatório gerado automaticamente pelo sistema da Associação Vida Carrapicho</p>
-          <p>CNPJ: 07.895.526/0001-26 | www.vidacarrapicho.org</p>
-          <p>R. Iraí de Minas, 202 - Jardim Itapolis - São Paulo/SP - CEP 03941-040</p>
-        </div>
-      </div>
-    `;
+                    <div class="pdf-content" style="font-family: Arial, sans-serif; padding: 20px;">
+                        <div class="report-header">
+                            <img src="../img/logo-carrapicho.png" style="width: 80px; margin-bottom: 10px;">
+                            <h1 class="report-title">Relatório Geral da Associação</h1>
+                            <p class="report-date">Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
+                            <p>Associação Vida Carrapicho - Transparência e Gestão</p>
+                        </div>
+                        <div class="report-summary">
+                            <h3>💰 Resumo Financeiro</h3>
+                            <table style="width: 100%;">
+                                <tr><td><strong>📈 Total de Receitas:</strong></td><td style="color: #00A859;">R$ ${totalReceita.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+                                <tr><td><strong>📉 Total de Despesas:</strong></td><td style="color: #dc2626;">R$ ${totalDespesa.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+                                <tr><td><strong>⚖️ Saldo Atual:</strong></td><td style="color: ${saldo >= 0 ? '#00A859' : '#dc2626'};">R$ ${saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+                            </table>
+                        </div>
+                        <div class="report-summary">
+                            <h3>📅 Resumo de Eventos</h3>
+                            <table style="width: 100%;">
+                                <tr><td><strong>Total de Eventos:</strong></td><td>${eventos.length}</td></tr>
+                                <tr><td><strong>Eventos Futuros:</strong></td><td>${eventos.filter(e => e.status === 'upcoming').length}</td></tr>
+                                <tr><td><strong>Eventos Realizados:</strong></td><td>${eventos.filter(e => e.status === 'completed').length}</td></tr>
+                            </table>
+                        </div>
+                        <div class="report-footer">
+                            <p>Relatório gerado automaticamente pelo sistema da Associação Vida Carrapicho</p>
+                            <p>CNPJ: 07.895.526/0001-26 | www.vidacarrapicho.org</p>
+                            <p>R. Iraí de Minas, 202 - Jardim Itapolis - São Paulo/SP - CEP 03941-040</p>
+                        </div>
+                    </div>
+                `;
 
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = html;
@@ -1846,7 +1821,6 @@
 
                 html2pdf().set(opt).from(element).save();
                 setTimeout(() => tempDiv.remove(), 1000);
-
             } catch (error) {
                 console.error('Erro ao gerar relatório completo:', error);
                 alert('Erro ao gerar relatório completo');
