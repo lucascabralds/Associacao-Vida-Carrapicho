@@ -42,7 +42,7 @@ const adminMiddleware = (req, res, next) => {
 };
 
 // =====================================================
-// ROTA DE LOGIN
+// ROTA DE LOGIN (COMPARAÇÃO DIRETA - SEM HASH)
 // =====================================================
 app.post('/api/auth/login', async (req, res) => {
     try {
@@ -59,9 +59,9 @@ app.post('/api/auth/login', async (req, res) => {
         }
         
         const user = result.rows[0];
-        const isValid = await bcrypt.compare(password, user.password);
         
-        if (!isValid) {
+        // COMPARAÇÃO DIRETA (TEXTO PURO)
+        if (password !== user.password) {
             return res.status(401).json({ error: 'Email ou senha inválidos' });
         }
         
@@ -81,7 +81,6 @@ app.post('/api/auth/login', async (req, res) => {
         res.status(500).json({ error: 'Erro no login' });
     }
 });
-
 // =====================================================
 // ROTAS DE USUÁRIOS
 // =====================================================
