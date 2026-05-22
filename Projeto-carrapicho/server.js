@@ -17,53 +17,35 @@ app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// CONFIGURAÇÃO DE UPLOAD DE IMAGENS (MULTER)
+// UPLOAD DE IMAGENS COM CLOUDINARY (VERCEL)
 // =====================================================
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-// Garantir que a pasta uploads existe
-const uploadDir = path.join(__dirname, 'frontend', 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    try {
-        fs.mkdirSync(uploadDir, { recursive: true });
-        console.log('✅ Pasta uploads criada:', uploadDir);
-    } catch (err) {
-        console.error('❌ Erro ao criar pasta uploads:', err.message);
-    }
-}
+// Configurar Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
-// Configuração do storage do multer
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const ext = path.extname(file.originalname);
-        cb(null, 'evento-' + uniqueSuffix + ext);
+// Configurar storage do Cloudinary
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'eventos-carrapicho',
+        allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+        transformation: [{ width: 1024, height: 768, crop: 'limit' }]
     }
 });
 
-const fileFilter = (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|webp/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-    if (mimetype && extname) {
-        return cb(null, true);
-    } else {
-        cb(new Error('Apenas imagens são permitidas'));
-    }
-};
-
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 },
-    fileFilter: fileFilter
+const upload = multer({ 
+    storage: storage, 
+    limits: { fileSize: 5 * 1024 * 1024 } 
 });
 
 // Serve arquivos estáticos
 app.use(express.static(path.join(__dirname, 'frontend')));
-app.use('/uploads', express.static(path.join(__dirname, 'frontend', 'uploads')));
-
 // =====================================================
 // ROTAS PRINCIPAIS
 // =====================================================
