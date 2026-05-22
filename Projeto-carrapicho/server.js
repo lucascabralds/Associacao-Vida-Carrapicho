@@ -516,30 +516,35 @@ app.get('/api/donations', authMiddleware, async (req, res) => {
 });
 
 // =====================================================
-// ROTA DE CONTATO
+// ROTA DE CONTATO (UNIFICADA - Salva na tabela voluntarios)
 // =====================================================
 app.post('/api/contato', async (req, res) => {
     try {
-        const { name, email, phone, message } = req.body;
-
-        console.log('📧 Contato recebido:', { name, email, phone, message });
-
-        try {
-            await pool.query(
-                `INSERT INTO contacts (name, email, phone, message) 
-                 VALUES ($1, $2, $3, $4)`,
-                [name, email, phone || null, message]
-            );
-        } catch (dbError) {
-            console.log('Tabela contacts não existe, apenas logando mensagem');
-        }
-
+        const { name, email, phone, message, interesse } = req.body;
+        
+        console.log('📧 Contato recebido:', { name, email, phone, message, interesse });
+        
+        // Mapear interesse para tipo legível
+        let tipo = 'duvida';
+        if (interesse === 'voluntario') tipo = 'voluntario';
+        else if (interesse === 'doacao') tipo = 'doacao';
+        else if (interesse === 'parceria') tipo = 'parceria';
+        
+        // Salvar na tabela voluntarios (UNIFICADO)
+        const result = await pool.query(
+            `INSERT INTO voluntarios (nome, email, telefone, interesse, status, tipo) 
+             VALUES ($1, $2, $3, $4, 'pendente', $5) RETURNING id`,
+            [name, email, phone || null, message, tipo]
+        );
+        
+        console.log('✅ Salvo na tabela voluntarios! ID:', result.rows[0].id);
+        
         res.json({
             sucesso: true,
             mensagem: 'Mensagem enviada com sucesso!'
         });
     } catch (error) {
-        console.error(error);
+        console.error('❌ Erro contato:', error);
         res.status(500).json({
             sucesso: false,
             mensagem: 'Erro ao enviar mensagem'
@@ -547,22 +552,7 @@ app.post('/api/contato', async (req, res) => {
     }
 });
 
-// =====================================================
-// ROTAS DE VOLUNTÁRIOS
-// =====================================================
-
-// Listar voluntários (admin)
-app.get('/api/voluntarios', authMiddleware, async (req, res) => {
-    try {
-        const result = await pool.query('SELECT * FROM voluntarios ORDER BY created_at DESC');
-        res.json(result.rows);
-    } catch (error) {
-        console.error('List voluntarios error:', error);
-        res.status(500).json({ error: 'Erro ao listar voluntários' });
-    }
-});
-
-// Criar inscrição (público)
+// Criar inscrição de VOLUNTÁRIO (público)
 app.post('/api/voluntarios', async (req, res) => {
     try {
         const { nome, email, telefone, disponibilidade, interesse } = req.body;
@@ -572,8 +562,8 @@ app.post('/api/voluntarios', async (req, res) => {
         }
         
         const result = await pool.query(
-            `INSERT INTO voluntarios (nome, email, telefone, disponibilidade, interesse, status)
-             VALUES ($1, $2, $3, $4, $5, 'pendente') RETURNING id`,
+            `INSERT INTO voluntarios (nome, email, telefone, disponibilidade, interesse, status, tipo)
+             VALUES ($1, $2, $3, $4, $5, 'pendente', 'voluntario') RETURNING id`,
             [nome, email, telefone || null, disponibilidade || null, interesse || null]
         );
         
