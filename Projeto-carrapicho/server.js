@@ -194,37 +194,45 @@ app.post('/api/users', authMiddleware, adminMiddleware, async (req, res) => {
         res.status(500).json({ error: 'Erro ao criar usuário' });
     }
 });
-
-app.put('/api/users/:id', authMiddleware, adminMiddleware, async (req, res) => {
+app.put('/api/events/:id', authMiddleware, upload.single('image'), async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, email, role, active, password } = req.body;
+        const { title, description, event_date, location, status } = req.body;
 
-        const updates = [];
-        const values = [];
-        let paramCount = 1;
-
-        if (name) { updates.push(`name = $${paramCount++}`); values.push(name); }
-        if (email) { updates.push(`email = $${paramCount++}`); values.push(email); }
-        if (role) { updates.push(`role = $${paramCount++}`); values.push(role); }
-        if (active !== undefined) { updates.push(`active = $${paramCount++}`); values.push(active); }
-        if (password) {
-            const hashedPassword = await bcrypt.hash(password, 10);
-            updates.push(`password = $${paramCount++}`);
-            values.push(hashedPassword);
+        let cover_image = null;
+        if (req.file && req.file.path) {
+            cover_image = req.file.path;
         }
 
-        if (updates.length === 0) {
-            return res.status(400).json({ error: 'Nenhum dado para atualizar' });
+        let query = `UPDATE events SET 
+                     title = COALESCE($1, title),
+                     description = COALESCE($2, description),
+                     event_date = COALESCE($3, event_date),
+                     location = COALESCE($4, location),
+                     status = COALESCE($5, status),
+                     updated_at = NOW()`;
+        
+        let values = [title, description, event_date, location, status];
+        let paramCount = 6;
+
+        if (cover_image) {
+            query += `, cover_image = $${paramCount++}`;
+            values.push(cover_image);
         }
 
+        query += ` WHERE id = $${paramCount} RETURNING *`;
         values.push(id);
-        await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = $${paramCount}`, values);
 
-        res.json({ success: true });
+        const result = await pool.query(query, values);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Evento não encontrado' });
+        }
+
+        res.json(result.rows[0]);
     } catch (error) {
-        console.error('Update user error:', error);
-        res.status(500).json({ error: 'Erro ao atualizar usuário' });
+        console.error('Update event error:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
