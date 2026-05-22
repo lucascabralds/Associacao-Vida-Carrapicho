@@ -13,6 +13,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
     integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   <link rel="icon" type="image/png" href="img/Logo.png">
@@ -100,8 +101,19 @@
           <p class="doacao-total">Total: R$ <span id="display-total-doacao">0</span></p>
           <div id="area-pix">
             <div class="pix-qrcode-box">
-              <img id="img-qrcode-pix" src="" alt="QR Code PIX" />
+              <!-- Container dedicado para o QR Code -->
+              <div id="qrcode-container" style="display: flex; justify-content: center; align-items: center; min-height: 220px; margin: 10px 0;">
+                <!-- QR Code aparecerá aqui -->
+              </div>
               <p>Escaneie o QR Code com o app do seu banco</p>
+
+          <div class="aviso-pix" style="background: #fef3c7; padding: 12px; border-radius: 8px; margin: 15px 0; font-size: 13px; color: #92400e;">
+            ⚠️ <strong>Informação importante:</strong><br>
+            • O QR Code é uma comodidade para facilitar sua doação.<br>
+            • Este sistema NÃO confirma pagamentos automaticamente.<br>
+            • Guarde o comprovante do seu banco como prova da doação.<br>
+            • O valor será creditado diretamente na conta da ONG.
+          </div>
               <div class="pix-copia-cola-box">
                 <input type="text" id="input-copia-cola" readonly />
                 <button type="button" id="btn-copiar-pix">Copiar</button>
@@ -163,6 +175,15 @@
                 <input type="tel" id="contato-telefone" placeholder="(11) 12345-6789" />
               </div>
               <div class="form-group">
+                <div class="form-group">
+              <label>Assunto / Interesse</label>
+              <select id="contato-interesse" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 14px;">
+                  <option value="duvida">❓ Dúvidas / Informações</option>
+                  <option value="voluntario">🤝 Quero ser voluntário</option>
+                  <option value="doacao">💰 Quero fazer doação</option>
+                  <option value="parceria">🏢 Quero ser parceiro</option>
+              </select>
+          </div>
                 <label>Mensagem</label>
                 <textarea id="contato-mensagem" placeholder="Escreva sua mensagem..." rows="4" required></textarea>
               </div>
@@ -311,6 +332,11 @@
       </div>
       <div class="footer-copyright">
         © 2026 Associação Vida Carrapicho. Todos os direitos reservados.
+      </div>
+      <div style="text-align: center; margin-top: 20px;">
+    <a href="https://www.cruzeirodosul.edu.br/" target="_blank">
+        <img src="./img/logo-cruzeiro.svg" style="height: 50px; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+    </a>
       </div>
     </footer>
   </main>
@@ -565,31 +591,49 @@
         if ($(e.target).is('#modal-contato-overlay')) closeModalContato();
       });
 
-      // Formulário de contato
-      $('#form-contato-modal').on('submit', async function (e) {
-        e.preventDefault();
-        const dados = {
-          name: $('#contato-nome').val(),
-          email: $('#contato-email').val(),
-          phone: $('#contato-telefone').val(),
-          message: $('#contato-mensagem').val()
-        };
-        try {
-          const response = await fetch(window.location.origin + '/api/contato', {
+$('#form-contato-modal').on('submit', async function (e) {
+    e.preventDefault();
+    
+    const interesse = $('#contato-interesse').val();
+    const dados = {
+        name: $('#contato-nome').val(),
+        email: $('#contato-email').val(),
+        phone: $('#contato-telefone').val(),
+        message: $('#contato-mensagem').val(),
+        interesse: interesse
+    };
+    
+    let url = window.location.origin + '/api/contato';
+    let mensagemSucesso = 'Mensagem enviada com sucesso!';
+    
+    if (interesse === 'voluntario') {
+        url = window.location.origin + '/api/voluntarios';
+        mensagemSucesso = '✅ Inscrição enviada! Entraremos em contato em breve.';
+    }
+    
+    try {
+        const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
-          });
-          const resultado = await response.json();
-          alert(resultado.mensagem);
-          $('#form-contato-modal')[0].reset();
-          closeModalContato();
-        } catch (erro) {
-          console.error(erro);
-          alert('Erro ao enviar mensagem');
-        }
-      });
-    });
+            body: JSON.stringify({
+                nome: dados.name,
+                email: dados.email,
+                telefone: dados.phone,
+                disponibilidade: null,
+                interesse: dados.message
+            })
+        });
+        
+        const resultado = await response.json();
+        alert(mensagemSucesso);
+        $('#form-contato-modal')[0].reset();
+        closeModalContato();
+    } catch (erro) {
+        console.error(erro);
+        alert('Erro ao enviar. Tente novamente.');
+    }
+  });
+});
   </script>
 
 </body>

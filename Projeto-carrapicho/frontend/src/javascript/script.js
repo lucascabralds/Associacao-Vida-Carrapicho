@@ -231,33 +231,44 @@ $('.btn-valor-preset').on('click', function () {
 $('#input-valor-doacao').on('input', function () {
   $('.btn-valor-preset').removeClass('active');
 });
-
 // 4. Lógica de "Continuar" para o Passo 2
 $('#btn-continuar-doacao').on('click', function () {
   var valorDigitado = $('#input-valor-doacao').val();
 
   if (!valorDigitado || valorDigitado <= 0) {
-    showToast("Por favor, informe ou escolha um valor válido para doar.");
+    alert("Por favor, informe um valor válido.");
     return;
   }
 
-  // Formata o valor na tela do passo 2
   $('#display-total-doacao').text(parseFloat(valorDigitado).toFixed(2).replace('.', ','));
 
-  // === GERA O PIX DINAMICAMENTE AQUI ===
   var payloadPix = gerarPayloadPix(valorDigitado);
-
-  // Usa uma API gratuita para gerar a imagem do QR Code na hora
-  var urlQrCode = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent(payloadPix);
-
-  // Joga a imagem e o texto na tela
-  $('#img-qrcode-pix').attr('src', urlQrCode);
   $('#input-copia-cola').val(payloadPix);
-  // =====================================
 
+  // Troca de tela
   $('#step-1-valor').hide();
-  $('#step-2-pagamento').fadeIn();
+  $('#step-2-pagamento').show();
+  
+  // FORÇA A ÁREA PIX FICAR VISÍVEL
+  $('#area-pix').show();
+  
+  // Gera o QR Code
+  var container = document.getElementById('qrcode-container');
+  if (container) {
+    container.style.display = 'flex';
+    container.style.justifyContent = 'center';
+    container.style.alignItems = 'center';
+    container.style.minHeight = '250px';
+    container.innerHTML = '';
+    
+    var img = document.createElement('img');
+    img.src = "https://quickchart.io/qr?text=" + encodeURIComponent(payloadPix) + "&size=200&margin=2";
+    img.style.width = "200px";
+    img.style.height = "200px";
+    container.appendChild(img);
+  }
 });
+
 
 // 5. Botão Voltar (do Passo 2 para o Passo 1)
 $('.btn-voltar-doacao').on('click', function (e) {

@@ -548,6 +548,70 @@ app.post('/api/contato', async (req, res) => {
 });
 
 // =====================================================
+// ROTAS DE VOLUNTÁRIOS
+// =====================================================
+
+// Listar voluntários (admin)
+app.get('/api/voluntarios', authMiddleware, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM voluntarios ORDER BY created_at DESC');
+        res.json(result.rows);
+    } catch (error) {
+        console.error('List voluntarios error:', error);
+        res.status(500).json({ error: 'Erro ao listar voluntários' });
+    }
+});
+
+// Criar inscrição (público)
+app.post('/api/voluntarios', async (req, res) => {
+    try {
+        const { nome, email, telefone, disponibilidade, interesse } = req.body;
+        
+        if (!nome || !email) {
+            return res.status(400).json({ error: 'Nome e email são obrigatórios' });
+        }
+        
+        const result = await pool.query(
+            `INSERT INTO voluntarios (nome, email, telefone, disponibilidade, interesse, status)
+             VALUES ($1, $2, $3, $4, $5, 'pendente') RETURNING id`,
+            [nome, email, telefone || null, disponibilidade || null, interesse || null]
+        );
+        
+        res.status(201).json({ success: true, id: result.rows[0].id });
+    } catch (error) {
+        console.error('Create voluntario error:', error);
+        res.status(500).json({ error: 'Erro ao cadastrar voluntário' });
+    }
+});
+
+// Atualizar status do voluntário (admin)
+app.put('/api/voluntarios/:id', authMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+        
+        await pool.query('UPDATE voluntarios SET status = $1 WHERE id = $2', [status, id]);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Update voluntario error:', error);
+        res.status(500).json({ error: 'Erro ao atualizar voluntário' });
+    }
+});
+
+// Deletar voluntário (admin)
+app.delete('/api/voluntarios/:id', authMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        await pool.query('DELETE FROM voluntarios WHERE id = $1', [id]);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Delete voluntario error:', error);
+        res.status(500).json({ error: 'Erro ao deletar voluntário' });
+    }
+});
+
+
+// =====================================================
 // EXPORTA APP PARA VERCEL (SERVERLESS)
 // =====================================================
 module.exports = app;
