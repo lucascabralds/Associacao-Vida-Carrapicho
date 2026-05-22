@@ -1,4 +1,3 @@
-// =====================================================
 // SERVER.JS - SISTEMA ONG COMPLETO (POSTGRESQL VERSION)
 // =====================================================
 console.log('🚀 Iniciando servidor...');
@@ -17,11 +16,24 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve arquivos estáticos da pasta frontend
+// =====================================================
+// CRIAR PASTA UPLOADS (ANTES DE USAR)
+// =====================================================
+const uploadDir = path.join(__dirname, 'frontend', 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    try {
+        fs.mkdirSync(uploadDir, { recursive: true });
+        console.log('✅ Pasta uploads criada:', uploadDir);
+    } catch (err) {
+        console.error('❌ Erro ao criar pasta uploads:', err.message);
+    }
+}
+
+// Serve arquivos estáticos da pasta frontend (DEPOIS de criar a pasta)
 app.use(express.static(path.join(__dirname, 'frontend')));
 
 // =====================================================
-// ROTAS PRINCIPAIS (CORRIGIDAS - SEM /admin/* com erro)
+// ROTAS PRINCIPAIS
 // =====================================================
 
 // Página inicial - home.html
@@ -39,7 +51,7 @@ app.get('/index.html', (req, res) => {
     res.redirect('/');
 });
 
-// Admin - rota única (sem asterisco problemático)
+// Admin - rota única
 app.get('/admin', (req, res) => {
     const adminPath = path.join(__dirname, 'frontend', 'admin', 'index.html');
     if (fs.existsSync(adminPath)) {
@@ -62,11 +74,6 @@ app.get('/evento.html', (req, res) => {
 // =====================================================
 // CONFIGURAÇÃO DE UPLOAD DE IMAGENS
 // =====================================================
-const uploadDir = path.join(__dirname, 'frontend', 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, uploadDir);
@@ -96,6 +103,8 @@ const upload = multer({
 });
 
 app.use('/uploads', express.static(path.join(__dirname, 'frontend', 'uploads')));
+
+// ... CONTINUA O RESTO DO SEU CÓDIGO (rotas de API, etc)
 
 // =====================================================
 // CONEXÃO COM O BANCO (POSTGRESQL)
