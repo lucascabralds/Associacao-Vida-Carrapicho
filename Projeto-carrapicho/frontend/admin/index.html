@@ -1030,7 +1030,7 @@
             verificarPermissaoAdmin();
         }
 
-       async function carregarVoluntarios() {
+     async function carregarVoluntarios() {
     if (!isAdmin()) return;
     
     try {
@@ -1041,7 +1041,7 @@
         const tbody = document.getElementById('listaVoluntarios');
         
         if (!registros || registros.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9">Nenhum registro</td></tr>';
+            tbody.innerHTML = '</table><td colspan="9">Nenhum registro</td></tr>';
             return;
         }
         
@@ -1058,6 +1058,10 @@
         
         tbody.innerHTML = registros.map(r => {
             const tipoInfo = getTipoInfo(r.tipo || 'voluntario');
+            const mensagem = r.interesse || '';
+            const mensagemCurta = mensagem.length > 50 ? mensagem.substring(0, 50) + '...' : mensagem;
+            const temMensagemLonga = mensagem.length > 50;
+            
             return `
                 <tr>
                     <td>${r.id}</td>
@@ -1066,8 +1070,8 @@
                     <td>${r.email}</td>
                     <td>${r.telefone || '-'}</td>
                     <td style="max-width: 300px; word-wrap: break-word;">
-                        ${r.interesse ? (r.interesse.length > 60 ? r.interesse.substring(0, 60) + '...' : r.interesse) : '-'}
-                        ${r.interesse && r.interesse.length > 60 ? `<br><small><button class="btn-secondary" onclick="verMensagem('${(r.interesse || '').replace(/'/g, "\\'")}', '${r.nome}')">📖 Ver completo</button></small>` : ''}
+                        ${mensagemCurta || '-'}
+                        ${temMensagemLonga ? `<br><small><button class="btn-secondary" onclick="verMensagemCompleta(${r.id})" style="margin-top: 5px; font-size: 11px;">📖 Ver mensagem completa</button></small>` : ''}
                     </td>
                     <td>${new Date(r.created_at).toLocaleDateString('pt-BR')}</td>
                     <td>
