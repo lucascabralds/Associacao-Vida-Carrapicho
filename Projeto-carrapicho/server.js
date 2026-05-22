@@ -372,22 +372,39 @@ app.put('/api/events/:id', authMiddleware, upload.array('images', 10), async (re
     }
 });
 
-app.delete('/api/events/:id', authMiddleware, async (req, res) => {
+// ATUALIZAR EVENTO (PUT) - VERSÃO SIMPLIFICADA
+app.put('/api/events/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
-        const images = await pool.query('SELECT image_url FROM event_images WHERE event_id = $1', [id]);
-        for (const img of images.rows) {
-            const imagePath = path.join(__dirname, 'frontend', img.image_url);
-            if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
+        const { title, description, event_date, location, status, cover_image } = req.body;
+
+        console.log('📝 Atualizando evento ID:', id);
+
+        const result = await pool.query(
+            `UPDATE events 
+             SET title = COALESCE($1, title),
+                 description = COALESCE($2, description),
+                 event_date = COALESCE($3, event_date),
+                 location = COALESCE($4, location),
+                 status = COALESCE($5, status),
+                 cover_image = COALESCE($6, cover_image),
+                 updated_at = NOW()
+             WHERE id = $7
+             RETURNING *`,
+            [title, description, event_date, location, status, cover_image, id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Evento não encontrado' });
         }
-        await pool.query('DELETE FROM events WHERE id = $1', [id]);
-        res.status(204).send();
+
+        console.log('✅ Evento atualizado ID:', result.rows[0].id);
+        res.json(result.rows[0]);
     } catch (error) {
-        console.error('Delete event error:', error);
-        res.status(500).json({ error: 'Erro ao deletar evento' });
+        console.error('❌ Erro no PUT:', error.message);
+        res.status(500).json({ error: error.message });
     }
 });
-
 // =====================================================
 // ROTAS DE TRANSPARÊNCIA
 // =====================================================
