@@ -1272,53 +1272,34 @@ function fecharModalMensagem() {
         // FORMULÁRIO DE CRIAÇÃO DE EVENTO
         // =====================================================
         document.getElementById('formEvento').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData();
-            formData.append('title', document.getElementById('evento_title').value);
-            formData.append('description', document.getElementById('evento_desc').value);
-            formData.append('event_date', document.getElementById('evento_date').value);
-            formData.append('location', document.getElementById('evento_location').value);
-            formData.append('status', document.getElementById('evento_status').value);
-            
-            const files = document.getElementById('evento_images').files;
-            if (files.length > 5) {
-                alert('Máximo de 5 imagens por evento!');
-                return;
-            }
-            
-            const loadingMsg = document.createElement('div');
-            loadingMsg.textContent = '⏳ Processando imagens...';
-            loadingMsg.style.color = '#00A859';
-            document.getElementById('formEvento').appendChild(loadingMsg);
-            
-            for (let i = 0; i < files.length; i++) {
-                const compressed = await comprimirImagem(files[i], 1024, 0.7);
-                formData.append('images', compressed, `imagem_${i}.jpg`);
-            }
-            
-            try {
-                const response = await fetch(`${API_URL}/events`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    body: formData
-                });
-                
-                if (response.ok) {
-                    alert(`✅ Evento criado com sucesso!\n📸 Imagens enviadas: ${files.length}`);
-                    document.getElementById('formEvento').reset();
-                    document.getElementById('evento_preview').innerHTML = '';
-                    carregarEventos();
-                } else {
-                    const error = await response.json();
-                    alert('❌ Erro ao criar evento: ' + (error.error || 'Erro desconhecido'));
-                }
-            } catch (error) {
-                alert('❌ Erro de conexão: ' + error.message);
-            } finally {
-                loadingMsg.remove();
-            }
-        });
+    e.preventDefault();
+    
+    const data = {
+        title: document.getElementById('evento_title').value,
+        description: document.getElementById('evento_desc').value,
+        event_date: document.getElementById('evento_date').value,
+        location: document.getElementById('evento_location').value,
+        status: document.getElementById('evento_status').value,
+        cover_image: document.getElementById('evento_cover_image').value || null
+    };
+    
+    const response = await fetch(`${API_URL}/events`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+    });
+    
+    if (response.ok) {
+        alert('Evento criado com sucesso!');
+        location.reload();
+    } else {
+        const error = await response.json();
+        alert('Erro: ' + error.error);
+    }
+});
 
         // =====================================================
         // PREVIEW AO SELECIONAR IMAGENS (COM LIMITE DE 5)
@@ -1715,49 +1696,63 @@ function fecharModalMensagem() {
             }
         }
 
-        // =====================================================
-        // EDIÇÃO DE EVENTO
-        // =====================================================
-        async function abrirModalEditarEvento(id) {
-            const response = await fetch(`${API_URL}/events/${id}`);
-            const evento = await response.json();
-            document.getElementById('edit_evento_id').value = evento.id;
-            document.getElementById('edit_evento_title').value = evento.title;
-            document.getElementById('edit_evento_desc').value = evento.description || '';
-            document.getElementById('edit_evento_date').value = evento.event_date.slice(0, 16);
-            document.getElementById('edit_evento_location').value = evento.location || '';
-            document.getElementById('edit_evento_status').value = evento.status;
-            imagensAtuais = evento.images || [];
-            document.getElementById('edit_evento_current_images').innerHTML = imagensAtuais.map(img => `<div class="img-item" data-id="${img.id}"><img src="${img.image_url}"><span class="remove-img-btn" onclick="removerImagem(${img.id})">×</span></div>`).join('');
-            document.getElementById('edit_evento_preview').innerHTML = '';
-            document.getElementById('modalEditarEvento').style.display = 'flex';
-        }
+       // =====================================================
+// EDIÇÃO DE EVENTO - VERSÃO COM URL (SEM UPLOAD)
+// =====================================================
+async function abrirModalEditarEvento(id) {
+    const response = await fetch(`${API_URL}/events/${id}`);
+    const evento = await response.json();
+    
+    document.getElementById('edit_evento_id').value = evento.id;
+    document.getElementById('edit_evento_title').value = evento.title;
+    document.getElementById('edit_evento_desc').value = evento.description || '';
+    document.getElementById('edit_evento_date').value = evento.event_date.slice(0, 16);
+    document.getElementById('edit_evento_location').value = evento.location || '';
+    document.getElementById('edit_evento_status').value = evento.status;
+    document.getElementById('edit_evento_cover_image').value = evento.cover_image || '';
+    
+    document.getElementById('modalEditarEvento').style.display = 'flex';
+}
 
-        window.removerImagem = function(id) {
-            imagensAtuais = imagensAtuais.filter(i => i.id !== id);
-            document.getElementById('edit_evento_current_images').innerHTML = imagensAtuais.map(img => `<div class="img-item" data-id="${img.id}"><img src="${img.image_url}"><span class="remove-img-btn" onclick="removerImagem(${img.id})">×</span></div>`).join('');
-        };
-
-        document.getElementById('formEditarEvento')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('edit_evento_id').value;
-            const formData = new FormData();
-            formData.append('title', document.getElementById('edit_evento_title').value);
-            formData.append('description', document.getElementById('edit_evento_desc').value);
-            formData.append('event_date', document.getElementById('edit_evento_date').value);
-            formData.append('location', document.getElementById('edit_evento_location').value);
-            formData.append('status', document.getElementById('edit_evento_status').value);
-            const removeIds = imagensAtuais.filter(img => !img.id).map(img => img.id).join(',');
-            if (removeIds) formData.append('remove_images', removeIds);
-            const files = document.getElementById('edit_evento_images').files;
-            for (let i = 0; i < files.length; i++) formData.append('images', files[i]);
-            const response = await fetch(`${API_URL}/events/${id}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
-            if (response.ok) { alert('Evento atualizado!'); fecharModal(); carregarEventos(); }
-            else alert('Erro');
+document.getElementById('formEditarEvento')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('edit_evento_id').value;
+    
+    const data = {
+        title: document.getElementById('edit_evento_title').value,
+        description: document.getElementById('edit_evento_desc').value,
+        event_date: document.getElementById('edit_evento_date').value,
+        location: document.getElementById('edit_evento_location').value,
+        status: document.getElementById('edit_evento_status').value,
+        cover_image: document.getElementById('edit_evento_cover_image').value || null
+    };
+    
+    try {
+        const response = await fetch(`${API_URL}/events/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
         });
+        
+        if (response.ok) {
+            alert('✅ Evento atualizado com sucesso!');
+            fecharModal();
+            carregarEventos();
+        } else {
+            const error = await response.json();
+            alert('❌ Erro: ' + (error.error || 'Erro desconhecido'));
+        }
+    } catch (error) {
+        alert('❌ Erro de conexão: ' + error.message);
+    }
+});
 
-        function fecharModal() { document.getElementById('modalEditarEvento').style.display = 'none'; }
-
+function fecharModal() { 
+    document.getElementById('modalEditarEvento').style.display = 'none'; 
+}
         // =====================================================
         // PREVIEW NA EDIÇÃO
         // =====================================================
