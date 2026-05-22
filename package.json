@@ -2,7 +2,6 @@
   "name": "associacao-vida-carrapicho",
   "version": "1.0.0",
   "scripts": {
-    "build": "echo 'Build concluído'",
     "start": "node Projeto-carrapicho/server.js"
   },
   "dependencies": {
