@@ -1303,64 +1303,23 @@ function fecharModalMensagem() {
             }
         }
 
+                // =====================================================
+        // PREVIEW AO SELECIONAR IMAGENS (FORA DO SUBMIT)
         // =====================================================
-        // PREVIEW DAS IMAGENS COM BOTÃO DE REMOVER
-        // =====================================================
-        function previewImages(files, previewElement) {
-            previewElement.innerHTML = '';
-            for (let i = 0; i < Math.min(files.length, 5); i++) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const div = document.createElement('div');
-                    div.className = 'preview-img-wrapper';
-                    div.style.position = 'relative';
-                    div.style.display = 'inline-block';
-                    div.style.margin = '5px';
-                    
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.style.width = '80px';
-                    img.style.height = '80px';
-                    img.style.objectFit = 'cover';
-                    img.style.borderRadius = '8px';
-                    img.style.border = '2px solid #00A859';
-                    
-                    const btnRemover = document.createElement('button');
-                    btnRemover.innerHTML = '✕';
-                    btnRemover.style.position = 'absolute';
-                    btnRemover.style.top = '-8px';
-                    btnRemover.style.right = '-8px';
-                    btnRemover.style.width = '24px';
-                    btnRemover.style.height = '24px';
-                    btnRemover.style.borderRadius = '50%';
-                    btnRemover.style.backgroundColor = '#dc2626';
-                    btnRemover.style.color = 'white';
-                    btnRemover.style.border = 'none';
-                    btnRemover.style.cursor = 'pointer';
-                    btnRemover.style.fontSize = '14px';
-                    btnRemover.style.fontWeight = 'bold';
-                    btnRemover.className = 'remove-preview-btn';
-                    btnRemover.onclick = () => removerImagemSelecionada(i);
-                    
-                    div.appendChild(img);
-                    div.appendChild(btnRemover);
-                    previewElement.appendChild(div);
-                };
-                reader.readAsDataURL(files[i]);
+        document.getElementById('evento_images').addEventListener('change', (e) => {
+            const preview = document.getElementById('evento_preview');
+            let files = Array.from(e.target.files);
+            
+            if (files.length > 5) {
+                alert('Máximo de 5 imagens!');
+                files = files.slice(0, 5);
+                const dt = new DataTransfer();
+                files.forEach(f => dt.items.add(f));
+                e.target.files = dt.files;
             }
             
-            // Atualizar contador
-            let contador = document.getElementById('imagens-contador');
-            if (!contador) {
-                contador = document.createElement('div');
-                contador.id = 'imagens-contador';
-                contador.style.marginTop = '10px';
-                contador.style.fontSize = '12px';
-                contador.style.color = '#666';
-                previewElement.parentNode.appendChild(contador);
-            }
-            contador.textContent = `${files.length}/5 imagens selecionadas`;
-        }
+            previewImages(files, preview);
+        });
 
         // =====================================================
         // FORMULÁRIO DE CRIAÇÃO DE EVENTO
@@ -1368,50 +1327,51 @@ function fecharModalMensagem() {
         document.getElementById('formEvento').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-        const data = {
-    title: document.getElementById('evento_title').value,
-    description: document.getElementById('evento_desc').value,
-    event_date: document.getElementById('evento_date').value,
-    location: document.getElementById('evento_location').value,
-    status: document.getElementById('evento_status').value,
-    cover_image: document.getElementById('evento_cover_image').value || null
-};
+            const data = {
+                title: document.getElementById('evento_title').value,
+                description: document.getElementById('evento_desc').value,
+                event_date: document.getElementById('evento_date').value,
+                location: document.getElementById('evento_location').value,
+                status: document.getElementById('evento_status').value,
+                cover_image: document.getElementById('evento_cover_image').value || null
+            };
 
-if (!data.title || !data.event_date) {
-    alert('❌ Título e data são obrigatórios!');
-    return;
-}
+            if (!data.title || !data.event_date) {
+                alert('❌ Título e data são obrigatórios!');
+                return;
+            }
 
-const loadingMsg = document.createElement('div');
-loadingMsg.textContent = '⏳ Criando evento...';
-loadingMsg.style.color = '#00A859';
-document.getElementById('formEvento').appendChild(loadingMsg);
+            const loadingMsg = document.createElement('div');
+            loadingMsg.textContent = '⏳ Criando evento...';
+            loadingMsg.style.color = '#00A859';
+            document.getElementById('formEvento').appendChild(loadingMsg);
 
-try {
-    const response = await fetch(`${API_URL}/events`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data)
-    });
-    
-    if (response.ok) {
-        alert('✅ Evento criado com sucesso!');
-        document.getElementById('formEvento').reset();
-        document.getElementById('evento_preview').innerHTML = '';
-        carregarEventos();
-    } else {
-        const error = await response.json();
-        alert('❌ Erro ao criar evento: ' + (error.error || 'Erro desconhecido'));
-    }
-} catch (error) {
-    alert('❌ Erro de conexão: ' + error.message);
-} finally {
-    loadingMsg.remove();
-}
-            
+            try {
+                const response = await fetch(`${API_URL}/events`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    alert('✅ Evento criado com sucesso!');
+                    document.getElementById('formEvento').reset();
+                    document.getElementById('evento_preview').innerHTML = '';
+                    carregarEventos();
+                } else {
+                    const error = await response.json();
+                    alert('❌ Erro ao criar evento: ' + (error.error || 'Erro desconhecido'));
+                }
+            } catch (error) {
+                alert('❌ Erro de conexão: ' + error.message);
+            } finally {
+                loadingMsg.remove();
+            }
+        });
+
         // =====================================================
         // PREVIEW AO SELECIONAR IMAGENS (COM LIMITE DE 5)
         // =====================================================
@@ -1429,7 +1389,6 @@ try {
             
             previewImages(files, preview);
         });
-
         // =====================================================
         // VERIFICAÇÃO DE PERMISSÕES
         // =====================================================
