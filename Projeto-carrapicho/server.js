@@ -319,34 +319,67 @@ app.post('/api/events', authMiddleware, upload.array('images', 10), async (req, 
     }
 });
 
-// ATUALIZAR EVENTO (PUT) - VERSÃO SIMPLIFICADA
-app.put('/api/events/:id', authMiddleware, async (req, res) => {
+// ATUALIZAR EVENTO (PUT) - COM UPLOAD DE IMAGENS
+app.put('/api/events/:id', authMiddleware, upload.array('images', 10), async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, description, event_date, location, status, cover_image } = req.body;
+        const { title, description, event_date, location, status, remove_images } = req.body;
 
         console.log('📝 Atualizando evento ID:', id);
+        console.log('📸 Novas imagens:', req.files?.length || 0);
+        console.log('🗑️ Remover imagens:', remove_images);
 
-        const result = await pool.query(
-            `UPDATE events 
-             SET title = COALESCE($1, title),
-                 description = COALESCE($2, description),
-                 event_date = COALESCE($3, event_date),
-                 location = COALESCE($4, location),
-                 status = COALESCE($5, status),
-                 cover_image = COALESCE($6, cover_image),
-                 updated_at = NOW()
-             WHERE id = $7
-             RETURNING *`,
-            [title, description, event_date, location, status, cover_image, id]
-        );
+        // 1. ATUALIZAR DADOS BÁSICOS
+        const updates = [];
+        const values = [];
+        let paramCount = 1;
 
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Evento não encontrado' });
+        if (title) { updates.push(`title = $${paramCount++}`); values.push(title); }
+        if (description !== undefined) { updates.push(`description = $${paramCount++}`); values.push(description); }
+        if (event_date) { updates.push(`event_date = $${paramCount++}`); values.push(event_date); }
+        if (location) { updates.push(`location = $${paramCount++}`); values.push(location); }
+        if (status) { updates.push(`status = $${paramCount++}`); values.push(status); }
+
+        if (updates.length > 0) {
+            updates.push(`updated_at = NOW()`);
+            values.push(id);
+            await pool.query(`UPDATE events SET ${updates.join(', ')} WHERE id = $${paramCount}`, values);
+            console.log('✅ Dados básicos atualizados');
         }
 
-        console.log('✅ Evento atualizado ID:', result.rows[0].id);
-        res.json(result.rows[0]);
+        // 2. REMOVER IMAGENS MARCADAS
+        if (remove_images) {
+            const removeIds = remove_images.split(',').map(Number);
+            for (const imgId of removeIds) {
+                const imgResult = await pool.query('SELECT image_url FROM event_images WHERE id = $1 AND event_id = $2', [imgId, id]);
+                if (imgResult.rows.length > 0 && imgResult.rows[0].image_url) {
+                    const imagePath = path.join(__dirname, 'frontend', imgResult.rows[0].image_url);
+                    if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
+                }
+                await pool.query('DELETE FROM event_images WHERE id = $1 AND event_id = $2', [imgId, id]);
+            }
+            console.log('✅ Imagens removidas');
+        }
+
+        // 3. ADICIONAR NOVAS IMAGENS
+        const newImages = req.files || [];
+        const existingCover = await pool.query('SELECT id FROM event_images WHERE event_id = $1 AND is_cover = TRUE', [id]);
+        
+        for (let i = 0; i < newImages.length; i++) {
+            const imageUrl = `/uploads/${newImages[i].filename}`;
+            const isCover = (existingCover.rows.length === 0 && i === 0);
+            await pool.query(
+                `INSERT INTO event_images (event_id, image_url, is_cover) VALUES ($1, $2, $3)`,
+                [id, imageUrl, isCover]
+            );
+        }
+        console.log('✅ Novas imagens adicionadas:', newImages.length);
+
+        // 4. BUSCAR EVENTO ATUALIZADO
+        const updatedEvent = await pool.query('SELECT * FROM events WHERE id = $1', [id]);
+        const eventImages = await pool.query('SELECT * FROM event_images WHERE event_id = $1 ORDER BY is_cover DESC, id ASC', [id]);
+        
+        res.json({ ...updatedEvent.rows[0], images: eventImages.rows });
     } catch (error) {
         console.error('❌ Erro no PUT:', error.message);
         res.status(500).json({ error: error.message });
