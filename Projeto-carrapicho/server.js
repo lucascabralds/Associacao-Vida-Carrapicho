@@ -319,7 +319,7 @@ app.post('/api/events', authMiddleware, upload.array('images', 10), async (req, 
     }
 });
 
-// ATUALIZAR EVENTO (PUT) - APENAS UMA VEZ, VERSÃO SIMPLIFICADA
+// ATUALIZAR EVENTO (PUT) - VERSÃO SIMPLIFICADA
 app.put('/api/events/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
