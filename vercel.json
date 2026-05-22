@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "Projeto-carrapicho/server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/Projeto-carrapicho/server.js"
+    },
+    {
+      "src": "/admin",
+      "dest": "/Projeto-carrapicho/frontend/admin/index.html"
+    },
+    {
+      "src": "/admin/(.*)",
+      "dest": "/Projeto-carrapicho/frontend/admin/index.html"
+    },
+    {
+      "src": "/evento.html",
+      "dest": "/Projeto-carrapicho/frontend/evento.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/Projeto-carrapicho/frontend/home.html"
+    }
+  ]
+}
