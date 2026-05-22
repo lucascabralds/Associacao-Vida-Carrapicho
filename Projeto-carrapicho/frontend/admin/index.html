@@ -1092,6 +1092,80 @@
     }
 }
 
+function verMensagemCompleta(id) {
+    // Buscar o registro específico
+    fetch(`${API_URL}/voluntarios`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(res => res.json())
+    .then(registros => {
+        const registro = registros.find(r => r.id === id);
+        if (!registro) {
+            alert('Registro não encontrado');
+            return;
+        }
+        
+        const tipoInfo = {
+            'voluntario': '🤝 Voluntário',
+            'duvida': '❓ Dúvida',
+            'doacao': '💰 Doação',
+            'parceria': '🏢 Parceria'
+        }[registro.tipo] || '📝 Outro';
+        
+      
+        const modalHtml = `
+            <div id="modalMensagemCompleta" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 10001; display: flex; justify-content: center; align-items: center;">
+                <div style="background: white; border-radius: 20px; max-width: 550px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+                    <div style="background: linear-gradient(135deg, #1D2671, #00A859); padding: 20px; border-radius: 20px 20px 0 0; color: white;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3 style="margin: 0;">📝 Mensagem Completa</h3>
+                                <p style="margin: 5px 0 0; opacity: 0.9; font-size: 13px;">${tipoInfo}</p>
+                            </div>
+                            <button onclick="fecharModalMensagemCompleta()" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 24px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer;">&times;</button>
+                        </div>
+                    </div>
+                    <div style="padding: 25px;">
+                        <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e7eb;">
+                            <p style="margin: 0;"><strong>👤 Nome:</strong> ${registro.nome}</p>
+                            <p style="margin: 8px 0 0;"><strong>📧 Email:</strong> ${registro.email}</p>
+                            ${registro.telefone ? `<p style="margin: 8px 0 0;"><strong>📞 Telefone:</strong> ${registro.telefone}</p>` : ''}
+                            <p style="margin: 8px 0 0;"><strong>📅 Data:</strong> ${new Date(registro.created_at).toLocaleString('pt-BR')}</p>
+                            <p style="margin: 8px 0 0;"><strong>📌 Status:</strong> <span style="background: ${registro.status === 'pendente' ? '#fef3c7' : registro.status === 'contatado' ? '#d1fae5' : '#e0e7ff'}; padding: 2px 8px; border-radius: 12px;">${registro.status === 'pendente' ? '⏳ Pendente' : registro.status === 'contatado' ? '📞 Contatado' : registro.status === 'aprovado' ? '✅ Aprovado' : '❌ Recusado'}</span></p>
+                        </div>
+                        <div>
+                            <strong>💬 Mensagem:</strong>
+                            <div style="background: #f8fafc; padding: 16px; border-radius: 12px; margin-top: 8px; white-space: pre-wrap; word-wrap: break-word; max-height: 300px; overflow-y: auto;">
+                                ${registro.interesse || '<em>Nenhuma mensagem</em>'}
+                            </div>
+                        </div>
+                        <div style="margin-top: 25px; text-align: center;">
+                            <button onclick="fecharModalMensagemCompleta()" class="btn-primary" style="padding: 10px 30px;">Fechar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+    
+        if (document.getElementById('modalMensagemCompleta')) {
+            document.getElementById('modalMensagemCompleta').remove();
+        }
+        
+        /
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    })
+    .catch(err => {
+        console.error('Erro ao buscar mensagem:', err);
+        alert('Erro ao carregar mensagem completa');
+    });
+}
+
+function fecharModalMensagemCompleta() {
+    const modal = document.getElementById('modalMensagemCompleta');
+    if (modal) modal.remove();
+}
+        
         async function atualizarStatusVoluntario(id, status) {
     try {
         const response = await fetch(`${API_URL}/voluntarios/${id}`, {
