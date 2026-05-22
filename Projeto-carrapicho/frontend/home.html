@@ -595,13 +595,12 @@ $('#form-contato-modal').on('submit', async function (e) {
     e.preventDefault();
     
     const interesse = $('#contato-interesse').val();
-    const mensagem = $('#contato-mensagem').val();
     const dados = {
         name: $('#contato-nome').val(),
         email: $('#contato-email').val(),
         phone: $('#contato-telefone').val(),
-        message: mensagem,
-        interesse_tipo: interesse  // NOVO CAMPO
+        message: $('#contato-mensagem').val(),
+        interesse: interesse
     };
     
     let url = window.location.origin + '/api/contato';
@@ -621,8 +620,7 @@ $('#form-contato-modal').on('submit', async function (e) {
                 email: dados.email,
                 telefone: dados.phone,
                 disponibilidade: null,
-                interesse_tipo: dados.interesse_tipo,  // NOVO
-                mensagem: dados.message  // SEPARADO
+                interesse: dados.message
             })
         });
         
@@ -634,6 +632,7 @@ $('#form-contato-modal').on('submit', async function (e) {
         console.error(erro);
         alert('Erro ao enviar. Tente novamente.');
     }
+  });
 });
   </script>
 
