@@ -1,4 +1,2 @@
-// API entry point para Vercel
-const app = require('../server');
-
+const app = require('../Projeto-carrapicho/server.js');
 module.exports = app;
