@@ -1,5 +1,5 @@
 // =====================================================
-// SERVER.JS - SISTEMA ONG COMPLETO (POSTGRESQL VERSION)
+// SERVER.JS - SISTEMA ONG COMPLETO (URL DE IMAGEM)
 // =====================================================
 console.log('🚀 Iniciando servidor...');
 
@@ -9,7 +9,6 @@ const path = require('path');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const QRCode = require('qrcode');
-const multer = require('multer');
 const fs = require('fs');
 require('dotenv').config();
 
@@ -54,44 +53,6 @@ app.get('/evento.html', (req, res) => {
         res.status(404).send('evento.html não encontrado');
     }
 });
-
-// =====================================================
-// CONFIGURAÇÃO DE UPLOAD DE IMAGENS (APENAS UMA VEZ)
-// =====================================================
-const uploadDir = path.join(__dirname, 'frontend', 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const ext = path.extname(file.originalname);
-        cb(null, 'evento-' + uniqueSuffix + ext);
-    }
-});
-
-const fileFilter = (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|webp/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-    if (mimetype && extname) {
-        return cb(null, true);
-    } else {
-        cb(new Error('Apenas imagens são permitidas'));
-    }
-};
-
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 },
-    fileFilter: fileFilter
-});
-
-app.use('/uploads', express.static(path.join(__dirname, 'frontend', 'uploads')));
 
 // =====================================================
 // CONEXÃO COM O BANCO (POSTGRESQL)
@@ -249,18 +210,14 @@ app.delete('/api/users/:id', authMiddleware, adminMiddleware, async (req, res) =
     }
 });
 
-/// =====================================================
-// ROTAS DE EVENTOS
+// =====================================================
+// ROTAS DE EVENTOS (APENAS COM URL, SEM UPLOAD)
 // =====================================================
 
+// LISTAR eventos
 app.get('/api/events', async (req, res) => {
     try {
-        const result = await pool.query(`
-            SELECT e.*, 
-                   (SELECT image_url FROM event_images WHERE event_id = e.id AND is_cover = TRUE LIMIT 1) as cover_image
-            FROM events e 
-            ORDER BY e.event_date ASC
-        `);
+        const result = await pool.query('SELECT * FROM events ORDER BY event_date ASC');
         res.json(result.rows);
     } catch (error) {
         console.error('List events error:', error);
@@ -268,6 +225,7 @@ app.get('/api/events', async (req, res) => {
     }
 });
 
+// BUSCAR evento por ID
 app.get('/api/events/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -275,125 +233,71 @@ app.get('/api/events/:id', async (req, res) => {
         if (events.rows.length === 0) {
             return res.status(404).json({ error: 'Evento não encontrado' });
         }
-        const images = await pool.query('SELECT * FROM event_images WHERE event_id = $1 ORDER BY is_cover DESC, id ASC', [id]);
-        res.json({ ...events.rows[0], images: images.rows });
+        res.json(events.rows[0]);
     } catch (error) {
         console.error('Get event error:', error);
         res.status(500).json({ error: 'Erro ao buscar evento' });
     }
 });
 
-app.post('/api/events', authMiddleware, upload.array('images', 10), async (req, res) => {
+// CRIAR evento
+app.post('/api/events', authMiddleware, async (req, res) => {
     try {
-        const { title, description, event_date, location, status } = req.body;
+        const { title, description, event_date, location, status, cover_image } = req.body;
 
         if (!title || !event_date) {
             return res.status(400).json({ error: 'Título e data são obrigatórios' });
         }
 
         const result = await pool.query(
-            `INSERT INTO events (title, description, event_date, location, status, created_by)
-             VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-            [title, description, event_date, location, status || 'upcoming', req.user.id]
+            `INSERT INTO events (title, description, event_date, location, status, created_by, cover_image)
+             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+            [title, description, event_date, location, status || 'upcoming', req.user.id, cover_image || null]
         );
 
-        const eventId = result.rows[0].id;
-
-        const images = req.files || [];
-        for (let i = 0; i < images.length; i++) {
-            const imageUrl = `/uploads/${images[i].filename}`;
-            const isCover = (i === 0);
-            await pool.query(
-                `INSERT INTO event_images (event_id, image_url, is_cover) VALUES ($1, $2, $3)`,
-                [eventId, imageUrl, isCover]
-            );
-        }
-
-        const newEvent = await pool.query('SELECT * FROM events WHERE id = $1', [eventId]);
-        const eventImages = await pool.query('SELECT * FROM event_images WHERE event_id = $1 ORDER BY is_cover DESC, id ASC', [eventId]);
-
-        res.status(201).json({ ...newEvent.rows[0], images: eventImages.rows });
+        const newEvent = await pool.query('SELECT * FROM events WHERE id = $1', [result.rows[0].id]);
+        res.status(201).json(newEvent.rows[0]);
     } catch (error) {
         console.error('Create event error:', error);
-        res.status(500).json({ error: 'Erro ao criar evento' });
-    }
-});
-
-// ATUALIZAR EVENTO (PUT) - COM UPLOAD DE IMAGENS
-app.put('/api/events/:id', authMiddleware, upload.array('images', 10), async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { title, description, event_date, location, status, remove_images } = req.body;
-
-        console.log('📝 Atualizando evento ID:', id);
-        console.log('📸 Novas imagens:', req.files?.length || 0);
-        console.log('🗑️ Remover imagens:', remove_images);
-
-        // 1. ATUALIZAR DADOS BÁSICOS
-        const updates = [];
-        const values = [];
-        let paramCount = 1;
-
-        if (title) { updates.push(`title = $${paramCount++}`); values.push(title); }
-        if (description !== undefined) { updates.push(`description = $${paramCount++}`); values.push(description); }
-        if (event_date) { updates.push(`event_date = $${paramCount++}`); values.push(event_date); }
-        if (location) { updates.push(`location = $${paramCount++}`); values.push(location); }
-        if (status) { updates.push(`status = $${paramCount++}`); values.push(status); }
-
-        if (updates.length > 0) {
-            updates.push(`updated_at = NOW()`);
-            values.push(id);
-            await pool.query(`UPDATE events SET ${updates.join(', ')} WHERE id = $${paramCount}`, values);
-            console.log('✅ Dados básicos atualizados');
-        }
-
-        // 2. REMOVER IMAGENS MARCADAS
-        if (remove_images) {
-            const removeIds = remove_images.split(',').map(Number);
-            for (const imgId of removeIds) {
-                const imgResult = await pool.query('SELECT image_url FROM event_images WHERE id = $1 AND event_id = $2', [imgId, id]);
-                if (imgResult.rows.length > 0 && imgResult.rows[0].image_url) {
-                    const imagePath = path.join(__dirname, 'frontend', imgResult.rows[0].image_url);
-                    if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
-                }
-                await pool.query('DELETE FROM event_images WHERE id = $1 AND event_id = $2', [imgId, id]);
-            }
-            console.log('✅ Imagens removidas');
-        }
-
-        // 3. ADICIONAR NOVAS IMAGENS
-        const newImages = req.files || [];
-        const existingCover = await pool.query('SELECT id FROM event_images WHERE event_id = $1 AND is_cover = TRUE', [id]);
-        
-        for (let i = 0; i < newImages.length; i++) {
-            const imageUrl = `/uploads/${newImages[i].filename}`;
-            const isCover = (existingCover.rows.length === 0 && i === 0);
-            await pool.query(
-                `INSERT INTO event_images (event_id, image_url, is_cover) VALUES ($1, $2, $3)`,
-                [id, imageUrl, isCover]
-            );
-        }
-        console.log('✅ Novas imagens adicionadas:', newImages.length);
-
-        // 4. BUSCAR EVENTO ATUALIZADO
-        const updatedEvent = await pool.query('SELECT * FROM events WHERE id = $1', [id]);
-        const eventImages = await pool.query('SELECT * FROM event_images WHERE event_id = $1 ORDER BY is_cover DESC, id ASC', [id]);
-        
-        res.json({ ...updatedEvent.rows[0], images: eventImages.rows });
-    } catch (error) {
-        console.error('❌ Erro no PUT:', error.message);
         res.status(500).json({ error: error.message });
     }
 });
 
+// ATUALIZAR evento
+app.put('/api/events/:id', authMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description, event_date, location, status, cover_image } = req.body;
+
+        const result = await pool.query(
+            `UPDATE events 
+             SET title = COALESCE($1, title),
+                 description = COALESCE($2, description),
+                 event_date = COALESCE($3, event_date),
+                 location = COALESCE($4, location),
+                 status = COALESCE($5, status),
+                 cover_image = COALESCE($6, cover_image),
+                 updated_at = NOW()
+             WHERE id = $7
+             RETURNING *`,
+            [title, description, event_date, location, status, cover_image, id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Evento não encontrado' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Update event error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// DELETAR evento
 app.delete('/api/events/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
-        const images = await pool.query('SELECT image_url FROM event_images WHERE event_id = $1', [id]);
-        for (const img of images.rows) {
-            const imagePath = path.join(__dirname, 'frontend', img.image_url);
-            if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
-        }
         await pool.query('DELETE FROM events WHERE id = $1', [id]);
         res.status(204).send();
     } catch (error) {
@@ -423,25 +327,22 @@ app.get('/api/transparency', async (req, res) => {
     }
 });
 
-app.post('/api/events', authMiddleware, async (req, res) => {
+app.post('/api/transparency', authMiddleware, async (req, res) => {
     try {
-        const { title, description, event_date, location, status, cover_image } = req.body;
-
-        if (!title || !event_date) {
-            return res.status(400).json({ error: 'Título e data são obrigatórios' });
+        const { type, category, description, amount, transaction_date, document_url } = req.body;
+        if (!type || !category || !amount || !transaction_date) {
+            return res.status(400).json({ error: 'Campos obrigatórios' });
         }
-
         const result = await pool.query(
-            `INSERT INTO events (title, description, event_date, location, status, created_by, cover_image)
+            `INSERT INTO transparency (type, category, description, amount, transaction_date, document_url, created_by)
              VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-            [title, description, event_date, location, status || 'upcoming', req.user.id, cover_image || null]
+            [type, category, description, amount, transaction_date, document_url || null, req.user.id]
         );
-
-        const newEvent = await pool.query('SELECT * FROM events WHERE id = $1', [result.rows[0].id]);
-        res.status(201).json(newEvent.rows[0]);
+        const newRecord = await pool.query('SELECT * FROM transparency WHERE id = $1', [result.rows[0].id]);
+        res.status(201).json(newRecord.rows[0]);
     } catch (error) {
-        console.error('Create event error:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Create transparency error:', error);
+        res.status(500).json({ error: 'Erro ao criar registro' });
     }
 });
 
@@ -595,33 +496,16 @@ app.post('/api/voluntarios', async (req, res) => {
     }
 });
 
-app.put('/api/events/:id', authMiddleware, async (req, res) => {
+app.put('/api/voluntarios/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, description, event_date, location, status, cover_image } = req.body;
-
-        const result = await pool.query(
-            `UPDATE events 
-             SET title = COALESCE($1, title),
-                 description = COALESCE($2, description),
-                 event_date = COALESCE($3, event_date),
-                 location = COALESCE($4, location),
-                 status = COALESCE($5, status),
-                 cover_image = COALESCE($6, cover_image),
-                 updated_at = NOW()
-             WHERE id = $7
-             RETURNING *`,
-            [title, description, event_date, location, status, cover_image, id]
-        );
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Evento não encontrado' });
-        }
-
-        res.json(result.rows[0]);
+        const { status } = req.body;
+        
+        await pool.query('UPDATE voluntarios SET status = $1 WHERE id = $2', [status, id]);
+        res.json({ success: true });
     } catch (error) {
-        console.error('Update event error:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Update voluntario error:', error);
+        res.status(500).json({ error: 'Erro ao atualizar voluntário' });
     }
 });
 
