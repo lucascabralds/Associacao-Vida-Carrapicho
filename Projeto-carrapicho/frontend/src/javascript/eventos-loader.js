@@ -51,7 +51,7 @@ function criarCardEvento(evento, indice) {
         ? evento.images.slice(0, 3).map(img => `
             <div class="event-thumb">
                 <img src="${img.image_url}" alt="${titulo}">
-                <p>${titulo}</p>
+               
             </div>
         `).join('')
         : `
