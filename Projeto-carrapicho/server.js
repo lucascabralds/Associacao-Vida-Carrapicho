@@ -546,7 +546,6 @@ app.post('/api/contato', async (req, res) => {
         });
     }
 });
-
 // =====================================================
 // ROTAS DE VOLUNTÁRIOS
 // =====================================================
@@ -562,19 +561,19 @@ app.get('/api/voluntarios', authMiddleware, async (req, res) => {
     }
 });
 
-// Criar inscrição (público)
+// Criar inscrição (público) - COM interesse_tipo e mensagem separados
 app.post('/api/voluntarios', async (req, res) => {
     try {
-        const { nome, email, telefone, disponibilidade, interesse } = req.body;
+        const { nome, email, telefone, disponibilidade, interesse_tipo, mensagem } = req.body;
         
         if (!nome || !email) {
             return res.status(400).json({ error: 'Nome e email são obrigatórios' });
         }
         
         const result = await pool.query(
-            `INSERT INTO voluntarios (nome, email, telefone, disponibilidade, interesse, status)
-             VALUES ($1, $2, $3, $4, $5, 'pendente') RETURNING id`,
-            [nome, email, telefone || null, disponibilidade || null, interesse || null]
+            `INSERT INTO voluntarios (nome, email, telefone, disponibilidade, interesse_tipo, interesse, status)
+             VALUES ($1, $2, $3, $4, $5, $6, 'pendente') RETURNING id`,
+            [nome, email, telefone || null, disponibilidade || null, interesse_tipo || null, mensagem || null]
         );
         
         res.status(201).json({ success: true, id: result.rows[0].id });
@@ -609,6 +608,7 @@ app.delete('/api/voluntarios/:id', authMiddleware, async (req, res) => {
         res.status(500).json({ error: 'Erro ao deletar voluntário' });
     }
 });
+
 
 
 // =====================================================
