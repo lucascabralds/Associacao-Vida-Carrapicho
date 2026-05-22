@@ -1,183 +1,497 @@
-Sumário de implementação do sistema - Frontend Associação Vida Carrapicho
+````markdown
+# 🔐 ACESSO PARA AVALIAÇÃO DO PROFESSOR
 
-1. Visão Geral do Frontend
-2. Tecnologias Utilizadas
-3. Estrutura de Diretórios
-4. Funcionalidades Implementadas
-5. Pré-requisitos para Instalação
-6. Passo a Passo para Instalação
-7. Configuração de Dependências e APIs
-8. Como Executar o Sistema
-9. Guia de Uso da Interface
-10. Personalização e Estilos (CSS)
-11. Solução de Problemas
-12. Manutenção e Atualizações
-________________________________________
+## Credenciais do Painel Administrativo
 
-1. Visão Geral do Frontend
-O frontend da Associação Vida Carrapicho é uma Landing Page interativa e responsiva ("Single Page Application" estática) desenvolvida para apresentar a ONG, engajar o público e facilitar a captação de recursos. O sistema permite a navegação fluida entre seções institucionais, visualização de gráficos de transparência financeira e conta com um sistema dinâmico de doações com geração de código PIX em tempo real.
+| Tipo | Acesso |
+|------|--------|
+| **URL do Admin** | `linkversel/admin` ou em "adminstração" no footer|
+| **E-mail** | `admin@carrapicho.com` |
+| **Senha** | `admin123` |
 
-Objetivos
-- Apresentar a missão, estrutura e eventos da associação.
-- Fornecer um meio rápido e acessível para doações via PIX ou Cartão.
-- Demonstrar transparência através de gráficos visuais de alocação de recursos.
-- Garantir acessibilidade e usabilidade em dispositivos móveis e desktops.
-________________________________________
+> ⚠️ **Importante:** O servidor Node.js precisa estar rodando para acessar o painel administrativo.
 
-2. Tecnologias Utilizadas
+---
 
-Frontend Core
-- HTML5: Estruturação semântica da página (index.html)
-- CSS3: Estilização, variáveis de tema e responsividade
-- JavaScript (ES6+): Lógica de interação, modais e cálculos dinâmicos
+# 📋 Sumário de Implementação — Associação Vida Carrapicho
 
-Bibliotecas e APIs Externas (Via CDN)
-- jQuery (3.7.1): Manipulação do DOM e simplificação de eventos
-- Chart.js: Renderização do gráfico de barras de transparência
-- ChartDataLabels: Exibição de porcentagens dinâmicas dentro do gráfico
-- QR Code API (v1): API pública (qrserver.com) para gerar o QR Code do PIX
-________________________________________
+## 📑 Sumário
 
-3. Estrutura de Diretórios
+1. [Visão Geral do Sistema](#1-visão-geral-do-sistema)
+2. [Tecnologias Utilizadas](#2-tecnologias-utilizadas)
+3. [Estrutura de Diretórios](#3-estrutura-de-diretórios)
+4. [Funcionalidades Implementadas](#4-funcionalidades-implementadas)
+5. [Pré-requisitos para Instalação](#5-pré-requisitos-para-instalação)
+6. [Passo a Passo para Instalação](#6-passo-a-passo-para-instalação)
+7. [Configuração de Dependências e APIs](#7-configuração-de-dependências-e-apis)
+8. [Como Executar o Sistema](#8-como-executar-o-sistema)
+9. [Guia de Uso da Interface](#9-guia-de-uso-da-interface)
+10. [Personalização e Estilos (CSS)](#10-personalização-e-estilos-css)
+11. [Solução de Problemas](#11-solução-de-problemas)
+12. [Manutenção e Atualizações](#12-manutenção-e-atualizações)
 
+---
+
+# 1. 🌻 Visão Geral do Sistema
+
+O sistema da **Associação Vida Carrapicho** é uma plataforma web completa desenvolvida para auxiliar a ONG na divulgação institucional, gerenciamento administrativo, controle financeiro e organização de eventos.
+
+O projeto foi dividido em dois grandes módulos:
+
+---
+
+## 🌐 Site Institucional (Frontend Público)
+
+Landing Page responsiva e interativa desenvolvida para:
+
+- Apresentar a ONG e sua missão
+- Divulgar eventos e ações sociais
+- Facilitar doações via PIX
+- Exibir transparência financeira
+- Captar voluntários e parceiros
+
+O frontend possui:
+
+- Navegação fluida
+- Design responsivo
+- Animações modernas
+- Modais interativos
+- Sistema de eventos dinâmicos
+- Geração automática de QR Code PIX
+
+---
+
+## 🔐 Painel Administrativo (Sistema Restrito)
+
+Sistema completo de gerenciamento interno com autenticação JWT.
+
+Permite:
+
+- CRUD de eventos
+- Upload de imagens
+- Gestão financeira
+- Gestão de voluntários
+- Controle de usuários
+- Dashboard estatístico
+- Relatórios PDF
+
+---
+
+## 🎯 Objetivos do Projeto
+
+- Modernizar a presença digital da associação
+- Facilitar arrecadações via PIX
+- Garantir transparência financeira
+- Melhorar organização administrativa
+- Automatizar processos internos
+- Disponibilizar acesso responsivo em qualquer dispositivo
+
+---
+
+# 2. 🚀 Tecnologias Utilizadas
+
+## 🎨 Frontend
+
+| Tecnologia | Finalidade |
+|------------|------------|
+| **HTML5** | Estruturação semântica |
+| **CSS3** | Estilização e responsividade |
+| **JavaScript (ES6+)** | Interatividade e lógica dinâmica |
+| **jQuery** | Manipulação simplificada do DOM |
+| **Chart.js** | Gráficos financeiros |
+| **ChartDataLabels** | Percentuais em gráficos |
+| **HTML2PDF** | Exportação de relatórios |
+
+---
+
+## 🔧 Backend
+
+| Tecnologia | Finalidade |
+|------------|------------|
+| **Node.js + Express** | API RESTful |
+| **PostgreSQL** | Banco de dados relacional |
+| **JWT** | Autenticação segura |
+| **bcryptjs** | Hash de senhas |
+| **Multer** | Upload de imagens |
+| **QRCode** | Geração de QR Code PIX |
+
+---
+
+# 3. 📁 Estrutura de Diretórios
+
+```bash
 Associacao-Vida-Carrapicho/
-|
-|-- index.html                 # Página principal estrutural
-|
-|-- src/
-|   |-- styles/
-|   |   |-- style.css          # Estilos globais e variáveis de cor
-|   |   |-- header.css         # Estilização da barra de navegação
-|   |   |-- home.css           # Estilização da seção Hero (Início)
-|   |   |-- eventos.css        # Estilização dos cards de eventos
-|   |
-|   |-- javascript/
-|       |-- script.js          # Lógica principal (Modais, PIX, Gráfico)
-|
-|-- img/                       # Logotipos, ícones SVG e imagens de conteúdo
-________________________________________
+└── Projeto-carrapicho/
+    ├── server.js
+    ├── .env
+    ├── package.json
+    ├── vercel.json
+    │
+    ├── backend/
+    │   ├── config/
+    │   │   └── database.js
+    │   │
+    │   ├── controllers/
+    │   │   ├── authController.js
+    │   │   ├── eventController.js
+    │   │   ├── transparencyController.js
+    │   │   └── donationController.js
+    │   │
+    │   ├── routes/
+    │   │   ├── authRoutes.js
+    │   │   ├── eventRoutes.js
+    │   │   ├── transparencyRoutes.js
+    │   │   └── donationRoutes.js
+    │   │
+    │   └── middlewares/
+    │       └── auth.js
+    │
+    └── frontend/
+        ├── home.html
+        ├── evento.html
+        │
+        ├── admin/
+        │   └── index.html
+        │
+        ├── src/
+        │   ├── styles/
+        │   │   ├── style.css
+        │   │   ├── header.css
+        │   │   ├── home.css
+        │   │   └── eventos.css
+        │   │
+        │   └── javascript/
+        │       ├── script.js
+        │       ├── animations.js
+        │       └── eventos-loader.js
+        │
+        ├── uploads/
+        └── img/
+````
 
-4. Funcionalidades Implementadas
+---
 
-Navegação e Interface
-- Menu Responsivo (Mobile First): Menu estilo "hamburguer" que se adapta a telas menores.
-- Navegação Fixa (Sticky Header): O cabeçalho acompanha o usuário durante a rolagem.
+# 4. ✅ Funcionalidades Implementadas
 
-Sistema de Doações (Modal)
-- Interface em múltiplos passos (Escolha de Valor -> Método de Pagamento).
-- Botões de valores predefinidos (R$ 20, R$ 50, R$ 100, etc.) e campo de valor customizado.
-- Gerador de PIX Dinâmico: Calcula o Payload PIX no padrão EMV e gera o código CRC16 automaticamente baseado no valor inserido.
-- Geração de QR Code na tela e botão "Pix Copia e Cola" funcional.
-- Simulação visual de formulário para cartão de crédito.
+# 🌐 Site Institucional
 
-Módulo de Transparência
-- Modal dedicado com cards de KPIs (Doações, Alimentação, Educação, etc.).
-- Gráfico de barras dinâmico gerado via Chart.js que exibe a distribuição percentual exata dos recursos.
+| Funcionalidade           | Descrição                        | Status |
+| ------------------------ | -------------------------------- | :----: |
+| Navegação Responsiva     | Menu hamburguer e cabeçalho fixo |    ✅   |
+| Sistema PIX              | Modal com QR Code dinâmico       |    ✅   |
+| Transparência Financeira | Dashboard visual com gráficos    |    ✅   |
+| Eventos Dinâmicos        | Cards e detalhes completos       |    ✅   |
+| Contato e Voluntários    | Formulários integrados           |    ✅   |
+| Créditos da Equipe       | Modal dos desenvolvedores        |    ✅   |
+| Animações Modernas       | Scroll reveal e contadores       |    ✅   |
 
-Módulo de Contato
-- Modal interativo com formulário de envio de mensagem e mapa integrado (via iframe do Google Maps).
-________________________________________
+---
 
-5. Pré-requisitos para Instalação
+# 🔐 Painel Administrativo
 
-Ambiente Necessário
-- Navegador Web: Chrome, Firefox, Safari ou Edge (Atualizados)
-- Conexão com Internet: Necessária para carregar as bibliotecas (jQuery, Chart.js) e gerar o QR Code PIX
-- Editor de Código: VS Code, Sublime Text (Apenas para edição)
-________________________________________
+| Funcionalidade        | Descrição                          | Status |
+| --------------------- | ---------------------------------- | :----: |
+| Login JWT             | Sistema seguro de autenticação     |    ✅   |
+| Dashboard             | Indicadores financeiros e gráficos |    ✅   |
+| Gestão de Eventos     | CRUD completo                      |    ✅   |
+| Upload de Imagens     | Até 5 imagens por evento           |    ✅   |
+| Gestão Financeira     | Receitas e despesas                |    ✅   |
+| Gestão de Usuários    | Admin e Editor                     |    ✅   |
+| Gestão de Voluntários | Controle de status                 |    ✅   |
+| Relatórios PDF        | Financeiro e eventos               |    ✅   |
+| Proteção de Rotas     | Middleware JWT                     |    ✅   |
 
-6. Passo a Passo para Instalação
+---
 
-1. Extraia a pasta Associacao-Vida-Carrapicho/ no seu computador.
-2. Certifique-se de que a estrutura de pastas (/img, /src/styles, /src/javascript) está intacta no mesmo nível do index.html.
-3. Não é necessária a instalação de dependências via terminal (NPM), pois o projeto utiliza requisições via CDN nativas do HTML.
-________________________________________
+# 5. 🖥️ Pré-requisitos para Instalação
 
-7. Configuração de Dependências e APIs
+## Backend
 
-Caso precise atualizar as bibliotecas, elas estão localizadas no <head> e no final do <body> do arquivo index.html:
+* Node.js v18+
+* PostgreSQL v14+
+* Git
 
-jQuery (Head):
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+## Frontend
 
-Chart.js (Antes do Gráfico):
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+* Navegador atualizado
+* Internet para bibliotecas CDN
 
-Chave PIX (Para alteração futura):
-No arquivo src/javascript/script.js, na função gerarPayloadPix(), atualize as constantes:
-const chave = "07895526000126"; // Substitua pela chave PIX oficial
-const nomeCompleto = "ASSOCIACAO VIDA CARRAPICHO"; 
-________________________________________
+---
 
-8. Como Executar o Sistema
+# 6. ⚙️ Passo a Passo para Instalação
 
-Opção 1: Execução Local Direta (Modo Leitura)
-1. Navegue até a pasta do projeto.
-2. Dê um duplo clique no arquivo index.html.
-3. O sistema abrirá diretamente no seu navegador padrão (URL constará como file:///...).
+## 📦 Instalação Completa
 
-Opção 2: Execução via Servidor Local (Recomendado para Testes)
-Se estiver usando o VS Code, instale a extensão "Live Server".
-1. Clique com o botão direito no arquivo index.html.
-2. Selecione "Open with Live Server".
-3. O projeto abrirá no endereço http://127.0.0.1:5500.
-________________________________________
+```bash
+# 1. Entre na pasta do projeto
+cd Projeto-carrapicho
 
-9. Guia de Uso da Interface
+# 2. Instale as dependências
+npm install
 
-Explorando a Página
-1. Utilize o menu superior para navegar suavemente entre as seções: Início, Sobre Nós e Eventos.
-2. Na seção "Próximos Eventos", visualize os cards com datas destacadas.
+# 3. Configure o PostgreSQL
+# Crie um banco chamado:
+ong_carrapicho
 
-Realizando uma Doação (Teste)
-1. Clique no botão verde "Doar" no canto superior direito.
-2. Selecione um valor sugerido (ex: R$ 50) ou digite um valor no campo de texto.
-3. Clique em "Continuar".
-4. Selecione a opção "PIX".
-5. Escaneie o QR Code exibido com o celular ou clique em "Copiar" para testar o sistema Copia e Cola.
+# 4. Configure o arquivo .env
 
-Acessando a Transparência
-1. Clique em "Transparência" no menu principal.
-2. O modal escurecerá a tela e exibirá o painel.
-3. Observe as animações das barras de progresso (.kpi-bar-fill) e o carregamento fluido do gráfico Chart.js.
-________________________________________
+# 5. Inicie o servidor
+npm start
+```
 
-10. Personalização e Estilos (CSS)
+---
 
-Para alterar o esquema de cores global do site de maneira fácil, acesse o arquivo src/styles/style.css e localize o bloco :root:
+# 7. 🔧 Configuração de Dependências e APIs
 
+# 🗄️ Banco de Dados PostgreSQL
+
+```sql
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) DEFAULT 'editor',
+    active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE events (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    event_date TIMESTAMP NOT NULL,
+    location VARCHAR(200),
+    status VARCHAR(20) DEFAULT 'upcoming',
+    created_by INTEGER REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE event_images (
+    id SERIAL PRIMARY KEY,
+    event_id INTEGER REFERENCES events(id) ON DELETE CASCADE,
+    image_url VARCHAR(500),
+    is_cover BOOLEAN DEFAULT false
+);
+
+CREATE TABLE transparency (
+    id SERIAL PRIMARY KEY,
+    type VARCHAR(20),
+    category VARCHAR(50),
+    description TEXT,
+    amount DECIMAL(10,2),
+    transaction_date DATE
+);
+
+CREATE TABLE donations (
+    id SERIAL PRIMARY KEY,
+    donor_name VARCHAR(100),
+    donor_email VARCHAR(100),
+    amount DECIMAL(10,2),
+    pix_payload TEXT,
+    qr_code TEXT,
+    status VARCHAR(20)
+);
+
+CREATE TABLE voluntarios (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100),
+    email VARCHAR(100),
+    telefone VARCHAR(20),
+    disponibilidade TEXT,
+    interesse TEXT,
+    status VARCHAR(20)
+);
+
+CREATE TABLE contacts (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100),
+    phone VARCHAR(20),
+    message TEXT
+);
+```
+
+---
+
+# ⚙️ Arquivo `.env`
+
+```env
+DATABASE_URL=postgresql://usuario:senha@localhost:5432/ong_carrapicho
+
+JWT_SECRET=meu_segredo_super_secreto_123
+
+PIX_KEY=07895526000126
+PIX_MERCHANT_NAME="ASSOCIACAO VIDA CARRAPICHO"
+PIX_MERCHANT_CITY="SAO PAULO"
+
+NODE_ENV=development
+PORT=3000
+```
+
+---
+
+# 8. ▶️ Como Executar o Sistema
+
+## 🌐 Apenas Frontend
+
+Abra:
+
+```bash
+frontend/home.html
+```
+
+---
+
+## 🔐 Sistema Completo
+
+```bash
+npm start
+```
+
+### Acessos
+
+| Sistema      | URL                           |
+| ------------ | ----------------------------- |
+| Site Público | `http://localhost:3000`       |
+| Painel Admin | `http://localhost:3000/admin` |
+
+---
+
+# 9. 📖 Guia de Uso da Interface
+
+# 🌐 Site Público
+
+## 💰 Realizando uma Doação
+
+1. Clique em **Doar**
+2. Escolha um valor
+3. Gere o QR Code PIX
+4. Escaneie ou copie o código
+
+---
+
+## 📊 Transparência
+
+Acesse:
+
+**Menu → Transparência**
+
+Visualize:
+
+* Total arrecadado
+* Total de gastos
+* Saldo atual
+* Gráficos financeiros
+
+---
+
+## 👥 Voluntários
+
+1. Clique em **Contato**
+2. Escolha "Quero ser voluntário"
+3. Envie os dados
+
+---
+
+# 🔐 Painel Administrativo
+
+## 📊 Dashboard
+
+* Indicadores financeiros
+* Gráficos estatísticos
+* Resumos por categoria
+
+---
+
+## 📅 Gestão de Eventos
+
+* Criar eventos
+* Upload de imagens
+* Editar informações
+* Excluir registros
+
+---
+
+## 💵 Gestão Financeira
+
+* Registrar receitas
+* Registrar despesas
+* Filtrar categorias
+
+---
+
+## 👥 Gestão de Usuários
+
+* Criar Admin/Editor
+* Alterar permissões
+* Exclusão segura
+
+---
+
+# 10. 🎨 Personalização e Estilos (CSS)
+
+## 🌈 Variáveis Globais
+
+```css
 :root {
-    --primary-blue: #1D2671;      /* Cor primária para textos fortes */
-    --text-color: #4a4a4a;        /* Cor para textos de parágrafos */
-    --green-donate: #00A859;      /* Cor de destaque para botões e doações */
-    --yellow-accent: #FFB800;     /* Cor de botões secundários (Ex: Saiba Mais) */
+    --primary-blue: #1D2671;
+    --text-color: #4a4a4a;
+    --green-donate: #00A859;
+    --yellow-accent: #FFB800;
 }
+```
 
-Alterar essas variáveis atualizará a cor em toda a página automaticamente.
-________________________________________
+---
 
-11. Solução de Problemas!
+## 🔤 Fontes
 
-Erro: O Gráfico de transparência não carrega ou fica em branco.
-Causa: Falta de conexão com a internet ou adblocker bloqueando o script do Chart.js.
-Solução: Verifique a conexão com a internet. Verifique o console (F12) para ver se os links cdn.jsdelivr.net foram bloqueados..
+```css
+* {
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+```
 
-Erro: O QR Code do PIX aparece quebrado.
-Causa: A API externa do qrserver.com pode estar instável.
-Solução: O código "Pix Copia e Cola" funciona de maneira independente e offline. O usuário ainda pode copiar o texto caso a imagem da API falhe.
+---
 
-Erro: Modal de doação não abre ao clicar.
-Causa: O jQuery pode não ter sido carregado corretamente antes do arquivo script.js.
-Solução: Verifique se as tags <script> no arquivo index.html estão na ordem correta (jQuery no head, script.js no final do body).
-________________________________________
+# 11. 🛠️ Solução de Problemas
 
-12. Manutenção e Atualizações
+| Problema             | Solução                    |
+| -------------------- | -------------------------- |
+| Gráfico não aparece  | Verifique internet/CDN     |
+| QR Code falha        | Use PIX Copia e Cola       |
+| Admin não abre       | Execute `npm start`        |
+| Login inválido       | Verifique PostgreSQL       |
+| Upload falha         | Verifique pasta uploads    |
+| Eventos não carregam | Confirme API na porta 3000 |
 
-Como alterar os Dados do Gráfico
-No arquivo src/javascript/script.js, localize a função buildChart():
-Altere a array data: [43.75, 31.25, 18.75, 6.25] para as novas porcentagens.
-Altere a array labels: para modificar os nomes das categorias se necessário.
+---
 
-Backup
-Recomenda-se realizar uma cópia completa da pasta Associacao-Vida-Carrapicho/ antes de realizar grandes modificações nos arquivos HTML, CSS ou JS. Utilize ferramentas de controle de versão (Git) para gerenciar o histórico de edições do frontend.
+# 12. 🔄 Manutenção e Atualizações
+
+## 💾 Backup Recomendado
+
+Realizar backup de:
+
+* Banco PostgreSQL
+* Pasta `uploads/`
+* Arquivo `.env`
+
+---
+
+## 🚀 Deploy na Vercel
+
+1. Conecte o GitHub à Vercel
+2. Configure variáveis de ambiente
+3. Deploy automático disponível via `vercel.json`
+
+---
+
+<div align="center">
+
+# 🌻 Associação Vida Carrapicho
+
+### © 2026 — Todos os direitos reservados.
+
+</div>
+```
