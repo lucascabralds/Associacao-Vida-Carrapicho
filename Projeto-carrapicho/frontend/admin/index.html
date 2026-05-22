@@ -783,13 +783,11 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>📸 Imagens do Evento (máximo 5)</label>
-                            <input type="file" id="evento_images" name="images" multiple accept="image/*">
-                            <div id="evento_preview" class="image-preview" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;"></div>
+                            <label>🖼️ URL da Imagem de Capa</label>
+                            <input type="url" id="evento_cover_image" placeholder="https://res.cloudinary.com/dt6fhuisp/image/upload/...">
                             <small style="color: #6b7280;">
-                                ⭐ A primeira imagem será a capa do evento.<br>
-                                📏 Formatos: JPG, PNG, GIF, WEBP<br>
-                                🖼️ Clique no ✕ para remover a imagem
+                                ⭐ Insira a URL da imagem (pode ser do Cloudinary, Google Drive, etc.)<br>
+                                📏 Formatos aceitos: JPG, PNG, GIF, WEBP
                             </small>
                         </div>
                         <div class="form-group">
@@ -1370,52 +1368,50 @@ function fecharModalMensagem() {
         document.getElementById('formEvento').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const formData = new FormData();
-            formData.append('title', document.getElementById('evento_title').value);
-            formData.append('description', document.getElementById('evento_desc').value);
-            formData.append('event_date', document.getElementById('evento_date').value);
-            formData.append('location', document.getElementById('evento_location').value);
-            formData.append('status', document.getElementById('evento_status').value);
-            
-            const files = document.getElementById('evento_images').files;
-            if (files.length > 5) {
-                alert('Máximo de 5 imagens por evento!');
-                return;
-            }
-            
-            const loadingMsg = document.createElement('div');
-            loadingMsg.textContent = '⏳ Processando imagens...';
-            loadingMsg.style.color = '#00A859';
-            document.getElementById('formEvento').appendChild(loadingMsg);
-            
-            for (let i = 0; i < files.length; i++) {
-                const compressed = await comprimirImagem(files[i], 1024, 0.7);
-                formData.append('images', compressed, `imagem_${i}.jpg`);
-            }
-            
-            try {
-                const response = await fetch(`${API_URL}/events`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    body: formData
-                });
-                
-                if (response.ok) {
-                    alert(`✅ Evento criado com sucesso!\n📸 Imagens enviadas: ${files.length}`);
-                    document.getElementById('formEvento').reset();
-                    document.getElementById('evento_preview').innerHTML = '';
-                    carregarEventos();
-                } else {
-                    const error = await response.json();
-                    alert('❌ Erro ao criar evento: ' + (error.error || 'Erro desconhecido'));
-                }
-            } catch (error) {
-                alert('❌ Erro de conexão: ' + error.message);
-            } finally {
-                loadingMsg.remove();
-            }
-        });
+        const data = {
+    title: document.getElementById('evento_title').value,
+    description: document.getElementById('evento_desc').value,
+    event_date: document.getElementById('evento_date').value,
+    location: document.getElementById('evento_location').value,
+    status: document.getElementById('evento_status').value,
+    cover_image: document.getElementById('evento_cover_image').value || null
+};
 
+if (!data.title || !data.event_date) {
+    alert('❌ Título e data são obrigatórios!');
+    return;
+}
+
+const loadingMsg = document.createElement('div');
+loadingMsg.textContent = '⏳ Criando evento...';
+loadingMsg.style.color = '#00A859';
+document.getElementById('formEvento').appendChild(loadingMsg);
+
+try {
+    const response = await fetch(`${API_URL}/events`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+    });
+    
+    if (response.ok) {
+        alert('✅ Evento criado com sucesso!');
+        document.getElementById('formEvento').reset();
+        document.getElementById('evento_preview').innerHTML = '';
+        carregarEventos();
+    } else {
+        const error = await response.json();
+        alert('❌ Erro ao criar evento: ' + (error.error || 'Erro desconhecido'));
+    }
+} catch (error) {
+    alert('❌ Erro de conexão: ' + error.message);
+} finally {
+    loadingMsg.remove();
+}
+            
         // =====================================================
         // PREVIEW AO SELECIONAR IMAGENS (COM LIMITE DE 5)
         // =====================================================
