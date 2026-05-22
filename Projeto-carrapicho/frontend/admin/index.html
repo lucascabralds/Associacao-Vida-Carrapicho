@@ -1073,6 +1073,49 @@
     }
 }
 
+        async function atualizarStatusVoluntario(id, status) {
+    try {
+        const response = await fetch(`${API_URL}/voluntarios/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ status })
+        });
+        
+        if (response.ok) {
+            alert('✅ Status atualizado com sucesso!');
+            carregarVoluntarios();
+        } else {
+            alert('❌ Erro ao atualizar status');
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('❌ Erro de conexão');
+    }
+}
+
+async function deletarVoluntario(id) {
+    if (!confirm('⚠️ Tem certeza que deseja excluir esta inscrição?')) return;
+    
+    try {
+        const response = await fetch(`${API_URL}/voluntarios/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+            alert('✅ Inscrição excluída com sucesso!');
+            carregarVoluntarios();
+        } else {
+            alert('❌ Erro ao excluir');
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('❌ Erro de conexão');
+    }
+}
         
         // =====================================================
         // FUNÇÃO PARA COMPRIMIR IMAGEM
