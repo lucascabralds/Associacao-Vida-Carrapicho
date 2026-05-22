@@ -1297,7 +1297,7 @@ function fecharModalMensagem() {
             }
         });
 
-        // =====================================================
+               // =====================================================
         // FORMULÁRIO DE CRIAÇÃO DE EVENTO (COM UPLOAD)
         // =====================================================
         document.getElementById('formEvento').addEventListener('submit', async (e) => {
@@ -1311,9 +1311,13 @@ function fecharModalMensagem() {
             formData.append('status', document.getElementById('evento_status').value);
             
             const fileInput = document.getElementById('evento_image');
-            if (fileInput.files.length > 0) {
+            if (fileInput && fileInput.files.length > 0) {
                 formData.append('image', fileInput.files[0]);
             }
+
+            // Debug: ver o que está sendo enviado
+            console.log('📤 Título:', formData.get('title'));
+            console.log('📤 Data:', formData.get('event_date'));
 
             if (!formData.get('title') || !formData.get('event_date')) {
                 alert('❌ Título e data são obrigatórios!');
@@ -1321,7 +1325,7 @@ function fecharModalMensagem() {
             }
 
             const loadingMsg = document.createElement('div');
-            loadingMsg.textContent = '⏳ Enviando imagem...';
+            loadingMsg.textContent = '⏳ Enviando evento...';
             loadingMsg.style.color = '#00A859';
             document.getElementById('formEvento').appendChild(loadingMsg);
 
@@ -1332,16 +1336,19 @@ function fecharModalMensagem() {
                     body: formData
                 });
                 
+                const result = await response.json();
+                console.log('✅ Resposta:', result);
+                
                 if (response.ok) {
                     alert('✅ Evento criado com sucesso!');
                     document.getElementById('formEvento').reset();
                     document.getElementById('evento_preview').innerHTML = '';
                     carregarEventos();
                 } else {
-                    const error = await response.json();
-                    alert('❌ Erro: ' + (error.error || 'Erro desconhecido'));
+                    alert('❌ Erro: ' + (result.error || 'Erro desconhecido'));
                 }
             } catch (error) {
+                console.error('❌ Erro:', error);
                 alert('❌ Erro de conexão: ' + error.message);
             } finally {
                 loadingMsg.remove();
