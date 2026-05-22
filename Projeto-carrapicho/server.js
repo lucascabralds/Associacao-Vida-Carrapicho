@@ -423,22 +423,25 @@ app.get('/api/transparency', async (req, res) => {
     }
 });
 
-app.post('/api/transparency', authMiddleware, async (req, res) => {
+app.post('/api/events', authMiddleware, async (req, res) => {
     try {
-        const { type, category, description, amount, transaction_date, document_url } = req.body;
-        if (!type || !category || !amount || !transaction_date) {
-            return res.status(400).json({ error: 'Campos obrigatórios' });
+        const { title, description, event_date, location, status, cover_image } = req.body;
+
+        if (!title || !event_date) {
+            return res.status(400).json({ error: 'Título e data são obrigatórios' });
         }
+
         const result = await pool.query(
-            `INSERT INTO transparency (type, category, description, amount, transaction_date, document_url, created_by)
+            `INSERT INTO events (title, description, event_date, location, status, created_by, cover_image)
              VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-            [type, category, description, amount, transaction_date, document_url || null, req.user.id]
+            [title, description, event_date, location, status || 'upcoming', req.user.id, cover_image || null]
         );
-        const newRecord = await pool.query('SELECT * FROM transparency WHERE id = $1', [result.rows[0].id]);
-        res.status(201).json(newRecord.rows[0]);
+
+        const newEvent = await pool.query('SELECT * FROM events WHERE id = $1', [result.rows[0].id]);
+        res.status(201).json(newEvent.rows[0]);
     } catch (error) {
-        console.error('Create transparency error:', error);
-        res.status(500).json({ error: 'Erro ao criar registro' });
+        console.error('Create event error:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
@@ -592,16 +595,33 @@ app.post('/api/voluntarios', async (req, res) => {
     }
 });
 
-app.put('/api/voluntarios/:id', authMiddleware, async (req, res) => {
+app.put('/api/events/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body;
-        
-        await pool.query('UPDATE voluntarios SET status = $1 WHERE id = $2', [status, id]);
-        res.json({ success: true });
+        const { title, description, event_date, location, status, cover_image } = req.body;
+
+        const result = await pool.query(
+            `UPDATE events 
+             SET title = COALESCE($1, title),
+                 description = COALESCE($2, description),
+                 event_date = COALESCE($3, event_date),
+                 location = COALESCE($4, location),
+                 status = COALESCE($5, status),
+                 cover_image = COALESCE($6, cover_image),
+                 updated_at = NOW()
+             WHERE id = $7
+             RETURNING *`,
+            [title, description, event_date, location, status, cover_image, id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Evento não encontrado' });
+        }
+
+        res.json(result.rows[0]);
     } catch (error) {
-        console.error('Update voluntario error:', error);
-        res.status(500).json({ error: 'Erro ao atualizar voluntário' });
+        console.error('Update event error:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
