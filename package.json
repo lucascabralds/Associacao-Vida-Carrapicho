@@ -2,7 +2,8 @@
   "name": "associacao-vida-carrapicho",
   "version": "1.0.0",
   "scripts": {
-    "build": "cd Projeto-carrapicho && npm install"
+    "build": "echo 'Build concluído'",
+    "start": "node Projeto-carrapicho/server.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
