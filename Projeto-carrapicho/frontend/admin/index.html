@@ -1029,6 +1029,7 @@
             carregarTudo();
             verificarPermissaoAdmin();
         }
+
         async function carregarVoluntarios() {
     if (!isAdmin()) return;
     
@@ -1050,7 +1051,10 @@
                 <td>${v.nome}</td>
                 <td>${v.email}</td>
                 <td>${v.telefone || '-'}</td>
-                <td><button class="btn-secondary" onclick="verMensagem('${(v.interesse || '').replace(/'/g, "\\'")}', '${v.nome}')">📖 Ler Mensagem</button></td>
+                <td style="max-width: 250px; word-wrap: break-word;">
+                    ${v.interesse ? (v.interesse.length > 60 ? v.interesse.substring(0, 60) + '...' : v.interesse) : '-'}
+                    ${v.interesse && v.interesse.length > 60 ? `<br><small><button class="btn-secondary" onclick="verMensagem('${(v.interesse || '').replace(/'/g, "\\'")}', '${v.nome}')">📖 Ver completo</button></small>` : ''}
+                </td>
                 <td>${new Date(v.created_at).toLocaleDateString('pt-BR')}</td>
                 <td>
                     <select onchange="atualizarStatusVoluntario(${v.id}, this.value)" style="padding: 4px 8px; border-radius: 6px;">
@@ -1069,6 +1073,7 @@
     }
 }
 
+        
         // =====================================================
         // FUNÇÃO PARA COMPRIMIR IMAGEM
         // =====================================================
