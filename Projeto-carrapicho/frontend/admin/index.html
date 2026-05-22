@@ -433,7 +433,7 @@
             color: #dc2626;
         }
 
-        .image-preview,
+        .image-ew,
         .current-images {
             display: flex;
             gap: 10px;
@@ -1274,54 +1274,10 @@ function fecharModalMensagem() {
     const modal = document.getElementById('modalMensagem');
     if (modal) modal.remove();
 }
-        // =====================================================
-        // REMOVER IMAGEM DO PREVIEW
-        // =====================================================
-        function removerImagemSelecionada(index) {
-            const input = document.getElementById('evento_images');
-            const dt = new DataTransfer();
-            const files = Array.from(input.files);
-            
-            if (files[index]) {
-                files.splice(index, 1);
-                files.forEach(file => dt.items.add(file));
-                input.files = dt.files;
-                
-                // Atualizar preview
-                const preview = document.getElementById('evento_preview');
-                const imagens = preview.querySelectorAll('.preview-img-wrapper');
-                if (imagens[index]) imagens[index].remove();
-                
-                // Reorganizar índices dos botões
-                document.querySelectorAll('.remove-preview-btn').forEach((btn, i) => {
-                    btn.onclick = () => removerImagemSelecionada(i);
-                });
-                
-                // Atualizar contador
-                const contador = document.getElementById('imagens-contador');
-                if (contador) contador.textContent = `${input.files.length}/5 imagens selecionadas`;
-            }
-        }
+       
 
-                // =====================================================
-        // PREVIEW AO SELECIONAR IMAGENS (FORA DO SUBMIT)
-        // =====================================================
-        document.getElementById('evento_images').addEventListener('change', (e) => {
-            const preview = document.getElementById('evento_preview');
-            let files = Array.from(e.target.files);
-            
-            if (files.length > 5) {
-                alert('Máximo de 5 imagens!');
-                files = files.slice(0, 5);
-                const dt = new DataTransfer();
-                files.forEach(f => dt.items.add(f));
-                e.target.files = dt.files;
-            }
-            
-            previewImages(files, preview);
-        });
 
-        // =====================================================
+              // =====================================================
         // FORMULÁRIO DE CRIAÇÃO DE EVENTO
         // =====================================================
         document.getElementById('formEvento').addEventListener('submit', async (e) => {
@@ -1359,7 +1315,6 @@ function fecharModalMensagem() {
                 if (response.ok) {
                     alert('✅ Evento criado com sucesso!');
                     document.getElementById('formEvento').reset();
-                    document.getElementById('evento_preview').innerHTML = '';
                     carregarEventos();
                 } else {
                     const error = await response.json();
@@ -1371,7 +1326,6 @@ function fecharModalMensagem() {
                 loadingMsg.remove();
             }
         });
-
         // =====================================================
         // PREVIEW AO SELECIONAR IMAGENS (COM LIMITE DE 5)
         // =====================================================
