@@ -246,13 +246,13 @@ app.delete('/api/users/:id', authMiddleware, adminMiddleware, async (req, res) =
 // ROTAS DE EVENTOS
 // =====================================================
 
+// LISTAR eventos (GET)
 app.get('/api/events', async (req, res) => {
     try {
         const result = await pool.query(`
-            SELECT e.*, 
-                   (SELECT image_url FROM event_images WHERE event_id = e.id AND is_cover = TRUE LIMIT 1) as cover_image
-            FROM events e 
-            ORDER BY e.event_date ASC
+            SELECT id, title, description, event_date, location, status, created_by, created_at, updated_at, cover_image
+            FROM events 
+            ORDER BY event_date ASC
         `);
         res.json(result.rows);
     } catch (error) {
@@ -261,6 +261,7 @@ app.get('/api/events', async (req, res) => {
     }
 });
 
+// BUSCAR um evento (GET by ID)
 app.get('/api/events/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -268,14 +269,14 @@ app.get('/api/events/:id', async (req, res) => {
         if (events.rows.length === 0) {
             return res.status(404).json({ error: 'Evento não encontrado' });
         }
-        const images = await pool.query('SELECT * FROM event_images WHERE event_id = $1 ORDER BY is_cover DESC, id ASC', [id]);
-        res.json({ ...events.rows[0], images: images.rows });
+        res.json(events.rows[0]);
     } catch (error) {
         console.error('Get event error:', error);
         res.status(500).json({ error: 'Erro ao buscar evento' });
     }
 });
 
+// CRIAR evento (POST com upload)
 app.post('/api/events', authMiddleware, upload.single('image'), async (req, res) => {
     try {
         console.log('📸 Arquivo recebido:', req.file);
@@ -290,7 +291,7 @@ app.post('/api/events', authMiddleware, upload.single('image'), async (req, res)
         // Pega a URL do Cloudinary
         let cover_image = null;
         if (req.file && req.file.path) {
-            cover_image = req.file.path; // URL do Cloudinary
+            cover_image = req.file.path;
         }
 
         const result = await pool.query(
@@ -307,11 +308,11 @@ app.post('/api/events', authMiddleware, upload.single('image'), async (req, res)
     }
 });
 
-
-app.put('/api/events/:id', authMiddleware, upload.array('images', 10), async (req, res) => {
+// ATUALIZAR evento (PUT)
+app.put('/api/events/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, description, event_date, location, status, remove_images } = req.body;
+        const { title, description, event_date, location, status, cover_image } = req.body;
 
         const updates = [];
         const values = [];
@@ -322,53 +323,28 @@ app.put('/api/events/:id', authMiddleware, upload.array('images', 10), async (re
         if (event_date) { updates.push(`event_date = $${paramCount++}`); values.push(event_date); }
         if (location) { updates.push(`location = $${paramCount++}`); values.push(location); }
         if (status) { updates.push(`status = $${paramCount++}`); values.push(status); }
+        if (cover_image !== undefined) { updates.push(`cover_image = $${paramCount++}`); values.push(cover_image); }
 
-        if (updates.length > 0) {
-            updates.push(`updated_at = NOW()`);
-            values.push(id);
-            await pool.query(`UPDATE events SET ${updates.join(', ')} WHERE id = $${paramCount}`, values);
+        if (updates.length === 0) {
+            return res.status(400).json({ error: 'Nenhum dado para atualizar' });
         }
 
-        if (remove_images) {
-            const removeIds = remove_images.split(',').map(Number);
-            for (const imgId of removeIds) {
-                const images = await pool.query('SELECT image_url FROM event_images WHERE id = $1 AND event_id = $2', [imgId, id]);
-                if (images.rows.length > 0 && images.rows[0].image_url) {
-                    const imagePath = path.join(__dirname, 'frontend', images.rows[0].image_url);
-                    if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
-                }
-                await pool.query('DELETE FROM event_images WHERE id = $1 AND event_id = $2', [imgId, id]);
-            }
-        }
-
-        const newImages = req.files || [];
-        const existingCover = await pool.query('SELECT id FROM event_images WHERE event_id = $1 AND is_cover = TRUE', [id]);
-        for (let i = 0; i < newImages.length; i++) {
-            const imageUrl = `/uploads/${newImages[i].filename}`;
-            const isCover = (existingCover.rows.length === 0 && i === 0);
-            await pool.query(
-                `INSERT INTO event_images (event_id, image_url, is_cover) VALUES ($1, $2, $3)`,
-                [id, imageUrl, isCover]
-            );
-        }
+        updates.push(`updated_at = NOW()`);
+        values.push(id);
+        await pool.query(`UPDATE events SET ${updates.join(', ')} WHERE id = $${paramCount}`, values);
 
         const updatedEvent = await pool.query('SELECT * FROM events WHERE id = $1', [id]);
-        const eventImages = await pool.query('SELECT * FROM event_images WHERE event_id = $1 ORDER BY is_cover DESC, id ASC', [id]);
-        res.json({ ...updatedEvent.rows[0], images: eventImages.rows });
+        res.json(updatedEvent.rows[0]);
     } catch (error) {
         console.error('Update event error:', error);
         res.status(500).json({ error: 'Erro ao atualizar evento' });
     }
 });
 
+// DELETAR evento (DELETE)
 app.delete('/api/events/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
-        const images = await pool.query('SELECT image_url FROM event_images WHERE event_id = $1', [id]);
-        for (const img of images.rows) {
-            const imagePath = path.join(__dirname, 'frontend', img.image_url);
-            if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
-        }
         await pool.query('DELETE FROM events WHERE id = $1', [id]);
         res.status(204).send();
     } catch (error) {
@@ -376,6 +352,7 @@ app.delete('/api/events/:id', authMiddleware, async (req, res) => {
         res.status(500).json({ error: 'Erro ao deletar evento' });
     }
 });
+
 
 // =====================================================
 // ROTAS DE TRANSPARÊNCIA
