@@ -1,19 +1,25 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "Projeto-carrapicho/api/index.js",
-      "use": "@vercel/node"
+  "functions": {
+    "Projeto-carrapicho/server.js": {
+      "runtime": "nodejs18.x"
     }
-  ],
+  },
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/Projeto-carrapicho/api/index.js"
+      "dest": "/Projeto-carrapicho/server.js"
+    },
+    {
+      "src": "/admin",
+      "dest": "/Projeto-carrapicho/frontend/admin/index.html"
     },
     {
       "src": "/admin/(.*)",
       "dest": "/Projeto-carrapicho/frontend/admin/index.html"
+    },
+    {
+      "src": "/evento.html",
+      "dest": "/Projeto-carrapicho/frontend/evento.html"
     },
     {
       "src": "/src/(.*)",
@@ -29,11 +35,11 @@
     },
     {
       "src": "/",
-      "dest": "/Projeto-carrapicho/frontend/home.html"
+      "dest": "/Projeto-carrapicho/server.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/Projeto-carrapicho/api/index.js"
+      "dest": "/Projeto-carrapicho/server.js"
     }
   ]
 }
