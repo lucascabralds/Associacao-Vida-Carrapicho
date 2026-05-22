@@ -591,72 +591,73 @@
         if ($(e.target).is('#modal-contato-overlay')) closeModalContato();
       });
 
-$('#form-contato-modal').on('submit', async function (e) {
-    e.preventDefault();
-    
-    const interesse = $('#contato-interesse').val();
-    const mensagem = $('#contato-mensagem').val();
-    const nome = $('#contato-nome').val();
-    const email = $('#contato-email').val();
-    const telefone = $('#contato-telefone').val();
-    
-    // VALIDAÇÃO BÁSICA
-    if (!nome || !email || !mensagem) {
-        alert('❌ Por favor, preencha nome, email e mensagem!');
-        return;
-    }
-    
-    let url = window.location.origin + '/api/contato';
-    let dadosEnvio = {};
-    let mensagemSucesso = '📧 Mensagem enviada com sucesso!';
-    
-    if (interesse === 'voluntario') {
-        // Envia para API de voluntários
-        url = window.location.origin + '/api/voluntarios';
-        dadosEnvio = {
-            nome: nome,
-            email: email,
-            telefone: telefone || null,
-            disponibilidade: null,
-            interesse: mensagem  // A MENSAGEM VAI PARA O CAMPO "interesse"
-        };
-        mensagemSucesso = '✅ Inscrição enviada! Entraremos em contato em breve.';
-    } else {
-        // Envia para API de contato geral
-        url = window.location.origin + '/api/contato';
-        dadosEnvio = {
-            name: nome,
-            email: email,
-            phone: telefone || null,
-            message: mensagem
-        };
-    }
-    
-    console.log('📤 Enviando para:', url);
-    console.log('📦 Dados:', dadosEnvio);
-    
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dadosEnvio)
-        });
-        
-        const resultado = await response.json();
-        console.log('✅ Resposta:', resultado);
-        
-        if (response.ok) {
-            alert(mensagemSucesso);
-            $('#form-contato-modal')[0].reset();
-            closeModalContato();
-        } else {
-            alert('❌ Erro: ' + (resultado.error || 'Tente novamente'));
-        }
-    } catch (erro) {
-        console.error('❌ Erro detalhado:', erro);
-        alert('❌ Erro de conexão. Verifique se o servidor está rodando!');
-    }
-});
+  $('#form-contato-modal').on('submit', async function (e) {
+      e.preventDefault();
+      
+      // PEGAR OS VALORES
+      const interesse = $('#contato-interesse').val();
+      const nome = $('#contato-nome').val();
+      const email = $('#contato-email').val();
+      const telefone = $('#contato-telefone').val();
+      const mensagem = $('#contato-mensagem').val();
+      
+      // VALIDAR
+      if (!nome || !email || !mensagem) {
+          alert('❌ Por favor, preencha nome, email e mensagem!');
+          return;
+      }
+      
+      // PREPARAR DADOS
+      let url = '';
+      let dados = {};
+      let msg = '';
+      
+      if (interesse === 'voluntario') {
+          url = '/api/voluntarios';
+          dados = {
+              nome: nome,
+              email: email,
+              telefone: telefone || null,
+              disponibilidade: null,
+              interesse: mensagem
+          };
+          msg = '✅ Inscrição enviada! Entraremos em contato em breve.';
+      } else {
+          url = '/api/contato';
+          dados = {
+              name: nome,
+              email: email,
+              phone: telefone || null,
+              message: mensagem
+          };
+          msg = '📧 Mensagem enviada com sucesso!';
+      }
+      
+      console.log('📤 Enviando para:', url);
+      console.log('📦 Dados:', dados);
+      
+      try {
+          const response = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(dados)
+          });
+          
+          const resultado = await response.json();
+          console.log('✅ Resposta:', resultado);
+          
+          if (response.ok) {
+              alert(msg);
+              $('#form-contato-modal')[0].reset();
+              closeModalContato();
+          } else {
+              alert('❌ Erro: ' + (resultado.error || 'Tente novamente'));
+          }
+      } catch (erro) {
+          console.error('❌ Erro:', erro);
+          alert('❌ Erro ao enviar. Tente novamente.');
+      }
+  });
 });
   </script>
 
