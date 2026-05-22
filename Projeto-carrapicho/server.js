@@ -276,41 +276,37 @@ app.get('/api/events/:id', async (req, res) => {
     }
 });
 
-app.post('/api/events', authMiddleware, upload.array('images', 10), async (req, res) => {
+app.post('/api/events', authMiddleware, upload.single('image'), async (req, res) => {
     try {
+        console.log('📸 Arquivo recebido:', req.file);
+        console.log('📝 Body:', req.body);
+
         const { title, description, event_date, location, status } = req.body;
 
         if (!title || !event_date) {
             return res.status(400).json({ error: 'Título e data são obrigatórios' });
         }
 
-        const result = await pool.query(
-            `INSERT INTO events (title, description, event_date, location, status, created_by)
-             VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-            [title, description, event_date, location, status || 'upcoming', req.user.id]
-        );
-
-        const eventId = result.rows[0].id;
-
-        const images = req.files || [];
-        for (let i = 0; i < images.length; i++) {
-            const imageUrl = `/uploads/${images[i].filename}`;
-            const isCover = (i === 0);
-            await pool.query(
-                `INSERT INTO event_images (event_id, image_url, is_cover) VALUES ($1, $2, $3)`,
-                [eventId, imageUrl, isCover]
-            );
+        // Pega a URL do Cloudinary
+        let cover_image = null;
+        if (req.file && req.file.path) {
+            cover_image = req.file.path; // URL do Cloudinary
         }
 
-        const newEvent = await pool.query('SELECT * FROM events WHERE id = $1', [eventId]);
-        const eventImages = await pool.query('SELECT * FROM event_images WHERE event_id = $1 ORDER BY is_cover DESC, id ASC', [eventId]);
+        const result = await pool.query(
+            `INSERT INTO events (title, description, event_date, location, status, created_by, cover_image)
+             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+            [title, description, event_date, location, status || 'upcoming', req.user.id, cover_image]
+        );
 
-        res.status(201).json({ ...newEvent.rows[0], images: eventImages.rows });
+        const newEvent = await pool.query('SELECT * FROM events WHERE id = $1', [result.rows[0].id]);
+        res.status(201).json(newEvent.rows[0]);
     } catch (error) {
         console.error('Create event error:', error);
-        res.status(500).json({ error: 'Erro ao criar evento' });
+        res.status(500).json({ error: error.message });
     }
 });
+
 
 app.put('/api/events/:id', authMiddleware, upload.array('images', 10), async (req, res) => {
     try {
