@@ -433,7 +433,7 @@
             color: #dc2626;
         }
 
-        .image-ew,
+        .image-preview,
         .current-images {
             display: flex;
             gap: 10px;
@@ -669,7 +669,7 @@
     <!-- =====================================================
      TELA DE LOGIN
 ===================================================== -->
-     <div id="loginScreen" class="login-wrapper">
+    <div id="loginScreen" class="login-wrapper">
         <div class="login-card">
             <img src="../img/logo-carrapicho.png" alt="Logo">
             <h2>Painel Administrativo</h2>
@@ -687,6 +687,8 @@
             </div>
         </div>
     </div>
+
+    
 
 
     <!-- =====================================================
@@ -707,8 +709,8 @@
             </div>
         <div style="display: flex; gap: 10px; align-items: center;">
             <a href="/" class="btn-home">🏠 Site</a>
+            <img src="../img/logo-cruzeiro.svg" style="height: 35px;" alt="Cruzeiro do Sul">
             <button class="btn-sair" onclick="sair()">Sair</button>
-             <img src="../img/logo-cruzeiro.svg" style="height: 35px;" alt="Cruzeiro do Sul">
         </div>
         </header>
 
@@ -782,12 +784,16 @@
                                 <input type="text" id="evento_location" placeholder="Endereço do evento">
                             </div>
                         </div>
-                    <div class="form-group">
-                        <label>📸 Nova Imagem (opcional)</label>
-                        <input type="file" id="edit_evento_image" accept="image/*">
-                        <div id="edit_evento_preview" class="image-preview" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;"></div>
-                        <small style="color: #6b7280;">⭐ Selecione uma nova imagem para substituir a atual (opcional)</small>
-                    </div>
+                        <div class="form-group">
+                            <label>📸 Imagens do Evento (máximo 5)</label>
+                            <input type="file" id="evento_images" name="images" multiple accept="image/*">
+                            <div id="evento_preview" class="image-preview" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;"></div>
+                            <small style="color: #6b7280;">
+                                ⭐ A primeira imagem será a capa do evento.<br>
+                                📏 Formatos: JPG, PNG, GIF, WEBP<br>
+                                🖼️ Clique no ✕ para remover a imagem
+                            </small>
+                        </div>
                         <div class="form-group">
                             <label>Status</label>
                             <select id="evento_status">
@@ -1024,142 +1030,49 @@
             verificarPermissaoAdmin();
         }
 
-     async function carregarVoluntarios() {
+        async function carregarVoluntarios() {
     if (!isAdmin()) return;
     
     try {
         const response = await fetch(`${API_URL}/voluntarios`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        const registros = await response.json();
+        const voluntarios = await response.json();
         const tbody = document.getElementById('listaVoluntarios');
         
-        if (!registros || registros.length === 0) {
-            tbody.innerHTML = '</table><td colspan="9">Nenhum registro</td></tr>';
+        if (!voluntarios || voluntarios.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8">Nenhuma inscrição</td></tr>';
             return;
         }
         
-        // Mapear tipo para emoji e cor
-        const getTipoInfo = (tipo) => {
-            const tipos = {
-                'voluntario': { emoji: '🤝', label: 'Voluntário', cor: '#00A859' },
-                'duvida': { emoji: '❓', label: 'Dúvida', cor: '#FFB800' },
-                'doacao': { emoji: '💰', label: 'Doação', cor: '#1D2671' },
-                'parceria': { emoji: '🏢', label: 'Parceria', cor: '#FF6B6B' }
-            };
-            return tipos[tipo] || { emoji: '📝', label: 'Outro', cor: '#666' };
-        };
-        
-        tbody.innerHTML = registros.map(r => {
-            const tipoInfo = getTipoInfo(r.tipo || 'voluntario');
-            const mensagem = r.interesse || '';
-            const mensagemCurta = mensagem.length > 50 ? mensagem.substring(0, 50) + '...' : mensagem;
-            const temMensagemLonga = mensagem.length > 50;
-            
-            return `
-                <tr>
-                    <td>${r.id}</td>
-                    <td><span style="background: ${tipoInfo.cor}20; color: ${tipoInfo.cor}; padding: 4px 8px; border-radius: 20px; font-size: 12px;">${tipoInfo.emoji} ${tipoInfo.label}</span></td>
-                    <td>${r.nome}</td>
-                    <td>${r.email}</td>
-                    <td>${r.telefone || '-'}</td>
-                    <td style="max-width: 300px; word-wrap: break-word;">
-                        ${mensagemCurta || '-'}
-                        ${temMensagemLonga ? `<br><small><button class="btn-secondary" onclick="verMensagemCompleta(${r.id})" style="margin-top: 5px; font-size: 11px;">📖 Ver mensagem completa</button></small>` : ''}
-                    </td>
-                    <td>${new Date(r.created_at).toLocaleDateString('pt-BR')}</td>
-                    <td>
-                        <select onchange="atualizarStatusVoluntario(${r.id}, this.value)" style="padding: 4px 8px; border-radius: 6px;">
-                            <option value="pendente" ${r.status === 'pendente' ? 'selected' : ''}>⏳ Pendente</option>
-                            <option value="contatado" ${r.status === 'contatado' ? 'selected' : ''}>📞 Contatado</option>
-                            <option value="aprovado" ${r.status === 'aprovado' ? 'selected' : ''}>✅ Aprovado</option>
-                            <option value="recusado" ${r.status === 'recusado' ? 'selected' : ''}>❌ Recusado</option>
-                        </select>
-                    </td>
-                    <td><button class="btn-danger" onclick="deletarVoluntario(${r.id})">Excluir</button></td>
-                </tr>
-            `;
-        }).join('');
+        tbody.innerHTML = voluntarios.map(v => `
+            <tr>
+                <td>${v.id}</td>
+                <td>${v.nome}</td>
+                <td>${v.email}</td>
+                <td>${v.telefone || '-'}</td>
+                <td style="max-width: 250px; word-wrap: break-word;">
+                    ${v.interesse ? (v.interesse.length > 60 ? v.interesse.substring(0, 60) + '...' : v.interesse) : '-'}
+                    ${v.interesse && v.interesse.length > 60 ? `<br><small><button class="btn-secondary" onclick="verMensagem('${(v.interesse || '').replace(/'/g, "\\'")}', '${v.nome}')">📖 Ver completo</button></small>` : ''}
+                </td>
+                <td>${new Date(v.created_at).toLocaleDateString('pt-BR')}</td>
+                <td>
+                    <select onchange="atualizarStatusVoluntario(${v.id}, this.value)" style="padding: 4px 8px; border-radius: 6px;">
+                        <option value="pendente" ${v.status === 'pendente' ? 'selected' : ''}>⏳ Pendente</option>
+                        <option value="contatado" ${v.status === 'contatado' ? 'selected' : ''}>📞 Contatado</option>
+                        <option value="aprovado" ${v.status === 'aprovado' ? 'selected' : ''}>✅ Aprovado</option>
+                        <option value="recusado" ${v.status === 'recusado' ? 'selected' : ''}>❌ Recusado</option>
+                    </select>
+                </td>
+                <td><button class="btn-danger" onclick="deletarVoluntario(${v.id})">Excluir</button></td>
+            </tr>
+        `).join('');
     } catch (error) {
-        console.error('Erro ao carregar:', error);
-        document.getElementById('listaVoluntarios').innerHTML = '<tr><td colspan="9">Erro ao carregar</td></tr>';
+        console.error('Erro ao carregar voluntários:', error);
+        document.getElementById('listaVoluntarios').innerHTML = '<tr><td colspan="8">Erro ao carregar</td></tr>';
     }
 }
 
-function verMensagemCompleta(id) {
-    // Buscar o registro específico
-    fetch(`${API_URL}/voluntarios`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-    })
-    .then(res => res.json())
-    .then(registros => {
-        const registro = registros.find(r => r.id === id);
-        if (!registro) {
-            alert('Registro não encontrado');
-            return;
-        }
-        
-        const tipoInfo = {
-            'voluntario': '🤝 Voluntário',
-            'duvida': '❓ Dúvida',
-            'doacao': '💰 Doação',
-            'parceria': '🏢 Parceria'
-        }[registro.tipo] || '📝 Outro';
-        
-      
-        const modalHtml = `
-            <div id="modalMensagemCompleta" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 10001; display: flex; justify-content: center; align-items: center;">
-                <div style="background: white; border-radius: 20px; max-width: 550px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
-                    <div style="background: linear-gradient(135deg, #1D2671, #00A859); padding: 20px; border-radius: 20px 20px 0 0; color: white;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <h3 style="margin: 0;">📝 Mensagem Completa</h3>
-                                <p style="margin: 5px 0 0; opacity: 0.9; font-size: 13px;">${tipoInfo}</p>
-                            </div>
-                            <button onclick="fecharModalMensagemCompleta()" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 24px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer;">&times;</button>
-                        </div>
-                    </div>
-                    <div style="padding: 25px;">
-                        <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e7eb;">
-                            <p style="margin: 0;"><strong>👤 Nome:</strong> ${registro.nome}</p>
-                            <p style="margin: 8px 0 0;"><strong>📧 Email:</strong> ${registro.email}</p>
-                            ${registro.telefone ? `<p style="margin: 8px 0 0;"><strong>📞 Telefone:</strong> ${registro.telefone}</p>` : ''}
-                            <p style="margin: 8px 0 0;"><strong>📅 Data:</strong> ${new Date(registro.created_at).toLocaleString('pt-BR')}</p>
-                            <p style="margin: 8px 0 0;"><strong>📌 Status:</strong> <span style="background: ${registro.status === 'pendente' ? '#fef3c7' : registro.status === 'contatado' ? '#d1fae5' : '#e0e7ff'}; padding: 2px 8px; border-radius: 12px;">${registro.status === 'pendente' ? '⏳ Pendente' : registro.status === 'contatado' ? '📞 Contatado' : registro.status === 'aprovado' ? '✅ Aprovado' : '❌ Recusado'}</span></p>
-                        </div>
-                        <div>
-                            <strong>💬 Mensagem:</strong>
-                            <div style="background: #f8fafc; padding: 16px; border-radius: 12px; margin-top: 8px; white-space: pre-wrap; word-wrap: break-word; max-height: 300px; overflow-y: auto;">
-                                ${registro.interesse || '<em>Nenhuma mensagem</em>'}
-                            </div>
-                        </div>
-                        <div style="margin-top: 25px; text-align: center;">
-                            <button onclick="fecharModalMensagemCompleta()" class="btn-primary" style="padding: 10px 30px;">Fechar</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-    
-        if (document.getElementById('modalMensagemCompleta')) {
-            document.getElementById('modalMensagemCompleta').remove();
-        }
-        
-        
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    })
-    .catch(err => {
-        console.error('Erro ao buscar mensagem:', err);
-        alert('Erro ao carregar mensagem completa');
-    });
-}
-
-function fecharModalMensagemCompleta() {
-    const modal = document.getElementById('modalMensagemCompleta');
-    if (modal) modal.remove();
-}
-        
         async function atualizarStatusVoluntario(id, status) {
     try {
         const response = await fetch(`${API_URL}/voluntarios/${id}`, {
@@ -1272,33 +1185,96 @@ function fecharModalMensagem() {
     const modal = document.getElementById('modalMensagem');
     if (modal) modal.remove();
 }
-       
+        // =====================================================
+        // REMOVER IMAGEM DO PREVIEW
+        // =====================================================
+        function removerImagemSelecionada(index) {
+            const input = document.getElementById('evento_images');
+            const dt = new DataTransfer();
+            const files = Array.from(input.files);
+            
+            if (files[index]) {
+                files.splice(index, 1);
+                files.forEach(file => dt.items.add(file));
+                input.files = dt.files;
+                
+                // Atualizar preview
+                const preview = document.getElementById('evento_preview');
+                const imagens = preview.querySelectorAll('.preview-img-wrapper');
+                if (imagens[index]) imagens[index].remove();
+                
+                // Reorganizar índices dos botões
+                document.querySelectorAll('.remove-preview-btn').forEach((btn, i) => {
+                    btn.onclick = () => removerImagemSelecionada(i);
+                });
+                
+                // Atualizar contador
+                const contador = document.getElementById('imagens-contador');
+                if (contador) contador.textContent = `${input.files.length}/5 imagens selecionadas`;
+            }
+        }
 
         // =====================================================
-        // PREVIEW DA IMAGEM
+        // PREVIEW DAS IMAGENS COM BOTÃO DE REMOVER
         // =====================================================
-        document.getElementById('evento_image').addEventListener('change', (e) => {
-            const preview = document.getElementById('evento_preview');
-            preview.innerHTML = '';
-            const file = e.target.files[0];
-            if (file) {
+        function previewImages(files, previewElement) {
+            previewElement.innerHTML = '';
+            for (let i = 0; i < Math.min(files.length, 5); i++) {
                 const reader = new FileReader();
-                reader.onload = (ev) => {
+                reader.onload = (e) => {
+                    const div = document.createElement('div');
+                    div.className = 'preview-img-wrapper';
+                    div.style.position = 'relative';
+                    div.style.display = 'inline-block';
+                    div.style.margin = '5px';
+                    
                     const img = document.createElement('img');
-                    img.src = ev.target.result;
-                    img.style.width = '100px';
-                    img.style.height = '100px';
+                    img.src = e.target.result;
+                    img.style.width = '80px';
+                    img.style.height = '80px';
                     img.style.objectFit = 'cover';
                     img.style.borderRadius = '8px';
                     img.style.border = '2px solid #00A859';
-                    preview.appendChild(img);
+                    
+                    const btnRemover = document.createElement('button');
+                    btnRemover.innerHTML = '✕';
+                    btnRemover.style.position = 'absolute';
+                    btnRemover.style.top = '-8px';
+                    btnRemover.style.right = '-8px';
+                    btnRemover.style.width = '24px';
+                    btnRemover.style.height = '24px';
+                    btnRemover.style.borderRadius = '50%';
+                    btnRemover.style.backgroundColor = '#dc2626';
+                    btnRemover.style.color = 'white';
+                    btnRemover.style.border = 'none';
+                    btnRemover.style.cursor = 'pointer';
+                    btnRemover.style.fontSize = '14px';
+                    btnRemover.style.fontWeight = 'bold';
+                    btnRemover.className = 'remove-preview-btn';
+                    btnRemover.onclick = () => removerImagemSelecionada(i);
+                    
+                    div.appendChild(img);
+                    div.appendChild(btnRemover);
+                    previewElement.appendChild(div);
                 };
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(files[i]);
             }
-        });
+            
+            // Atualizar contador
+            let contador = document.getElementById('imagens-contador');
+            if (!contador) {
+                contador = document.createElement('div');
+                contador.id = 'imagens-contador';
+                contador.style.marginTop = '10px';
+                contador.style.fontSize = '12px';
+                contador.style.color = '#666';
+                previewElement.parentNode.appendChild(contador);
+            }
+            contador.textContent = `${files.length}/5 imagens selecionadas`;
+        }
 
-               // =====================================================
-        // FORMULÁRIO DE CRIAÇÃO DE EVENTO (COM UPLOAD)
+        // =====================================================
+        // FORMULÁRIO DE CRIAÇÃO DE EVENTO
         // =====================================================
         document.getElementById('formEvento').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1310,25 +1286,22 @@ function fecharModalMensagem() {
             formData.append('location', document.getElementById('evento_location').value);
             formData.append('status', document.getElementById('evento_status').value);
             
-            const fileInput = document.getElementById('evento_image');
-            if (fileInput && fileInput.files.length > 0) {
-                formData.append('image', fileInput.files[0]);
-            }
-
-            // Debug: ver o que está sendo enviado
-            console.log('📤 Título:', formData.get('title'));
-            console.log('📤 Data:', formData.get('event_date'));
-
-            if (!formData.get('title') || !formData.get('event_date')) {
-                alert('❌ Título e data são obrigatórios!');
+            const files = document.getElementById('evento_images').files;
+            if (files.length > 5) {
+                alert('Máximo de 5 imagens por evento!');
                 return;
             }
-
+            
             const loadingMsg = document.createElement('div');
-            loadingMsg.textContent = '⏳ Enviando evento...';
+            loadingMsg.textContent = '⏳ Processando imagens...';
             loadingMsg.style.color = '#00A859';
             document.getElementById('formEvento').appendChild(loadingMsg);
-
+            
+            for (let i = 0; i < files.length; i++) {
+                const compressed = await comprimirImagem(files[i], 1024, 0.7);
+                formData.append('images', compressed, `imagem_${i}.jpg`);
+            }
+            
             try {
                 const response = await fetch(`${API_URL}/events`, {
                     method: 'POST',
@@ -1336,24 +1309,40 @@ function fecharModalMensagem() {
                     body: formData
                 });
                 
-                const result = await response.json();
-                console.log('✅ Resposta:', result);
-                
                 if (response.ok) {
-                    alert('✅ Evento criado com sucesso!');
+                    alert(`✅ Evento criado com sucesso!\n📸 Imagens enviadas: ${files.length}`);
                     document.getElementById('formEvento').reset();
                     document.getElementById('evento_preview').innerHTML = '';
                     carregarEventos();
                 } else {
-                    alert('❌ Erro: ' + (result.error || 'Erro desconhecido'));
+                    const error = await response.json();
+                    alert('❌ Erro ao criar evento: ' + (error.error || 'Erro desconhecido'));
                 }
             } catch (error) {
-                console.error('❌ Erro:', error);
                 alert('❌ Erro de conexão: ' + error.message);
             } finally {
                 loadingMsg.remove();
             }
         });
+
+        // =====================================================
+        // PREVIEW AO SELECIONAR IMAGENS (COM LIMITE DE 5)
+        // =====================================================
+        document.getElementById('evento_images').addEventListener('change', (e) => {
+            const preview = document.getElementById('evento_preview');
+            let files = Array.from(e.target.files);
+            
+            if (files.length > 5) {
+                alert('Máximo de 5 imagens!');
+                files = files.slice(0, 5);
+                const dt = new DataTransfer();
+                files.forEach(f => dt.items.add(f));
+                e.target.files = dt.files;
+            }
+            
+            previewImages(files, preview);
+        });
+
         // =====================================================
         // VERIFICAÇÃO DE PERMISSÕES
         // =====================================================
@@ -1730,8 +1719,9 @@ function fecharModalMensagem() {
                 alert('❌ Erro de conexão');
             }
         }
+
         // =====================================================
-        // EDIÇÃO DE EVENTO (COM UPLOAD DE IMAGEM)
+        // EDIÇÃO DE EVENTO
         // =====================================================
         async function abrirModalEditarEvento(id) {
             const response = await fetch(`${API_URL}/events/${id}`);
@@ -1742,69 +1732,49 @@ function fecharModalMensagem() {
             document.getElementById('edit_evento_date').value = evento.event_date.slice(0, 16);
             document.getElementById('edit_evento_location').value = evento.location || '';
             document.getElementById('edit_evento_status').value = evento.status;
+            imagensAtuais = evento.images || [];
+            document.getElementById('edit_evento_current_images').innerHTML = imagensAtuais.map(img => `<div class="img-item" data-id="${img.id}"><img src="${img.image_url}"><span class="remove-img-btn" onclick="removerImagem(${img.id})">×</span></div>`).join('');
+            document.getElementById('edit_evento_preview').innerHTML = '';
             document.getElementById('modalEditarEvento').style.display = 'flex';
         }
+
+        window.removerImagem = function(id) {
+            imagensAtuais = imagensAtuais.filter(i => i.id !== id);
+            document.getElementById('edit_evento_current_images').innerHTML = imagensAtuais.map(img => `<div class="img-item" data-id="${img.id}"><img src="${img.image_url}"><span class="remove-img-btn" onclick="removerImagem(${img.id})">×</span></div>`).join('');
+        };
 
         document.getElementById('formEditarEvento')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('edit_evento_id').value;
-            
             const formData = new FormData();
             formData.append('title', document.getElementById('edit_evento_title').value);
             formData.append('description', document.getElementById('edit_evento_desc').value);
             formData.append('event_date', document.getElementById('edit_evento_date').value);
             formData.append('location', document.getElementById('edit_evento_location').value);
             formData.append('status', document.getElementById('edit_evento_status').value);
-            
-            const fileInput = document.getElementById('edit_evento_image');
-            if (fileInput && fileInput.files.length > 0) {
-                formData.append('image', fileInput.files[0]);
-            }
-            
-            try {
-                const response = await fetch(`${API_URL}/events/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    body: formData
-                });
-                
-                if (response.ok) {
-                    alert('✅ Evento atualizado com sucesso!');
-                    fecharModal();
-                    carregarEventos();
-                } else {
-                    const error = await response.json();
-                    alert('❌ Erro: ' + (error.error || 'Erro desconhecido'));
-                }
-            } catch (error) {
-                alert('❌ Erro de conexão: ' + error.message);
-            }
+            const removeIds = imagensAtuais.filter(img => !img.id).map(img => img.id).join(',');
+            if (removeIds) formData.append('remove_images', removeIds);
+            const files = document.getElementById('edit_evento_images').files;
+            for (let i = 0; i < files.length; i++) formData.append('images', files[i]);
+            const response = await fetch(`${API_URL}/events/${id}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
+            if (response.ok) { alert('Evento atualizado!'); fecharModal(); carregarEventos(); }
+            else alert('Erro');
         });
 
-        function fecharModal() { 
-            document.getElementById('modalEditarEvento').style.display = 'none'; 
-        }
-        
-        // Preview da imagem na edição
-        document.getElementById('edit_evento_image')?.addEventListener('change', (e) => {
+        function fecharModal() { document.getElementById('modalEditarEvento').style.display = 'none'; }
+
+        // =====================================================
+        // PREVIEW NA EDIÇÃO
+        // =====================================================
+        document.getElementById('edit_evento_images')?.addEventListener('change', (e) => {
             const preview = document.getElementById('edit_evento_preview');
             preview.innerHTML = '';
-            const file = e.target.files[0];
-            if (file) {
+            for (let file of e.target.files) {
                 const reader = new FileReader();
-                reader.onload = (ev) => {
-                    const img = document.createElement('img');
-                    img.src = ev.target.result;
-                    img.style.width = '100px';
-                    img.style.height = '100px';
-                    img.style.objectFit = 'cover';
-                    img.style.borderRadius = '8px';
-                    preview.appendChild(img);
-                };
+                reader.onload = (ev) => preview.innerHTML += `<img src="${ev.target.result}">`;
                 reader.readAsDataURL(file);
             }
         });
-      
 
         // =====================================================
         // RELATÓRIOS PDF
@@ -2224,31 +2194,6 @@ async function gerarRelatorioCompleto() {
         alert('Erro ao gerar relatório: ' + error.message);
     }
 }
-             // =====================================================
-        // EXPORTA FUNÇÕES PARA O ESCOPO GLOBAL
-        // =====================================================
-        window.fazerLogin = fazerLogin;
-        window.sair = sair;
-        window.mostrarAba = mostrarAba;
-        window.carregarVoluntarios = carregarVoluntarios;
-        window.atualizarStatusVoluntario = atualizarStatusVoluntario;
-        window.deletarVoluntario = deletarVoluntario;
-        window.verMensagemCompleta = verMensagemCompleta;
-        window.fecharModalMensagemCompleta = fecharModalMensagemCompleta;
-        window.gerarRelatorioFinanceiro = gerarRelatorioFinanceiro;
-        window.gerarRelatorioEventos = gerarRelatorioEventos;
-        window.gerarRelatorioCompleto = gerarRelatorioCompleto;
-        window.verMensagem = verMensagem;
-        window.fecharModalMensagem = fecharModalMensagem;
-        window.abrirModalEditarEvento = abrirModalEditarEvento;
-        window.fecharModal = fecharModal;
-        window.deletarEvento = deletarEvento;
-        window.deletarFinanca = deletarFinanca;
-        window.editarUsuario = editarUsuario;
-        window.deletarUsuario = deletarUsuario;
-        window.removerImagem = removerImagem;
-        
-        console.log('✅ Admin carregado - todas as funções estão disponíveis');
     </script>
 </body>
 
