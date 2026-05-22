@@ -57,7 +57,7 @@ function criarCardEvento(evento, indice) {
         : `
             <div class="event-thumb">
                 <img src="${imagem}" alt="${titulo}">
-                <p>${titulo}</p>
+                
             </div>
         `;
 
