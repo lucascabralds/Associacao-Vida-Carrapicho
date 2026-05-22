@@ -1,2 +1,2 @@
-const app = require('../Projeto-carrapicho/server.js');
+const app = require('../server.js');
 module.exports = app;
