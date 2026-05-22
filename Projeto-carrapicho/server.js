@@ -262,18 +262,37 @@ app.get('/api/events', async (req, res) => {
 });
 
 // BUSCAR um evento (GET by ID)
-app.get('/api/events/:id', async (req, res) => {
+app.put('/api/events/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
-        const events = await pool.query('SELECT * FROM events WHERE id = $1', [id]);
-        if (events.rows.length === 0) {
+        const { title, description, event_date, location, status, cover_image } = req.body;
+
+        console.log('📝 Atualizando evento:', { id, title, event_date });
+
+        const result = await pool.query(
+            `UPDATE events 
+             SET title = COALESCE($1, title),
+                 description = COALESCE($2, description),
+                 event_date = COALESCE($3, event_date),
+                 location = COALESCE($4, location),
+                 status = COALESCE($5, status),
+                 cover_image = COALESCE($6, cover_image),
+                 updated_at = NOW()
+             WHERE id = $7
+             RETURNING *`,
+            [title, description, event_date, location, status, cover_image, id]
+        );
+
+        if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Evento não encontrado' });
         }
-        res.json(events.rows[0]);
+
+        res.json(result.rows[0]);
     } catch (error) {
-        console.error('Get event error:', error);
-        res.status(500).json({ error: 'Erro ao buscar evento' });
+        console.error('Update event error:', error);
+        res.status(500).json({ error: error.message });
     }
+});
 });
 
 // CRIAR evento (POST com upload)
