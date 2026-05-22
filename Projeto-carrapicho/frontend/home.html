@@ -384,25 +384,35 @@
     // =====================================================
     // FUNÇÃO PARA CARREGAR ESTATÍSTICAS DA HOME
     // =====================================================
-    async function carregarEstatisticasHome() {
-      try {
+   async function carregarEstatisticasHome() {
+    try {
         const API_URL = window.location.origin + '/api';
         const response = await fetch(`${API_URL}/transparency`);
         const data = await response.json();
 
-        const totalReceita = data.totals?.income || 0;
+        const totalReceita = parseFloat(data.totals?.income) || 0;
 
         const totalArrecadadoElement = document.getElementById('total-arrecadado');
         if (totalArrecadadoElement) {
-          totalArrecadadoElement.setAttribute('data-target', totalReceita);
-          totalArrecadadoElement.innerText = `R$ ${totalReceita.toLocaleString('pt-BR')}`;
+            // Forçar formatação brasileira
+            const valorFormatado = totalReceita.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            
+            totalArrecadadoElement.setAttribute('data-target', totalReceita);
+            totalArrecadadoElement.innerText = `R$ ${valorFormatado}`;
+            
+            console.log('✅ Elemento atualizado:', totalArrecadadoElement.innerText);
+        } else {
+            console.error('❌ Elemento #total-arrecadado não encontrado!');
         }
 
-        console.log('✅ Estatísticas da home atualizadas! Total arrecadado: R$', totalReceita);
-      } catch (error) {
+        console.log('✅ Total arrecadado (bruto):', totalReceita);
+    } catch (error) {
         console.error('Erro ao carregar estatísticas da home:', error);
-      }
     }
+}
 
     // =====================================================
     // FUNÇÃO PARA CARREGAR DADOS DO MODAL DE TRANSPARÊNCIA
