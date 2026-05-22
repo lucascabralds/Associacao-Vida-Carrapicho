@@ -301,7 +301,7 @@ app.put('/api/events/:id', authMiddleware, async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-});
+
 
 // CRIAR evento (POST com upload)
 app.post('/api/events', authMiddleware, upload.single('image'), async (req, res) => {
