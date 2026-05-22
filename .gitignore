@@ -1,2 +1,36 @@
-﻿Projeto-carrapicho/node_modules/
+﻿# Dependências
 node_modules/
+package-lock.json
+yarn.lock
+
+# Arquivos de ambiente
+.env
+.env.local
+.env.production
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Uploads locais (não enviar imagens de teste)
+frontend/uploads/
+
+# Vercel
+.vercel/
+
+# Arquivos temporários
+*.tmp
+*.temp
