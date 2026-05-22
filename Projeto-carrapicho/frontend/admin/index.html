@@ -1730,9 +1730,8 @@ function fecharModalMensagem() {
                 alert('❌ Erro de conexão');
             }
         }
-
         // =====================================================
-        // EDIÇÃO DE EVENTO
+        // EDIÇÃO DE EVENTO (COM UPLOAD DE IMAGEM)
         // =====================================================
         async function abrirModalEditarEvento(id) {
             const response = await fetch(`${API_URL}/events/${id}`);
@@ -1743,49 +1742,69 @@ function fecharModalMensagem() {
             document.getElementById('edit_evento_date').value = evento.event_date.slice(0, 16);
             document.getElementById('edit_evento_location').value = evento.location || '';
             document.getElementById('edit_evento_status').value = evento.status;
-            imagensAtuais = evento.images || [];
-            document.getElementById('edit_evento_current_images').innerHTML = imagensAtuais.map(img => `<div class="img-item" data-id="${img.id}"><img src="${img.image_url}"><span class="remove-img-btn" onclick="removerImagem(${img.id})">×</span></div>`).join('');
-            document.getElementById('edit_evento_preview').innerHTML = '';
             document.getElementById('modalEditarEvento').style.display = 'flex';
         }
-
-        window.removerImagem = function(id) {
-            imagensAtuais = imagensAtuais.filter(i => i.id !== id);
-            document.getElementById('edit_evento_current_images').innerHTML = imagensAtuais.map(img => `<div class="img-item" data-id="${img.id}"><img src="${img.image_url}"><span class="remove-img-btn" onclick="removerImagem(${img.id})">×</span></div>`).join('');
-        };
 
         document.getElementById('formEditarEvento')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('edit_evento_id').value;
+            
             const formData = new FormData();
             formData.append('title', document.getElementById('edit_evento_title').value);
             formData.append('description', document.getElementById('edit_evento_desc').value);
             formData.append('event_date', document.getElementById('edit_evento_date').value);
             formData.append('location', document.getElementById('edit_evento_location').value);
             formData.append('status', document.getElementById('edit_evento_status').value);
-            const removeIds = imagensAtuais.filter(img => !img.id).map(img => img.id).join(',');
-            if (removeIds) formData.append('remove_images', removeIds);
-            const files = document.getElementById('edit_evento_images').files;
-            for (let i = 0; i < files.length; i++) formData.append('images', files[i]);
-            const response = await fetch(`${API_URL}/events/${id}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
-            if (response.ok) { alert('Evento atualizado!'); fecharModal(); carregarEventos(); }
-            else alert('Erro');
+            
+            const fileInput = document.getElementById('edit_evento_image');
+            if (fileInput && fileInput.files.length > 0) {
+                formData.append('image', fileInput.files[0]);
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/events/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    alert('✅ Evento atualizado com sucesso!');
+                    fecharModal();
+                    carregarEventos();
+                } else {
+                    const error = await response.json();
+                    alert('❌ Erro: ' + (error.error || 'Erro desconhecido'));
+                }
+            } catch (error) {
+                alert('❌ Erro de conexão: ' + error.message);
+            }
         });
 
-        function fecharModal() { document.getElementById('modalEditarEvento').style.display = 'none'; }
-
-        // =====================================================
-        // PREVIEW NA EDIÇÃO
-        // =====================================================
-        document.getElementById('edit_evento_images')?.addEventListener('change', (e) => {
+        function fecharModal() { 
+            document.getElementById('modalEditarEvento').style.display = 'none'; 
+        }
+        
+        // Preview da imagem na edição
+        document.getElementById('edit_evento_image')?.addEventListener('change', (e) => {
             const preview = document.getElementById('edit_evento_preview');
             preview.innerHTML = '';
-            for (let file of e.target.files) {
+            const file = e.target.files[0];
+            if (file) {
                 const reader = new FileReader();
-                reader.onload = (ev) => preview.innerHTML += `<img src="${ev.target.result}">`;
+                reader.onload = (ev) => {
+                    const img = document.createElement('img');
+                    img.src = ev.target.result;
+                    img.style.width = '100px';
+                    img.style.height = '100px';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '8px';
+                    preview.appendChild(img);
+                };
                 reader.readAsDataURL(file);
             }
         });
+      
 
         // =====================================================
         // RELATÓRIOS PDF
