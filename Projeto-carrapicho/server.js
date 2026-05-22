@@ -515,6 +515,20 @@ app.get('/api/donations', authMiddleware, async (req, res) => {
     }
 });
 
+
+// LISTAR voluntários (admin) 
+app.get('/api/voluntarios', authMiddleware, async (req, res) => {
+    try {
+        console.log('🔍 GET /api/voluntarios chamada');
+        const result = await pool.query('SELECT * FROM voluntarios ORDER BY created_at DESC');
+        console.log(`📋 Encontrados ${result.rows.length} registros`);
+        res.json(result.rows);
+    } catch (error) {
+        console.error('List voluntarios error:', error);
+        res.status(500).json({ error: 'Erro ao listar voluntários' });
+    }
+});
+
 // =====================================================
 // ROTA DE CONTATO (UNIFICADA - Salva na tabela voluntarios)
 // =====================================================
