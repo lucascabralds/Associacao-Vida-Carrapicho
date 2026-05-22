@@ -12,20 +12,20 @@
       "dest": "/server.js"
     },
     {
+      "src": "/admin",
+      "dest": "/frontend/admin/index.html"
+    },
+    {
       "src": "/admin/(.*)",
       "dest": "/frontend/admin/index.html"
     },
     {
-      "src": "/(.*\\.(css|js|svg|png|jpg|jpeg|gif|ico))",
-      "dest": "/frontend/$1"
-    },
-    {
-      "src": "/",
-      "dest": "/frontend/home.html"
+      "src": "/evento.html",
+      "dest": "/frontend/evento.html"
     },
     {
       "src": "/(.*)",
-      "dest": "/server.js"
+      "dest": "/frontend/home.html"
     }
   ]
 }
