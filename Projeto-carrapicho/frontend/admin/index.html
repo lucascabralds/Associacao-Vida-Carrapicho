@@ -1030,46 +1030,61 @@
             verificarPermissaoAdmin();
         }
 
-        async function carregarVoluntarios() {
+       async function carregarVoluntarios() {
     if (!isAdmin()) return;
     
     try {
         const response = await fetch(`${API_URL}/voluntarios`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        const voluntarios = await response.json();
+        const registros = await response.json();
         const tbody = document.getElementById('listaVoluntarios');
         
-        if (!voluntarios || voluntarios.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8">Nenhuma inscrição</td></tr>';
+        if (!registros || registros.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9">Nenhum registro</td></tr>';
             return;
         }
         
-        tbody.innerHTML = voluntarios.map(v => `
-            <tr>
-                <td>${v.id}</td>
-                <td>${v.nome}</td>
-                <td>${v.email}</td>
-                <td>${v.telefone || '-'}</td>
-                <td style="max-width: 250px; word-wrap: break-word;">
-                    ${v.interesse ? (v.interesse.length > 60 ? v.interesse.substring(0, 60) + '...' : v.interesse) : '-'}
-                    ${v.interesse && v.interesse.length > 60 ? `<br><small><button class="btn-secondary" onclick="verMensagem('${(v.interesse || '').replace(/'/g, "\\'")}', '${v.nome}')">📖 Ver completo</button></small>` : ''}
-                </td>
-                <td>${new Date(v.created_at).toLocaleDateString('pt-BR')}</td>
-                <td>
-                    <select onchange="atualizarStatusVoluntario(${v.id}, this.value)" style="padding: 4px 8px; border-radius: 6px;">
-                        <option value="pendente" ${v.status === 'pendente' ? 'selected' : ''}>⏳ Pendente</option>
-                        <option value="contatado" ${v.status === 'contatado' ? 'selected' : ''}>📞 Contatado</option>
-                        <option value="aprovado" ${v.status === 'aprovado' ? 'selected' : ''}>✅ Aprovado</option>
-                        <option value="recusado" ${v.status === 'recusado' ? 'selected' : ''}>❌ Recusado</option>
-                    </select>
-                </td>
-                <td><button class="btn-danger" onclick="deletarVoluntario(${v.id})">Excluir</button></td>
-            </tr>
-        `).join('');
+        // Mapear tipo para emoji e cor
+        const getTipoInfo = (tipo) => {
+            const tipos = {
+                'voluntario': { emoji: '🤝', label: 'Voluntário', cor: '#00A859' },
+                'duvida': { emoji: '❓', label: 'Dúvida', cor: '#FFB800' },
+                'doacao': { emoji: '💰', label: 'Doação', cor: '#1D2671' },
+                'parceria': { emoji: '🏢', label: 'Parceria', cor: '#FF6B6B' }
+            };
+            return tipos[tipo] || { emoji: '📝', label: 'Outro', cor: '#666' };
+        };
+        
+        tbody.innerHTML = registros.map(r => {
+            const tipoInfo = getTipoInfo(r.tipo || 'voluntario');
+            return `
+                <tr>
+                    <td>${r.id}</td>
+                    <td><span style="background: ${tipoInfo.cor}20; color: ${tipoInfo.cor}; padding: 4px 8px; border-radius: 20px; font-size: 12px;">${tipoInfo.emoji} ${tipoInfo.label}</span></td>
+                    <td>${r.nome}</td>
+                    <td>${r.email}</td>
+                    <td>${r.telefone || '-'}</td>
+                    <td style="max-width: 300px; word-wrap: break-word;">
+                        ${r.interesse ? (r.interesse.length > 60 ? r.interesse.substring(0, 60) + '...' : r.interesse) : '-'}
+                        ${r.interesse && r.interesse.length > 60 ? `<br><small><button class="btn-secondary" onclick="verMensagem('${(r.interesse || '').replace(/'/g, "\\'")}', '${r.nome}')">📖 Ver completo</button></small>` : ''}
+                    </td>
+                    <td>${new Date(r.created_at).toLocaleDateString('pt-BR')}</td>
+                    <td>
+                        <select onchange="atualizarStatusVoluntario(${r.id}, this.value)" style="padding: 4px 8px; border-radius: 6px;">
+                            <option value="pendente" ${r.status === 'pendente' ? 'selected' : ''}>⏳ Pendente</option>
+                            <option value="contatado" ${r.status === 'contatado' ? 'selected' : ''}>📞 Contatado</option>
+                            <option value="aprovado" ${r.status === 'aprovado' ? 'selected' : ''}>✅ Aprovado</option>
+                            <option value="recusado" ${r.status === 'recusado' ? 'selected' : ''}>❌ Recusado</option>
+                        </select>
+                    </td>
+                    <td><button class="btn-danger" onclick="deletarVoluntario(${r.id})">Excluir</button></td>
+                </tr>
+            `;
+        }).join('');
     } catch (error) {
-        console.error('Erro ao carregar voluntários:', error);
-        document.getElementById('listaVoluntarios').innerHTML = '<tr><td colspan="8">Erro ao carregar</td></tr>';
+        console.error('Erro ao carregar:', error);
+        document.getElementById('listaVoluntarios').innerHTML = '<tr><td colspan="9">Erro ao carregar</td></tr>';
     }
 }
 
