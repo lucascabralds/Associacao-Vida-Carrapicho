@@ -968,6 +968,7 @@
                         <th>Email</th>
                         <th>Telefone</th>
                         <th>Interesse</th>
+                        <th>Mensagem</th>
                         <th>Data</th>
                         <th>Status</th>
                         <th>Ações</th>
@@ -1043,13 +1044,16 @@
             tbody.innerHTML = '<tr><td colspan="8">Nenhuma inscrição</td></tr>';
             return;
         }
-        
+                
         tbody.innerHTML = voluntarios.map(v => `
             <tr>
                 <td>${v.id}</td>
                 <td>${v.nome}</td>
                 <td>${v.email}</td>
                 <td>${v.telefone || '-'}</td>
+                <td>
+                    <span class="badge-interesse">${v.interesse_tipo || 'Não informado'}</span>
+                </td>
                 <td><button class="btn-secondary" onclick="verMensagem('${(v.interesse || '').replace(/'/g, "\\'")}', '${v.nome}')">📖 Ler Mensagem</button></td>
                 <td>${new Date(v.created_at).toLocaleDateString('pt-BR')}</td>
                 <td>
@@ -1063,11 +1067,6 @@
                 <td><button class="btn-danger" onclick="deletarVoluntario(${v.id})">Excluir</button></td>
             </tr>
         `).join('');
-    } catch (error) {
-        console.error('Erro ao carregar voluntários:', error);
-        document.getElementById('listaVoluntarios').innerHTML = '<tr><td colspan="8">Erro ao carregar</td></tr>';
-    }
-}
 
         // =====================================================
         // FUNÇÃO PARA COMPRIMIR IMAGEM
