@@ -15,3 +15,7 @@
     "qrcode": "^1.5.3"
   }
 }
+"dependencies": {
+  "cloudinary": "^1.41.0",
+  "multer-storage-cloudinary": "^4.0.0"
+}
