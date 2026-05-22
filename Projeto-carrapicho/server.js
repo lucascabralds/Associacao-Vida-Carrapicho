@@ -1,8 +1,7 @@
 // SERVER.JS - SISTEMA ONG COMPLETO (POSTGRESQL VERSION)
 // =====================================================
 console.log('🚀 Iniciando servidor...');
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -11,17 +10,17 @@ const bcrypt = require('bcryptjs');
 const QRCode = require('qrcode');
 const multer = require('multer');
 const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-/// =====================================================
+// =====================================================
 // UPLOAD DE IMAGENS COM CLOUDINARY (VERCEL)
 // =====================================================
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 // Configurar Cloudinary
 cloudinary.config({
@@ -47,7 +46,6 @@ const upload = multer({
 
 // Serve arquivos estáticos
 app.use(express.static(path.join(__dirname, 'frontend')));
-
 
 // =====================================================
 // ROTAS PRINCIPAIS
