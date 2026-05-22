@@ -249,7 +249,7 @@ app.delete('/api/users/:id', authMiddleware, adminMiddleware, async (req, res) =
     }
 });
 
-// =====================================================
+/// =====================================================
 // ROTAS DE EVENTOS
 // =====================================================
 
@@ -319,60 +319,7 @@ app.post('/api/events', authMiddleware, upload.array('images', 10), async (req, 
     }
 });
 
-app.put('/api/events/:id', authMiddleware, upload.array('images', 10), async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { title, description, event_date, location, status, remove_images } = req.body;
-
-        const updates = [];
-        const values = [];
-        let paramCount = 1;
-
-        if (title) { updates.push(`title = $${paramCount++}`); values.push(title); }
-        if (description !== undefined) { updates.push(`description = $${paramCount++}`); values.push(description); }
-        if (event_date) { updates.push(`event_date = $${paramCount++}`); values.push(event_date); }
-        if (location) { updates.push(`location = $${paramCount++}`); values.push(location); }
-        if (status) { updates.push(`status = $${paramCount++}`); values.push(status); }
-
-        if (updates.length > 0) {
-            updates.push(`updated_at = NOW()`);
-            values.push(id);
-            await pool.query(`UPDATE events SET ${updates.join(', ')} WHERE id = $${paramCount}`, values);
-        }
-
-        if (remove_images) {
-            const removeIds = remove_images.split(',').map(Number);
-            for (const imgId of removeIds) {
-                const images = await pool.query('SELECT image_url FROM event_images WHERE id = $1 AND event_id = $2', [imgId, id]);
-                if (images.rows.length > 0 && images.rows[0].image_url) {
-                    const imagePath = path.join(__dirname, 'frontend', images.rows[0].image_url);
-                    if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
-                }
-                await pool.query('DELETE FROM event_images WHERE id = $1 AND event_id = $2', [imgId, id]);
-            }
-        }
-
-        const newImages = req.files || [];
-        const existingCover = await pool.query('SELECT id FROM event_images WHERE event_id = $1 AND is_cover = TRUE', [id]);
-        for (let i = 0; i < newImages.length; i++) {
-            const imageUrl = `/uploads/${newImages[i].filename}`;
-            const isCover = (existingCover.rows.length === 0 && i === 0);
-            await pool.query(
-                `INSERT INTO event_images (event_id, image_url, is_cover) VALUES ($1, $2, $3)`,
-                [id, imageUrl, isCover]
-            );
-        }
-
-        const updatedEvent = await pool.query('SELECT * FROM events WHERE id = $1', [id]);
-        const eventImages = await pool.query('SELECT * FROM event_images WHERE event_id = $1 ORDER BY is_cover DESC, id ASC', [id]);
-        res.json({ ...updatedEvent.rows[0], images: eventImages.rows });
-    } catch (error) {
-        console.error('Update event error:', error);
-        res.status(500).json({ error: 'Erro ao atualizar evento' });
-    }
-});
-
-// ATUALIZAR EVENTO (PUT) - VERSÃO SIMPLIFICADA
+// ATUALIZAR EVENTO (PUT) - APENAS UMA VEZ, VERSÃO SIMPLIFICADA
 app.put('/api/events/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
@@ -405,6 +352,23 @@ app.put('/api/events/:id', authMiddleware, async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+app.delete('/api/events/:id', authMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const images = await pool.query('SELECT image_url FROM event_images WHERE event_id = $1', [id]);
+        for (const img of images.rows) {
+            const imagePath = path.join(__dirname, 'frontend', img.image_url);
+            if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
+        }
+        await pool.query('DELETE FROM events WHERE id = $1', [id]);
+        res.status(204).send();
+    } catch (error) {
+        console.error('Delete event error:', error);
+        res.status(500).json({ error: 'Erro ao deletar evento' });
+    }
+});
+
 // =====================================================
 // ROTAS DE TRANSPARÊNCIA
 // =====================================================
