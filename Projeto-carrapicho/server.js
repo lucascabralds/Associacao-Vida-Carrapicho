@@ -17,8 +17,10 @@ app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// CRIAR PASTA UPLOADS (ANTES DE USAR)
+// CONFIGURAÇÃO DE UPLOAD DE IMAGENS (MULTER)
 // =====================================================
+
+// Garantir que a pasta uploads existe
 const uploadDir = path.join(__dirname, 'frontend', 'uploads');
 if (!fs.existsSync(uploadDir)) {
     try {
@@ -29,8 +31,38 @@ if (!fs.existsSync(uploadDir)) {
     }
 }
 
-// Serve arquivos estáticos da pasta frontend (DEPOIS de criar a pasta)
+// Configuração do storage do multer
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname);
+        cb(null, 'evento-' + uniqueSuffix + ext);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|webp/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    if (mimetype && extname) {
+        return cb(null, true);
+    } else {
+        cb(new Error('Apenas imagens são permitidas'));
+    }
+};
+
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: fileFilter
+});
+
+// Serve arquivos estáticos
 app.use(express.static(path.join(__dirname, 'frontend')));
+app.use('/uploads', express.static(path.join(__dirname, 'frontend', 'uploads')));
 
 // =====================================================
 // ROTAS PRINCIPAIS
@@ -70,41 +102,6 @@ app.get('/evento.html', (req, res) => {
         res.status(404).send('evento.html não encontrado');
     }
 });
-
-// =====================================================
-// CONFIGURAÇÃO DE UPLOAD DE IMAGENS
-// =====================================================
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const ext = path.extname(file.originalname);
-        cb(null, 'evento-' + uniqueSuffix + ext);
-    }
-});
-
-const fileFilter = (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|webp/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-    if (mimetype && extname) {
-        return cb(null, true);
-    } else {
-        cb(new Error('Apenas imagens são permitidas'));
-    }
-};
-
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 },
-    fileFilter: fileFilter
-});
-
-app.use('/uploads', express.static(path.join(__dirname, 'frontend', 'uploads')));
-
-// ... CONTINUA O RESTO DO SEU CÓDIGO (rotas de API, etc)
 
 // =====================================================
 // CONEXÃO COM O BANCO (POSTGRESQL)
@@ -524,8 +521,11 @@ app.get('/api/donations', authMiddleware, async (req, res) => {
     }
 });
 
+// =====================================================
+// ROTAS DE VOLUNTÁRIOS
+// =====================================================
 
-// LISTAR voluntários (admin) 
+// LISTAR voluntários (admin)
 app.get('/api/voluntarios', authMiddleware, async (req, res) => {
     try {
         console.log('🔍 GET /api/voluntarios chamada');
@@ -547,13 +547,11 @@ app.post('/api/contato', async (req, res) => {
         
         console.log('📧 Contato recebido:', { name, email, phone, message, interesse });
         
-        // Mapear interesse para tipo legível
         let tipo = 'duvida';
         if (interesse === 'voluntario') tipo = 'voluntario';
         else if (interesse === 'doacao') tipo = 'doacao';
         else if (interesse === 'parceria') tipo = 'parceria';
         
-        // Salvar na tabela voluntarios (UNIFICADO)
         const result = await pool.query(
             `INSERT INTO voluntarios (nome, email, telefone, interesse, status, tipo) 
              VALUES ($1, $2, $3, $4, 'pendente', $5) RETURNING id`,
@@ -622,7 +620,6 @@ app.delete('/api/voluntarios/:id', authMiddleware, async (req, res) => {
         res.status(500).json({ error: 'Erro ao deletar voluntário' });
     }
 });
-
 
 // =====================================================
 // EXPORTA APP PARA VERCEL (SERVERLESS)
