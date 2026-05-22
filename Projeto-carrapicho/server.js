@@ -17,7 +17,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// =====================================================
+/// =====================================================
 // UPLOAD DE IMAGENS COM CLOUDINARY (VERCEL)
 // =====================================================
 const cloudinary = require('cloudinary').v2;
@@ -47,6 +47,8 @@ const upload = multer({
 
 // Serve arquivos estáticos
 app.use(express.static(path.join(__dirname, 'frontend')));
+
+
 // =====================================================
 // ROTAS PRINCIPAIS
 // =====================================================
