@@ -1,7 +1,8 @@
 // SERVER.JS - SISTEMA ONG COMPLETO (POSTGRESQL VERSION)
 // =====================================================
 console.log('🚀 Iniciando servidor...');
-
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
