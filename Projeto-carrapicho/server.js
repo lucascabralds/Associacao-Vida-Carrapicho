@@ -21,10 +21,9 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'frontend')));
 
 // =====================================================
-// ROTAS PRINCIPAIS (CORRIGIDAS - SEM /admin/* com erro)
+// ROTAS PRINCIPAIS
 // =====================================================
 
-// Página inicial - home.html
 app.get('/', (req, res) => {
     const homePath = path.join(__dirname, 'frontend', 'home.html');
     if (fs.existsSync(homePath)) {
@@ -34,12 +33,10 @@ app.get('/', (req, res) => {
     }
 });
 
-// Redireciona index.html para home.html
 app.get('/index.html', (req, res) => {
     res.redirect('/');
 });
 
-// Admin - rota única (sem asterisco problemático)
 app.get('/admin', (req, res) => {
     const adminPath = path.join(__dirname, 'frontend', 'admin', 'index.html');
     if (fs.existsSync(adminPath)) {
@@ -49,7 +46,6 @@ app.get('/admin', (req, res) => {
     }
 });
 
-// Página de detalhe do evento
 app.get('/evento.html', (req, res) => {
     const eventoPath = path.join(__dirname, 'frontend', 'evento.html');
     if (fs.existsSync(eventoPath)) {
@@ -60,7 +56,7 @@ app.get('/evento.html', (req, res) => {
 });
 
 // =====================================================
-// CONFIGURAÇÃO DE UPLOAD DE IMAGENS
+// CONFIGURAÇÃO DE UPLOAD DE IMAGENS (APENAS UMA VEZ)
 // =====================================================
 const uploadDir = path.join(__dirname, 'frontend', 'uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -164,13 +160,6 @@ app.post('/api/auth/login', async (req, res) => {
         res.status(500).json({ error: 'Erro no login' });
     }
 });
-
-
-
-const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } });
-
-// Servir arquivos do /tmp
-app.use('/uploads', express.static('/tmp/uploads'));
 
 // =====================================================
 // ROTAS DE USUÁRIOS
@@ -558,7 +547,6 @@ app.post('/api/contato', async (req, res) => {
 // ROTAS DE VOLUNTÁRIOS
 // =====================================================
 
-// Listar voluntários (admin)
 app.get('/api/voluntarios', authMiddleware, async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM voluntarios ORDER BY created_at DESC');
@@ -569,7 +557,6 @@ app.get('/api/voluntarios', authMiddleware, async (req, res) => {
     }
 });
 
-// Criar inscrição (público)
 app.post('/api/voluntarios', async (req, res) => {
     try {
         const { nome, email, telefone, disponibilidade, interesse } = req.body;
@@ -591,7 +578,6 @@ app.post('/api/voluntarios', async (req, res) => {
     }
 });
 
-// Atualizar status do voluntário (admin)
 app.put('/api/voluntarios/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
@@ -605,7 +591,6 @@ app.put('/api/voluntarios/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// Deletar voluntário (admin)
 app.delete('/api/voluntarios/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
@@ -616,7 +601,6 @@ app.delete('/api/voluntarios/:id', authMiddleware, async (req, res) => {
         res.status(500).json({ error: 'Erro ao deletar voluntário' });
     }
 });
-
 
 // =====================================================
 // EXPORTA APP PARA VERCEL (SERVERLESS)
